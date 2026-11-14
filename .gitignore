@@ -10,3 +10,6 @@ __pycache__/
 .ipynb_checkpoints/
 # live GOES downloads (re-downloadable)
 data/live_cache/
+# running logs (change constantly)
+logs/server.log
+logs/prewarm_*.log
