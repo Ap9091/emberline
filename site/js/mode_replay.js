@@ -34,7 +34,7 @@ const s = {
 };
 
 export const replayMode = {
-  async enter() {
+  async enter(args = {}) {
     setLegend('replay'); setBanner(null);
     app.view.clearState();
     app.view.set3D(app.want3D.replay ?? false, false);
@@ -48,7 +48,7 @@ export const replayMode = {
     app.on3DChange = on => { if (on && s.split) setSplit(false); };
     try {
       if (!s.fires) s.fires = await api.getReplayList();
-      await loadFire(s.fireId || (s.fires.find(f => f.default) || s.fires[0]).fire_id);
+      await loadFire(args.fireId || s.fireId || (s.fires.find(f => f.default) || s.fires[0]).fire_id);
     } catch (e) {
       fill(s.slots.sit, h('div', { class: 'note note-red' }, `Could not load the replay: ${e.message}`));
     }
@@ -62,6 +62,25 @@ export const replayMode = {
     app.view.onTownClick = null; app.on3DChange = null;
     setLoading(null);
   },
+};
+
+// ── hooks for the guided demo (js/demo.js) ───────────────────────────────────
+export const replayApi = {
+  get state() { return s; },
+  async open(fireId) { pause(); if (s.fireId !== fireId || !s.meta) await loadFire(fireId); },
+  async hour(hr) { pause(); await setHour(hr); },
+  async split(on) { if (s.split !== on) await setSplit(on); },
+  layers(t) { Object.assign(s.toggles, t); applyLayers(); drawToggles(); if (s.sit) drawVerify(); },
+  horizon(k) { s.horizon = k; applyLayers(); drawToggles(); if (s.sit) drawVerify(); },
+  town(name) { if (s.panel?.sit) s.panel.select(name); },
+  /** Run a what-if and wait until its answer is on screen. */
+  async wind(fromDeg, speed) {
+    s.whatif.set(fromDeg, speed);
+    for (let i = 0; i < 100 && (s.whatif.busy || !s.whatif.scenario); i++) await new Promise(r => setTimeout(r, 100));
+  },
+  realWind() { if (s.whatif?.active || s.whatif?.busy) s.whatif.reset(); },
+  async copilot(quiet = false) { pause(); if (!s.copilot._record().started) await s.copilot.run({ quiet }); },
+  pause,
 };
 
 // ── panel skeleton: people counter · situation · what-if · was it right · official orders · copilot · log ──

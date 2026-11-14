@@ -25,6 +25,7 @@ import { stateMode } from './mode_state.js';
 import { incidentMode } from './mode_incident.js';
 import { replayMode } from './mode_replay.js';
 import { initResults } from './results.js';
+import { demo, showWelcome, initSettings } from './demo.js';
 
 const MODES = { state: stateMode, incident: incidentMode, replay: replayMode };
 
@@ -88,9 +89,14 @@ async function start() {
   initResults();
   window.addEventListener('resize', () => app.view.resize());
 
-  // The page opens on STATE (step 1 of the demo). Add #replay or #incident to the URL to open another mode.
+  initSettings();
+
+  // The page opens on STATE with the welcome screen (start the guided demo, or explore).
+  // URL #replay / #incident opens another mode without the welcome screen; #demo starts the demo straight away.
   const wanted = location.hash.replace('#', '');
   await go(MODES[wanted] ? wanted : 'state');
+  if (wanted === 'demo') demo.start();
+  else if (!MODES[wanted]) showWelcome();
 }
 
 window.emberline = app;       // handy in the browser console: emberline.view.map, emberline.go('replay')

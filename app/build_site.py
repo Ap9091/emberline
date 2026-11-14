@@ -179,6 +179,26 @@ def main():
     if os.path.exists(OUT):
         shutil.rmtree(OUT)
     shutil.copytree(STATIC_DIR, OUT, ignore=shutil.ignore_patterns("index.html", "fonts"))
+    build_data()
+    write_pages()
+
+
+def frontend_only():
+    """Copy the changed app code (js, css, california outline) into site/ and rewrite the pages; keep site/data.
+    No backend needed:  python app/build_site.py --frontend-only"""
+    for name in os.listdir(STATIC_DIR):
+        if name in ("index.html", "fonts", "vendor"):
+            continue
+        src, dst = os.path.join(STATIC_DIR, name), os.path.join(OUT, name)
+        if os.path.isdir(src):
+            shutil.rmtree(dst, ignore_errors=True)
+            shutil.copytree(src, dst)
+        else:
+            shutil.copy2(src, dst)
+    write_pages()
+
+
+def build_data():
     sizes = {}
 
     # ── config + results ──
@@ -262,7 +282,8 @@ def main():
     import whatif_export
     whatif_export.export(DATA, [fid for fid in store.REPLAY_FIRES])
 
-    # ── the page ──
+
+def write_pages():
     with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "site_index.html")) as f:
         page = f.read()
     # claude.ai page: the host adds <html>/<head>, and outside map tiles are blocked
@@ -283,4 +304,4 @@ def main():
 
 if __name__ == "__main__":
     sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-    main()
+    frontend_only() if "--frontend-only" in sys.argv else main()

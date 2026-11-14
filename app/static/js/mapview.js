@@ -62,6 +62,17 @@ export class MapView {
   // ── set-up: all sources and layers, bottom to top ──────────────────────────
   _addLayers() {
     const m = this.map;
+    // California only: everything outside the state is covered, the border drawn, Los Angeles County ready to glow
+    // (california.geojson: US Census 2024 cartographic boundaries, simplified; see app/make_california.py)
+    m.addSource('california', { type: 'geojson', data: 'california.geojson' });
+    m.addLayer({ id: 'ca-mask', type: 'fill', source: 'california', filter: ['==', ['get', 'kind'], 'mask'],
+      paint: { 'fill-color': '#15181b', 'fill-opacity': 0.86 } });
+    m.addLayer({ id: 'la-fill', type: 'fill', source: 'california', filter: ['==', ['get', 'kind'], 'la'],
+      layout: { visibility: 'none' }, paint: { 'fill-color': '#ffb454', 'fill-opacity': 0.16 } });
+    m.addLayer({ id: 'la-line', type: 'line', source: 'california', filter: ['==', ['get', 'kind'], 'la'],
+      layout: { visibility: 'none', 'line-join': 'round' }, paint: { 'line-color': '#ffb454', 'line-width': 2.2 } });
+    m.addLayer({ id: 'ca-line', type: 'line', source: 'california', filter: ['==', ['get', 'kind'], 'ca'],
+      paint: { 'line-color': '#e6e9ec', 'line-width': ['interpolate', ['linear'], ['zoom'], 4, 0.8, 9, 1.6], 'line-opacity': 0.55 } });
     for (const id of ['forecast', 'actual', 'fire', 'verify', 'baseline', 'ring-1', 'ring-2', 'ring-3', 'exits', 'pixels']) {
       m.addSource(id, { type: 'geojson', data: EMPTY });
     }
@@ -239,6 +250,11 @@ export class MapView {
         if (this.map.getLayer(id)) this.map.setLayoutProperty(id, 'visibility', this.visible[group] ? 'visible' : 'none');
       }
     }
+  }
+
+  /** Los Angeles County outline (used by the demo). */
+  showLA(on) {
+    for (const id of ['la-fill', 'la-line']) if (this.map.getLayer(id)) this.map.setLayoutProperty(id, 'visibility', on ? 'visible' : 'none');
   }
 
   /** Which forecast hour (1, 2 or 3) the squares, the baseline ring and the "real fire later" layer show. */
