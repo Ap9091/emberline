@@ -1,0 +1,19 @@
+# Emberline - Python 3.11
+pandas
+numpy
+xarray
+s3fs
+netCDF4
+h5netcdf
+pyproj
+scikit-learn
+pyarrow
+requests
+Pillow
+matplotlib
+fastapi
+uvicorn
+python-dotenv
+google-genai
+anthropic
+rasterio

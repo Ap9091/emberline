@@ -1,0 +1,12 @@
+{
+ "Key: FIRMS_MAP_KEY": "OK    2/5000 transactions used",
+ "Key: GEMINI_API_KEY": "OK    gemini-3.8-flash answered",
+ "Key: ANTHROPIC_API_KEY": "FAIL  empty (expected - add it before Phase 4; Gemini is the fallback)",
+ "3a GOES ABI-L2-FDCC (AWS)": "OK    noaa-goes16: 105 CA fire px, 1 h = 10.8 MB in 1s; noaa-goes17: 332 CA fire px, 1 h = 5.3 MB in 1s; noaa-goes18: 59 CA fire px, 1 h = 3.2 MB in 1s",
+ "3b NASA FIRMS VIIRS": "OK    1995 points, 15 columns",
+ "3c Open-Meteo archive": "OK    24 hours x 6 cols",
+ "3d AWS Terrain Tiles": "OK    43-76 m near Chico",
+ "3e Vegetation (ESA WorldCover)": "OK    (2400, 4800) px in 3s",
+ "3f Towns + population": "OK    Census 42 places, OSM Overpass unreachable (Census used instead)",
+ "3g CAL FIRE incidents": "OK    2471 incidents 2018-2025 saved"
+}

@@ -1,0 +1,10 @@
+{
+ "fires": 70,
+ "hours_per_fire": 73,
+ "files": 61320,
+ "total_GB": 25.7,
+ "files_per_s": 64.0,
+ "MB_per_s": 16.5,
+ "estimated_hours": 0.43,
+ "fits_in_3_hours": true
+}

@@ -1,0 +1,22 @@
+EMBERLINE - PHASE 1 CHECKLIST
+----------------------------------------------------------------------
+[OK  ] Key: FIRMS_MAP_KEY               2/5000 transactions used
+[OK  ] Key: GEMINI_API_KEY              gemini-3.8-flash answered
+[FAIL] Key: ANTHROPIC_API_KEY           empty (expected - add it before Phase 4; Gemini is the fallback)
+[OK  ] 3a GOES ABI-L2-FDCC (AWS)        noaa-goes16: 105 CA fire px, 1 h = 10.8 MB in 1s; noaa-goes17: 332 CA fire px, 1
+[OK  ] 3b NASA FIRMS VIIRS              1995 points, 15 columns
+[OK  ] 3c Open-Meteo archive            24 hours x 6 cols
+[OK  ] 3d AWS Terrain Tiles             43-76 m near Chico
+[OK  ] 3e Vegetation (ESA WorldCover)   (2400, 4800) px in 3s
+[OK  ] 3f Towns + population            Census 42 places, OSM Overpass unreachable (Census used instead)
+[OK  ] 3g CAL FIRE incidents            2471 incidents 2018-2025 saved
+
+Fires per split (data/fires.csv):
+  train  40 fires  (2018-2022, 6,104,401 acres)
+  val    12 fires  (2023-2023, 204,569 acres)
+  test   18 fires  (2024-2025, 1,117,272 acres)
+  must-have test fire present: Park Fire       yes
+  must-have test fire present: Eaton Fire      yes
+  must-have test fire present: Palisades Fire  yes
+
+GOES download estimate (3 days per fire): 61,320 files, 25.7 GB, about 0.43 h at 16.5 MB/s -> fits the 3-hour budget

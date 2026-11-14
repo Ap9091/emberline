@@ -1,0 +1,112 @@
+=== Key: FIRMS_MAP_KEY ===
+  FIRMS key status: {'transaction_limit': 5000, 'current_transactions': 2, 'transaction_interval': '10 minutes'}
+  -> OK  2/5000 transactions used
+
+=== Key: GEMINI_API_KEY ===
+    (try 1 failed: RemoteProtocolError, retrying in 2s)
+    (try 2 failed: ServerError, retrying in 4s)
+    (try 3 failed: ServerError, retrying in 6s)
+  Gemini replied: 'OK'
+  -> OK  gemini-3.8-flash answered
+
+=== Key: ANTHROPIC_API_KEY ===
+  -> FAIL  empty (expected - add it before Phase 4; Gemini is the fallback)
+
+=== 3a GOES ABI-L2-FDCC (AWS) ===
+  noaa-goes16 2018 day 208 22Z (Carr Fire, 27 Jul 2018): 12 files, 10.8 MB
+    downloaded 1 hour in 0.7 s (15.3 MB/s, 8 parallel)
+    file: OR_ABI-L2-FDCC-M3_G16_s20182082157189_e20182082159562_c20182082200141.nc
+    Mask variable: shape (1500, 2500), dtype float32, long_name 'ABI L2+ Fire - Hot Spot Characterization: Fire Mask'
+    scan start 2018-07-27T21:57:18.9Z  |  fire pixels in all of CONUS: 300, inside California: 105
+    California fire codes: {10.0: 13, 12.0: 87, 13.0: 4, 14.0: 1}
+  noaa-goes17 2020 day 233 22Z (LNU/SCU/CZU complexes, 20 Aug 2020): 12 files, 5.3 MB
+    downloaded 1 hour in 0.7 s (7.7 MB/s, 8 parallel)
+    file: OR_ABI-L2-FDCC-M6_G17_s20202332201177_e20202332203549_c20202332204123.nc
+    Mask variable: shape (1500, 2500), dtype float32, long_name 'ABI L2+ Fire - Hot Spot Characterization: Fire Mask'
+    scan start 2020-08-20T22:01:17.7Z  |  fire pixels in all of CONUS: 404, inside California: 332
+    California fire codes: {30.0: 171, 31.0: 3, 32.0: 139, 33.0: 17, 34.0: 2}
+  noaa-goes18 2024 day 207 22Z (Park Fire, 25 Jul 2024): 12 files, 3.2 MB
+    downloaded 1 hour in 0.6 s (5.5 MB/s, 8 parallel)
+    file: OR_ABI-L2-FDCC-M6_G18_s20242072201176_e20242072203549_c20242072204118.nc
+    Mask variable: shape (1500, 2500), dtype float32, long_name 'ABI L2+ Fire - Hot Spot Characterization: Fire Mask'
+    scan start 2024-07-25T22:01:17.6Z  |  fire pixels in all of CONUS: 155, inside California: 59
+    California fire codes: {30.0: 52, 31.0: 1, 32.0: 5, 33.0: 1}
+  -> OK  noaa-goes16: 105 CA fire px, 1 h = 10.8 MB in 1s; noaa-goes17: 332 CA fire px, 1 h = 5.3 MB in 1s; noaa-goes18: 59 CA fire px, 1 h = 3.2 MB in 1s
+
+=== 3b NASA FIRMS VIIRS ===
+    (try 1 failed: ConnectionError, retrying in 2s)
+    (try 2 failed: ConnectionError, retrying in 4s)
+  1995 VIIRS points in California on 2024-07-25 (Park Fire day 2)
+  columns: ['latitude', 'longitude', 'bright_ti4', 'scan', 'track', 'acq_date', 'acq_time', 'satellite', 'instrument', 'confidence', 'version', 'bright_ti5', 'frp', 'daynight', 'type']
+  times: 2024-07-25 0840 to 2024-07-25 2142 UTC
+  confidence counts: {'n': 1317, 'h': 371, 'l': 307}  (n=nominal, h=high, l=low)
+   latitude  longitude  bright_ti4  scan  track    acq_date  acq_time satellite instrument confidence  version  bright_ti5   frp daynight  type
+1  34.60963 -117.33887      310.03  0.58   0.70  2024-07-25       840       N20      VIIRS          n        2      294.28  1.84        N     2
+2  34.75976 -119.38238      301.10  0.76   0.77  2024-07-25       840       N20      VIIRS          n        2      288.78  3.28        N     0
+3  34.75990 -119.38952      308.26  0.76   0.77  2024-07-25       840       N20      VIIRS          n        2      289.27  3.18        N     0
+  -> OK  1995 points, 15 columns
+
+=== 3c Open-Meteo archive ===
+    (try 1 failed: HTTPError, retrying in 2s)
+  24 hourly rows, columns ['time', 'wind_speed_10m', 'wind_direction_10m', 'wind_gusts_10m', 'relative_humidity_2m', 'temperature_2m']
+  time range 2024-07-24T00:00 to 2024-07-24T23:00 UTC
+            time  wind_speed_10m  wind_direction_10m  wind_gusts_10m  relative_humidity_2m  temperature_2m
+2024-07-24T20:00            23.8                 151            49.7                    20            38.7
+2024-07-24T21:00            17.4                 153            54.0                    22            39.8
+2024-07-24T22:00            19.6                 160            42.8                    21            40.3
+2024-07-24T23:00            18.7                 157            43.2                    21            40.7
+  -> OK  24 hours x 6 cols
+
+=== 3d AWS Terrain Tiles ===
+  tile z12/661/1554: (256, 256) pixels, elevation 43 to 76 m, mean 56 m
+  -> OK  43-76 m near Chico
+
+=== 3e Vegetation (ESA WorldCover) ===
+  window (2400, 4800) pixels (10 m) read in 3.1 s
+  land cover share: {'Tree cover': '59%', 'Shrubland': '0%', 'Grassland': '33%', 'Cropland': '2%', 'Built-up': '5%', 'Bare/sparse': '1%', 'Water': '0%', 'Wetland': '0%'}
+  -> OK  (2400, 4800) px in 3s
+
+=== 3f Towns + population ===
+  Census places in Butte County box: 42 (5 incorporated with population)
+                     NAME  INTPTLAT   INTPTLONG POPESTIMATE2024
+               Bangor CDP 39.376087 -121.411654             NaN
+               Belden CDP 40.006783 -121.248191             NaN
+          Berry Creek CDP 39.631812 -121.405621             NaN
+               Biggs city 39.410187 -121.713322            1941
+           Bucks Lake CDP 39.879560 -121.199081             NaN
+   Butte Creek Canyon CDP 39.744502 -121.707131             NaN
+        Butte Meadows CDP 40.085310 -121.542683             NaN
+         Butte Valley CDP 39.668815 -121.645888             NaN
+              Caribou CDP 40.073244 -121.165670             NaN
+Challenge-Brownsville CDP 39.464617 -121.263250             NaN
+             Cherokee CDP 39.650877 -121.533646             NaN
+               Chico city 39.758951 -121.817720          102911
+    (try 1 failed: ConnectionError, retrying in 2s)
+    (try 2 failed: ConnectionError, retrying in 4s)
+    (try 3 failed: ConnectionError, retrying in 6s)
+  OpenStreetMap Overpass FAILED (ConnectionError) - using Census places only
+  -> OK  Census 42 places, OSM Overpass unreachable (Census used instead)
+
+=== 3g CAL FIRE incidents ===
+  2471 incidents, columns ['Name', 'Started', 'County', 'Location', 'AcresBurned', 'Latitude', 'Longitude', 'AdminUnit', 'Type', 'CalFireIncident', 'UniqueId', 'Url']
+  start times 2018-01-09 12:00:00+00:00 to 2025-12-04 18:35:33+00:00
+                              Name              Started  AcresBurned
+August Complex (includes Doe Fire) 2020-08-17T03:37:26Z    1032648.0
+                        Dixie Fire 2021-07-14T00:15:00Z     963309.0
+                         Park Fire 2024-07-24T21:52:43Z     429603.0
+    Ranch Fire (Mendocino Complex) 2018-07-27T19:05:00Z     410203.0
+             SCU Lightning Complex 2020-08-16T16:25:25Z     396624.0
+  -> OK  2471 incidents 2018-2025 saved
+
+
+================ CHECKLIST ================
+OK    Key: FIRMS_MAP_KEY                 2/5000 transactions used
+OK    Key: GEMINI_API_KEY                gemini-3.8-flash answered
+FAIL  Key: ANTHROPIC_API_KEY             empty (expected - add it before Phase 4; Gemini is the fallback)
+OK    3a GOES ABI-L2-FDCC (AWS)          noaa-goes16: 105 CA fire px, 1 h = 10.8 MB in 1s; noaa-goes17: 332 CA fire px, 1 h = 5.3 MB in 1s; noaa-goes18: 59 CA fire px, 1 h = 3.2 MB in 1s
+OK    3b NASA FIRMS VIIRS                1995 points, 15 columns
+OK    3c Open-Meteo archive              24 hours x 6 cols
+OK    3d AWS Terrain Tiles               43-76 m near Chico
+OK    3e Vegetation (ESA WorldCover)     (2400, 4800) px in 3s
+OK    3f Towns + population              Census 42 places, OSM Overpass unreachable (Census used instead)
+OK    3g CAL FIRE incidents              2471 incidents 2018-2025 saved

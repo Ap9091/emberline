@@ -1,0 +1,49 @@
+Checking whether GOES can see 90 candidate fires...
+  NOT visible: York Fire (2023, 93,078 ac) pixels at hours [-24, -12, 1, 6, 12, 24, 48, 72, 96] = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+  NOT visible: Oak Fire (2022, 19,244 ac) pixels at hours [-24, -12, 1, 6, 12, 24, 48, 72, 96] = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+  NOT visible: Coffee Pot Fire (2024, 14,104 ac) pixels at hours [-24, -12, 1, 6, 12, 24, 48, 72, 96] = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+  NOT visible: Happy Fire (2024, 12,543 ac) pixels at hours [-24, -12, 1, 6, 12, 24, 48, 72, 96] = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+  NOT visible: Quarry Fire (2023, 9,130 ac) pixels at hours [-24, -12, 1, 6, 12, 24, 48, 72, 96] = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+Saved data/fires.csv with 70 fires
+       fires  complexes  total_acres
+split                               
+test      18          2    1117272.0
+train     40          9    6104401.0
+val       12          4     204569.0
+
+Test + validation fires:
+                      name            start_utc    acres split  goes_fire_px  goes_first_seen_h
+                 Park Fire 2024-07-24T21:52:43Z 429603.0  test            48                1.0
+              Gifford Fire 2025-08-01T22:44:29Z 131612.0  test            41                1.0
+                Madre Fire 2025-07-02T20:07:32Z  80779.0  test            23                1.0
+               Garnet Fire 2025-08-24T21:13:05Z  59844.0  test            13                1.0
+                Borel Fire 2024-07-24T19:59:10Z  59288.0  test            18                6.0
+               Bridge Fire 2024-09-08T21:12:21Z  56030.0  test            23                6.0
+                 Line Fire 2024-09-06T01:33:57Z  43978.0  test            19              -24.0
+                 Lake Fire 2024-07-05T22:48:46Z  38664.0  test            17                1.0
+2024 SQF Lightning Complex 2024-07-13T19:34:56Z  33026.0  test             7                1.0
+                 Salt Fire 2025-09-01T10:00:54Z  25579.0  test             1               96.0
+              Airport Fire 2024-09-09T20:21:00Z  23526.0  test            21              -24.0
+            Palisades Fire 2025-01-07T18:30:00Z  23448.0  test            15                1.0
+           Orleans Complex 2025-07-09T00:39:03Z  22153.0  test             7              -24.0
+             Mountain Fire 2024-11-06T16:51:00Z  19904.0  test            20                1.0
+                Sites Fire 2024-06-17T20:39:25Z  19195.0  test             9                1.0
+                Green Fire 2025-07-02T04:37:01Z  19022.0  test             1               24.0
+                Boone Fire 2024-09-03T19:10:46Z  17600.0  test            10                1.0
+                Eaton Fire 2025-01-08T02:18:00Z  14021.0  test            17                1.0
+       Smith River Complex 2023-08-15T14:00:00Z  95107.0   val             1               24.0
+     SRF Lightning Complex 2023-08-20T18:16:48Z  50198.0   val             1              -12.0
+        Happy Camp Complex 2023-08-16T17:27:00Z  21725.0   val             2              -12.0
+               Rabbit Fire 2023-07-14T22:30:00Z   8355.0   val             5                1.0
+                Plant Fire 2023-08-19T20:25:33Z   5464.0   val             6                1.0
+               Almond Fire 2023-08-06T23:52:04Z   5228.0   val             2                1.0
+                 Deep Fire 2023-08-16T15:28:40Z   4198.0   val             6              -12.0
+        South Fork Complex 2023-08-15T15:00:00Z   3929.0   val             1               72.0
+                  3-9 Fire 2023-08-16T09:22:13Z   2840.0   val             3               48.0
+                South Fire 2023-12-09T17:38:00Z   2715.0   val             1                6.0
+             Highland Fire 2023-10-30T19:37:00Z   2487.0   val             2                6.0
+                Bonny Fire 2023-07-27T21:52:00Z   2323.0   val             6                6.0
+
+Speed test: 72 files (19 MB) in 1.1 s = 64.0 files/s, 16.5 MB/s
+Estimate: 61,320 files, 25.7 GB raw, about 0.43 hours (fits the 3-hour budget)
