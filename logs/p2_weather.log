@@ -70,3 +70,7 @@
   [60/70] srf_lightning_complex_2023: wind mean 5.0 max 15.0 km/h, gust 47.5, min humidity 22%, max temp 33.0 C
     (rate limited: {"reason":"Daily API request limit exceeded. Please try again tomorrow.","error" - waiting 3s)
   [61/70] happy_camp_complex_2023: wind mean 4.3 max 14.4 km/h, gust 41.4, min humidity 14%, max temp 38.4 C
+    (try 1 failed: ConnectionError, retrying in 3s)
+    (rate limited: {"reason":"Daily API request limit exceeded. Please try again tomorrow.","error" - waiting 3s)
+  [62/70] rabbit_fire_2023: wind mean 7.4 max 16.3 km/h, gust 35.3, min humidity 13%, max temp 40.4 C
+    (rate limited: {"reason":"Daily API request limit exceeded. Please try again tomorrow.","error" - waiting 3s)
