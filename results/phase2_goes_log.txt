@@ -35,3 +35,16 @@ park_fire_2024: already done, skipping
 [33/69] july_complex_2020: 888 files (0 failed), 1549 fire pixels, fire in 45/74 hours, max 11 squares in one hour, 37 squares ever, gap-filled 12 square-hours (2 whole hours), 30 s
 [34/69] kincade_fire_2019: 888 files (0 failed), 3887 fire pixels, fire in 73/74 hours, max 26 squares in one hour, 41 squares ever, gap-filled 19 square-hours (1 whole hours), 30 s
 [35/69] mosquito_fire_2022: 887 files (0 failed), 9202 fire pixels, fire in 70/74 hours, max 37 squares in one hour, 50 squares ever, gap-filled 22 square-hours (0 whole hours), 28 s
+[36/69] tamarack_fire_2021: 888 files (0 failed), 7 fire pixels, fire in 5/74 hours, max 1 squares in one hour, 3 squares ever, gap-filled 1 square-hours (1 whole hours), 25 s
+[37/69] glass_fire_2020: 886 files (0 failed), 9721 fire pixels, fire in 74/74 hours, max 44 squares in one hour, 71 squares ever, gap-filled 40 square-hours (1 whole hours), 24 s
+[38/69] delta_fire_2018: 888 files (0 failed), 3569 fire pixels, fire in 72/74 hours, max 20 squares in one hour, 41 squares ever, gap-filled 14 square-hours (0 whole hours), 26 s
+[39/69] mckinney_fire_2022: 888 files (0 failed), 3529 fire pixels, fire in 57/74 hours, max 31 squares in one hour, 67 squares ever, gap-filled 43 square-hours (1 whole hours), 24 s
+[40/69] zogg_fire_2020: 887 files (0 failed), 7353 fire pixels, fire in 74/74 hours, max 27 squares in one hour, 59 squares ever, gap-filled 20 square-hours (0 whole hours), 27 s
+[41/69] walker_fire_2019: 888 files (0 failed), 7739 fire pixels, fire in 66/74 hours, max 42 squares in one hour, 58 squares ever, gap-filled 15 square-hours (1 whole hours), 25 s
+[42/69] river_fire_mendocino_complex_2018: 888 files (0 failed), 5065 fire pixels, fire in 74/74 hours, max 55 squares in one hour, 94 squares ever, gap-filled 37 square-hours (1 whole hours), 24 s
+[43/69] river_fire_2020: 672 files (0 failed), 5142 fire pixels, fire in 55/74 hours, max 45 squares in one hour, 66 squares ever, gap-filled 34 square-hours (0 whole hours), 18 s
+[44/69] loyalton_fire_2020: 672 files (0 failed), 3795 fire pixels, fire in 52/74 hours, max 26 squares in one hour, 51 squares ever, gap-filled 14 square-hours (0 whole hours), 19 s
+[45/69] lake_fire_2020: 672 files (0 failed), 3126 fire pixels, fire in 38/74 hours, max 30 squares in one hour, 43 squares ever, gap-filled 11 square-hours (1 whole hours), 18 s
+[46/69] klamathon_fire_2018: 888 files (0 failed), 2507 fire pixels, fire in 66/74 hours, max 28 squares in one hour, 71 squares ever, gap-filled 13 square-hours (2 whole hours), 26 s
+[47/69] apple_fire_2020: 888 files (0 failed), 8627 fire pixels, fire in 74/74 hours, max 38 squares in one hour, 59 squares ever, gap-filled 22 square-hours (0 whole hours), 25 s
+[48/69] mineral_fire_2020: 888 files (0 failed), 3212 fire pixels, fire in 68/74 hours, max 21 squares in one hour, 33 squares ever, gap-filled 18 square-hours (1 whole hours), 25 s

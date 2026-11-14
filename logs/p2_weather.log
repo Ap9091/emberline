@@ -38,3 +38,9 @@
   [24/70] lnu_lightning_complex_2020: wind mean 10.1 max 17.3 km/h, gust 50.4, min humidity 8%, max temp 41.5 C
     (try 1 failed: ConnectionError, retrying in 2s)
   [25/70] carr_fire_2018: wind mean 8.6 max 15.8 km/h, gust 55.8, min humidity 8%, max temp 42.7 C
+  [26/70] monument_fire_2021: wind mean 6.6 max 16.9 km/h, gust 59.8, min humidity 9%, max temp 35.5 C
+    (rate limited, waiting 15s)
+  [27/70] caldor_fire_2021: wind mean 9.9 max 17.3 km/h, gust 44.3, min humidity 16%, max temp 36.6 C
+    (rate limited, waiting 15s)
+    (rate limited, waiting 30s)
+    (rate limited, waiting 45s)
