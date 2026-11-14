@@ -89,8 +89,8 @@ async function staticAi(ref, kind) {
     ? (await get(`${DATA}/ai/replay_${ref.fire_id}.json`))[ref.hour]
     : (await get(`${DATA}/ai/incidents.json`))[ref.incident_id];
   if (!rec?.[kind]) {
-    throw offline('Hosted demo: no saved AI answer for this moment. Saved copilot runs: Park Fire, the first 30 hours ' +
-      '(24 Jul 14:00 to 25 Jul 19:00). Run the full app for new answers.');
+    throw offline('Hosted demo: no saved AI answer for this hour. Saved copilot runs: Park Fire, its first 30 hours, ' +
+      'and the Eaton Fire, its first hours (7 Jan from 18:00). Run the full app for new answers.');
   }
   return rec[kind];
 }
