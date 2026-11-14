@@ -9,6 +9,9 @@
 import { loadModel, loadFire, scenario } from './whatif_engine.js';
 
 export const STATIC = !!window.EMBERLINE_STATIC;
+// Hosted on an ordinary web host (Vercel, GitHub Pages): online map tiles and 3D terrain are allowed.
+// On a claude.ai page they are blocked, so that build uses the saved relief images instead.
+export const ONLINE_TILES = !STATIC || !!window.EMBERLINE_TILES;
 const DATA = 'data';
 const slug = s => String(s).replace(/[^A-Za-z0-9_-]+/g, '_');
 

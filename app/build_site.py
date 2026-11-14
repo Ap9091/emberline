@@ -265,8 +265,17 @@ def main():
     # ── the page ──
     with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "site_index.html")) as f:
         page = f.read()
-    with open(os.path.join(OUT, "index.html"), "w") as f:
+    # claude.ai page: the host adds <html>/<head>, and outside map tiles are blocked
+    with open(os.path.join(OUT, "claude.html"), "w") as f:
         f.write(page)
+    # ordinary web host (Vercel, GitHub Pages): a full HTML document, online map tiles + 3D allowed
+    full = ("<!doctype html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n"
+            "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1, viewport-fit=cover\">\n"
+            + page.split("<div id=\"app\"")[0] + "</head>\n<body>\n<div id=\"app\"" + page.split("<div id=\"app\"", 1)[1]
+            .replace("window.EMBERLINE_STATIC = true;", "window.EMBERLINE_STATIC = true; window.EMBERLINE_TILES = true;")
+            + "</body>\n</html>\n")
+    with open(os.path.join(OUT, "index.html"), "w") as f:
+        f.write(full)
     n_files = sum(len(fs) for _, _, fs in os.walk(OUT))
     mb = sum(os.path.getsize(os.path.join(d, x)) for d, _, fs in os.walk(OUT) for x in fs) / 1e6
     print(f"site/: {n_files} files, {mb:.1f} MB", flush=True)

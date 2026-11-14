@@ -15,4 +15,3 @@ logs/server.log
 logs/prewarm_*.log
 logs/warm_*.log
 logs/watchdog.log
-site/

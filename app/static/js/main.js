@@ -19,7 +19,7 @@ import { app, setClock } from './app.js';
 import { COLORS, TEXT } from './config.js';
 import { $ } from './util.js';
 import { loadBaseStyle } from './basemap.js';
-import { STATIC } from './api.js';
+import { STATIC, ONLINE_TILES } from './api.js';
 import { MapView } from './mapview.js';
 import { stateMode } from './mode_state.js';
 import { incidentMode } from './mode_incident.js';
@@ -47,7 +47,7 @@ async function go(mode, args) {
 
 /** 2D / 3D: remembered per mode. */
 function set3D(on) {
-  if (STATIC) return;                     // hosted version: no terrain tiles, so no 3D (see build_site.py)
+  if (!ONLINE_TILES) return;              // claude.ai version: no terrain tiles, so no 3D (see build_site.py)
   app.want3D[app.mode] = on;
   app.view.set3D(on);
   app.on3DChange?.(on);
@@ -56,8 +56,8 @@ function set3D(on) {
 
 function show3DButtons() {
   for (const btn of document.querySelectorAll('#dim-toggle button')) btn.classList.toggle('on', (btn.dataset.dim === '3d') === app.view.is3D);
-  $('#dim-toggle').classList.toggle('disabled', app.mode === 'state' || STATIC);
-  if (STATIC) $('#dim-toggle').title = '3D terrain runs in the full app (app/run.sh); the hosted demo is 2D';
+  $('#dim-toggle').classList.toggle('disabled', app.mode === 'state' || !ONLINE_TILES);
+  if (!ONLINE_TILES) $('#dim-toggle').title = '3D terrain runs in the full app (app/run.sh); this version is 2D';
 }
 
 async function start() {
@@ -74,7 +74,7 @@ async function start() {
   $('#ai-chip').title = ai.note || ai.switch || '';
 
   // map (hosted version: 2D only)
-  if (STATIC) app.want3D = { incident: false, replay: false };
+  if (!ONLINE_TILES) app.want3D = { incident: false, replay: false };
   app.baseStyle = await loadBaseStyle();
   $('#map-area').classList.toggle('no-basemap', !Object.keys(app.baseStyle.sources).length);   // offline: dark map, light labels
   app.view = new MapView('map-main', structuredClone(app.baseStyle));

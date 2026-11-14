@@ -4,7 +4,7 @@
 // If the style cannot be downloaded (offline), we fall back to a plain dark background.
 // ─────────────────────────────────────────────────────────────────────────────
 import { BASE_STYLE_URL, TERRAIN_TILES } from './config.js';
-import { STATIC } from './api.js';
+import { STATIC, ONLINE_TILES } from './api.js';
 
 const SATURATION = 0.38;                 // 1 = original colours, 0 = grey
 const PAPER = [226, 220, 205];           // warm paper tone that every colour is pulled toward
@@ -53,7 +53,7 @@ async function hostedStyle() {
 
 /** Download the base style, mute it, and add hillshade. Never throws: returns the fallback style on any error. */
 export async function loadBaseStyle() {
-  if (STATIC) return hostedStyle();
+  if (STATIC && !ONLINE_TILES) return hostedStyle();
   try {
     const ctl = new AbortController();
     const timer = setTimeout(() => ctl.abort(), 7000);
@@ -62,8 +62,8 @@ export async function loadBaseStyle() {
     if (!res.ok) throw new Error('style HTTP ' + res.status);
     return muteStyle(await res.json());
   } catch (e) {
-    console.warn('Base map not available, using plain background:', e.message);
-    return fallbackStyle();
+    console.warn('Base map not available:', e.message);
+    return STATIC ? hostedStyle() : fallbackStyle();     // hosted: the saved relief images still work offline
   }
 }
 
