@@ -716,3 +716,48 @@ body.hide-layers #layer-toggles, body.hide-layers #legend { display: none !impor
   .wl-points { grid-template-columns: 1fr; }
   .wl-card h1 { font-size: 22px; }
 }
+
+/* ── 14. Ask Emberline assistant (js/assistant.js) ────────────────────────── */
+#as-launch { position: fixed; z-index: 25; right: 16px; bottom: 52px; display: flex; align-items: center; gap: 8px;
+  background: #e6e9ec; color: #14171a; border: 0; border-radius: 22px; padding: 10px 16px 10px 13px; font: 600 13.5px var(--sans);
+  box-shadow: 0 6px 22px rgba(0, 0, 0, .45); }
+#as-launch:hover { background: #fff; }
+#as-launch.on { background: var(--ring); }
+#as-launch .as-spark { color: #c2410c; font-size: 15px; line-height: 1; }
+#as-launch.on .as-spark { color: #14171a; }
+body:has(#app[data-mode="replay"]) #as-launch { bottom: calc(var(--timeline-h) + 52px); }
+#as-box { position: fixed; z-index: 26; right: calc(var(--panel-w) + 12px); bottom: 52px; width: 384px; height: min(560px, calc(100vh - 120px));
+  display: flex; flex-direction: column; background: var(--bg-2); border: 1px solid var(--line-2); border-radius: 10px;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, .55); overflow: hidden; animation: dm-in .2s ease-out; }
+body:has(#app[data-mode="replay"]) #as-box { bottom: calc(var(--timeline-h) + 12px); height: min(560px, calc(100vh - var(--timeline-h) - 80px)); }
+/* the map controls sit top-right; the chat opens over the lower right of the map so the side panel (where answers land) stays visible */
+.as-head { display: flex; align-items: center; justify-content: space-between; padding: 11px 14px; border-bottom: 1px solid var(--line); background: var(--bg-1); }
+.as-head b { display: block; font-size: 14px; color: var(--text); }
+.as-head span { font: 11px var(--mono); color: var(--text-3); }
+.as-x { background: none; border: 0; color: var(--text-3); font-size: 14px; }
+.as-x:hover { color: var(--text); }
+.as-list { flex: 1; overflow: auto; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+.as-msg { display: flex; flex-direction: column; gap: 6px; max-width: 92%; }
+.as-user { align-self: flex-end; align-items: flex-end; }
+.as-bubble { padding: 9px 12px; border-radius: 12px; font-size: 13.5px; line-height: 1.5; white-space: pre-wrap; }
+.as-bot .as-bubble { background: var(--bg-3); border: 1px solid var(--line); color: #dde2e6; border-bottom-left-radius: 4px; }
+.as-user .as-bubble { background: #3a2410; border: 1px solid #7a4a1c; color: #ffe2bf; border-bottom-right-radius: 4px; }
+.as-note { font-size: 11px; color: var(--text-3); }
+.as-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.as-chip { background: var(--bg-0); border: 1px solid var(--line-2); color: var(--text-2); border-radius: 14px; padding: 4px 10px; font-size: 12px; text-align: left; }
+.as-chip:hover { color: var(--text); border-color: var(--ring); }
+.as-typing { display: inline-flex; gap: 4px; padding: 3px 0; }
+.as-typing i { width: 6px; height: 6px; border-radius: 50%; background: var(--text-3); animation: as-dot 1s infinite ease-in-out; }
+.as-typing i:nth-child(2) { animation-delay: .15s; } .as-typing i:nth-child(3) { animation-delay: .3s; }
+@keyframes as-dot { 50% { transform: translateY(-4px); background: var(--ring); } }
+.as-form { display: flex; gap: 8px; padding: 10px; border-top: 1px solid var(--line); }
+.as-form input { flex: 1; min-width: 0; background: var(--bg-0); border: 1px solid var(--line-2); border-radius: 8px; padding: 9px 11px; font-size: 13.5px; }
+.as-form input:focus { outline: none; border-color: var(--ring); }
+.as-send { width: 38px; padding: 0; font-size: 16px; border-radius: 8px; }
+.as-foot { font-size: 10.5px; color: var(--text-3); text-align: center; padding: 0 10px 8px; }
+.as-flash { animation: as-flash 2.4s ease-out; border-radius: 4px; }
+@keyframes as-flash { 0%, 40% { box-shadow: 0 0 0 2px var(--ring), 0 0 24px rgba(255, 180, 84, .35); } 100% { box-shadow: 0 0 0 0 transparent; } }
+@media (max-width: 900px) {
+  #as-launch, body:has(#app[data-mode="replay"]) #as-launch { position: fixed; bottom: 14px; right: 14px; }
+  #as-box, body:has(#app[data-mode="replay"]) #as-box { left: 8px; right: 8px; width: auto; bottom: 66px; height: 68vh; }
+}

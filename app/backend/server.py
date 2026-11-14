@@ -231,6 +231,20 @@ def ai_triage(req: TriageReq):
         return _offline(e)
 
 
+@app.post("/api/chat")
+def assistant_chat(body: dict):
+    """'Ask Emberline' assistant (Claude). 503 {offline: true} without ANTHROPIC_API_KEY: the browser uses its built-in answers."""
+    from . import assistant
+    try:
+        return assistant.chat(body.get("messages"), body.get("screen"))
+    except assistant.Offline as e:
+        return JSONResponse(status_code=503, content={"offline": True, "error": "The assistant is not connected (" + str(e) + ")."})
+    except ValueError as e:
+        raise HTTPException(400, str(e))
+    except Exception as e:      # rate limits, timeouts: a short message, never a crash
+        return JSONResponse(status_code=503, content={"offline": False, "error": "The assistant is unavailable right now: " + str(e)[:120]})
+
+
 @app.on_event("startup")
 def _warm():
     from . import live

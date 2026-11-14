@@ -16,6 +16,7 @@
 import { app } from './app.js';
 import { h, fill, $, sleep } from './util.js';
 import { replayApi as R } from './mode_replay.js';
+import { ask, setOpen } from './assistant.js';
 
 const EATON = 'eaton_fire_2025', PARK = 'park_fire_2024';
 const CA = [-124.4, 32.5, -114.1, 42.0];
@@ -224,12 +225,24 @@ const STEPS = [
     },
   },
   {
+    title: 'Ask Emberline anything',
+    body: () => [p('Stuck? The ', b('✦ Ask Emberline'), ' button opens an AI guide (Claude Sonnet 5.5).'),
+      p('Ask a question in plain words, or ask it to take you somewhere. It answers with our real numbers and ', b('moves the app for you'), '.'),
+      p('Here it is answering: ', h('i', {}, '“Show me the AI plan that got rejected.”'))],
+    async run(d) {
+      d.focus(null);
+      await sleep(700); if (!d.alive()) return;
+      await ask('Show me the AI plan that got rejected', { fromDemo: true });
+      if (d.alive() && R.state?.slots) d.focus(R.state.slots.ai);
+    },
+  },
+  {
     title: 'Your turn',
     body: () => [h('div', { class: 'dm-modes' },
         h('div', {}, b('REPLAY'), h('span', {}, 'Past fires hour by hour. You are here.')),
         h('div', {}, b('INCIDENT'), h('span', {}, 'One fire up close, with the AI copilot.')),
         h('div', {}, b('STATE'), h('span', {}, 'Every fire in California at once.'))),
-      p('Watch this demo again any time from the ', b('⚙ menu'), '.')],
+      p('Ask the ', b('✦ Ask Emberline'), ' guide anything, and watch this demo again any time from the ', b('⚙ menu'), '.')],
     async run(d) {
       d.focus($('#mode-tabs'));
       await d.replay(EATON, 2, { fire: true, forecast: true });
@@ -256,7 +269,7 @@ class Demo {
 
   get on() { return this.i >= 0; }
 
-  async start() {
+  async start(step = 0) {
     $('#results-backdrop')?.click();
     closeOverlays();
     document.body.classList.add('demo-on');
@@ -270,7 +283,8 @@ class Demo {
       });
     }
     this.card.hidden = false;
-    this.show(0);
+    setOpen(false);
+    this.show(Math.max(0, Math.min(STEPS.length - 1, step)));
   }
 
   next() { this.i + 1 < STEPS.length ? this.show(this.i + 1) : this.stop(); }
@@ -283,6 +297,7 @@ class Demo {
     this.focus(null);
     app.view.showLA(false);
     this.card.classList.toggle('dock-right', step.dock === 'right');
+    if (step.title !== 'Ask Emberline anything' && step.title !== 'Your turn') setOpen(false);
     const last = i === STEPS.length - 1;
     fill(this.card,
       h('div', { class: 'dm-head' },

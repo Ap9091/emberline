@@ -26,6 +26,7 @@ import { incidentMode } from './mode_incident.js';
 import { replayMode } from './mode_replay.js';
 import { initResults } from './results.js';
 import { demo, showWelcome, initSettings } from './demo.js';
+import { initAssistant } from './assistant.js';
 
 const MODES = { state: stateMode, incident: incidentMode, replay: replayMode };
 
@@ -90,6 +91,7 @@ async function start() {
   window.addEventListener('resize', () => app.view.resize());
 
   initSettings();
+  initAssistant(demo);
 
   // The page opens on STATE with the welcome screen (start the guided demo, or explore).
   // URL #replay / #incident opens another mode without the welcome screen; #demo starts the demo straight away.
