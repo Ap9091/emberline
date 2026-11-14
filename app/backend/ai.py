@@ -27,7 +27,7 @@ load_dotenv(os.path.join(ROOT, ".env"))
 CLAUDE_MODEL = os.getenv("EMBERLINE_CLAUDE_MODEL", "claude-haiku-5-5")
 GEMINI_MODEL = os.getenv("EMBERLINE_GEMINI_MODEL", "gemini-3.8-flash")
 # If the main Gemini model is overloaded (HTTP 503), try these next. The answer records which model replied.
-GEMINI_FALLBACKS = ["gemini-3.7-flash", "gemini-3.5-flash", "gemini-2.5-flash"]
+GEMINI_FALLBACKS = ["gemini-3.7-flash", "gemini-3.5-flash", "gemini-2.5-flash", "gemini-3.5-flash-lite", "gemini-3.1-flash-lite"]
 TIMEOUT_S = 60
 BUSY_SKIP_S = 60      # skip an overloaded or rate-limited model for 1 minute
 _BUSY = {}
@@ -138,6 +138,6 @@ def parse_json(text):
 
 def status():
     prov, model = provider()
-    return {"provider": prov, "model": model,
+    return {"provider": prov, "model": model + (" (auto-fallback to other Gemini models if busy)" if prov == "gemini" else ""),
             "note": None if prov else "No AI key: AI offline, forecast only",
             "switch": "Add ANTHROPIC_API_KEY to .env and restart to use Claude (no code change)."}

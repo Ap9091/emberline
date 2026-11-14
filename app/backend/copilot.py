@@ -96,7 +96,8 @@ def plan(sit):
         try:
             r = ai.ask("plan", _plan_prompt(ctx, feedback), want_json=True)
         except ai.AIOffline as e:
-            return {"status": "AI_OFFLINE", "attempts": attempts, "message": f"AI offline, forecast only ({e})"}
+            return {"status": "AI_OFFLINE", "attempts": attempts, "detail": str(e)[:200],
+                    "message": "AI offline, forecast only (AI service busy or quota reached; cached answers still work)"}
         p = r["json"]
         reasons, human = safety_check(p, sit)
         attempts.append({"attempt": i + 1, "plan": p, "verdict": "REJECTED" if reasons else "ACCEPTED",

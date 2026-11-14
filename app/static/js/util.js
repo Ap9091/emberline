@@ -13,7 +13,7 @@ export function h(tag, attrs = {}, ...children) {
     else if (k.startsWith('on')) el.addEventListener(k.slice(2), v);
     else el.setAttribute(k, v === true ? '' : v);
   }
-  for (const c of children.flat()) {
+  for (const c of children.flat(Infinity)) {
     if (c === null || c === undefined || c === false) continue;
     el.append(c.nodeType ? c : document.createTextNode(String(c)));
   }
@@ -32,7 +32,7 @@ export const $ = (sel, root = document) => root.querySelector(sel);
 
 /** Replace everything inside an element */
 export function fill(el, ...children) {
-  el.replaceChildren(...children.flat().filter(Boolean));
+  el.replaceChildren(...children.flat(Infinity).filter(Boolean));
   return el;
 }
 

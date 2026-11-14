@@ -1,0 +1,1 @@
+{"task": "plan", "provider": "gemini", "model": "gemini-3.5-flash-lite", "seconds": 1.1, "json": {"evacuate": [{"town": "Cohasset", "exit": "State Hwy 32 (NE)", "reason": "Fire at town with high threat, exit away from fire."}], "warn": ["Chico", "Butte Valley"], "summary": "Cohasset is ordered to evacuate via State Hwy 32 (NE) while Chico and Butte Valley remain under warning."}}

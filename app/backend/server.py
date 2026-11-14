@@ -57,7 +57,7 @@ def _situation(req):
 
 
 def _offline(e):
-    return JSONResponse(status_code=503, content={"status": "AI_OFFLINE", "message": f"AI offline, forecast only ({e})"})
+    return JSONResponse(status_code=503, content={"status": "AI_OFFLINE", "message": "AI offline, forecast only (AI service busy or quota reached; cached answers still work)", "detail": str(e)[:200]})
 
 
 class SitReq(BaseModel):
