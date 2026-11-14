@@ -74,3 +74,21 @@
     (rate limited: {"reason":"Daily API request limit exceeded. Please try again tomorrow.","error" - waiting 3s)
   [62/70] rabbit_fire_2023: wind mean 7.4 max 16.3 km/h, gust 35.3, min humidity 13%, max temp 40.4 C
     (rate limited: {"reason":"Daily API request limit exceeded. Please try again tomorrow.","error" - waiting 3s)
+    (rate limited: {"error":true,"reason":"Daily API request limit exceeded. Please try again tomor - waiting 3s)
+    (rate limited: {"error":true,"reason":"Daily API request limit exceeded. Please try again tomor - waiting 3s)
+    (rate limited: {"reason":"Daily API request limit exceeded. Please try again tomorrow.","error" - waiting 3s)
+    (rate limited: {"reason":"Daily API request limit exceeded. Please try again tomorrow.","error" - waiting 3s)
+    (try 6 failed: ConnectionError, retrying in 3s)
+  [63/70] plant_fire_2023: wind mean 7.3 max 20.9 km/h, gust 45.0, min humidity 15%, max temp 34.2 C
+    (rate limited: {"error":true,"reason":"Daily API request limit exceeded. Please try again tomor - waiting 3s)
+  [64/70] almond_fire_2023: wind mean 11.1 max 28.2 km/h, gust 50.8, min humidity 10%, max temp 40.8 C
+  [65/70] deep_fire_2023: wind mean 5.4 max 15.5 km/h, gust 54.7, min humidity 15%, max temp 32.9 C
+  [66/70] south_fork_complex_2023: wind mean 5.6 max 11.2 km/h, gust 37.8, min humidity 18%, max temp 30.8 C
+  [67/70] 3_9_fire_2023: wind mean 5.7 max 12.4 km/h, gust 40.0, min humidity 16%, max temp 28.1 C
+    (try 1 failed: ConnectionError, retrying in 3s)
+  [68/70] south_fire_2023: wind mean 12.1 max 29.3 km/h, gust 68.0, min humidity 9%, max temp 22.9 C
+  [69/70] highland_fire_2023: wind mean 18.2 max 27.1 km/h, gust 56.9, min humidity 5%, max temp 26.2 C
+  [70/70] bonny_fire_2023: wind mean 8.2 max 16.9 km/h, gust 42.5, min humidity 12%, max temp 34.8 C
+
+Saved 70 of 70 fires to data/processed/weather/ and results/phase2_weather_summary.csv
+No gaps: every fire has 74 hours with no missing values.

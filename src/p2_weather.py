@@ -14,6 +14,7 @@ such as Santa Ana / Diablo winds funnelled through canyons. Also, we use ONE poi
 start point), so every square of a fire's grid gets the same weather for a given hour.
 
 Run:  .venv/bin/python src/p2_weather.py        (skips fires already saved; add --redo to refetch)
+(If Open-Meteo says "daily limit exceeded", just run it again later - finished fires are kept.)
 """
 
 import os
