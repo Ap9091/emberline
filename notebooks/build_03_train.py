@@ -444,6 +444,32 @@ for n in failures.n:
 """)
 
 md("""
+**Our reading of the five failures** (the automatic checks above, plus what we know about these fires):
+
+1-2. **Bell Canyon and Hidden Hills (Palisades Fire, hour 53-54 = afternoon of 9 Jan 2025).** The fire that reached
+these towns appeared about 13 km from the Palisades edge just as the wind turned by about 70 degrees. The time and place match
+the **Kenneth Fire**, a separate fire that started near West Hills that afternoon. Because GOES pixels are coarse, our
+6 km tracker linked it to the Palisades Fire. No spread model can forecast a new ignition, so these are tracking errors
+more than forecast errors. A real fix needs official fire perimeters or finer VIIRS points to separate fires.
+3. **Los Angeles (Palisades Fire, hour 9).** The city of Los Angeles is represented by ONE point (its Census centre),
+and our warning threshold is very low (0.01) so that we catch 9 in 10 towns. Any square in the 6 km ring around the fire
+that comes within 1 km of that point is flagged. The fire did burn inside the city limits, but nowhere near the centre point.
+Big cities need neighbourhood points, not one point per city.
+4. **Oxnard (Mountain Fire, hour 4, gusts 87 km/h).** Strong Santa Ana winds pushed the forecast toward the Oxnard
+plain. The real fire stayed in the hills above Camarillo and never crossed onto the irrigated farmland. Our vegetation
+data (WorldCover) only says "cropland", not "irrigated and hard to burn", and one weather point cannot show the winds dropping
+near the coast.
+5. **Glendale (Eaton Fire, hour 13, gusts 112 km/h).** In extreme wind, every square near the fire gets a probability
+above our low threshold, so the warning spreads in all directions. The low threshold that catches 9 in 10 towns has
+this cost.
+
+**What this tells us:** the model is good at *where the fire edge spreads next* (Step 5: new-square F1 about 2x the grow-1km
+baseline). For *town warnings* it ties the simple grow-1km rule (90% vs 90% of towns) but with more false alarms. At the
+same false-alarm rate as grow-1km it warns 85% instead of 90%. Its town warnings are not better than the simple rule
+yet, and we say so.
+""")
+
+md("""
 **Leakage check.** If a score looks too good, the model may be cheating (using information from the future).
 (1) Phase 2 proved the features at hour h are identical when all later data is deleted. (2) Splits are by fire and by
 year. (3) No label column is a model input. (4) The +1 h score is *close to* persistence, not far above it - which is
