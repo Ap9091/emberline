@@ -4,6 +4,7 @@
 //   panel: LIVE / archive selector, incident list ranked by triage score, AI "why" line for the top 5
 // ─────────────────────────────────────────────────────────────────────────────
 import * as api from './api.js';
+import { STATIC } from './api.js';
 import { app, setClock, setLoading, setBanner, setToggles, setLegend, segmented } from './app.js';
 import { CALIFORNIA_BOUNDS, TRIAGE_AI_TOP_N, TEXT } from './config.js';
 import { h, fill, $, fmtInt, fmtKm2, fmt1, utcHM, utcDate, windArrow } from './util.js';
@@ -24,6 +25,8 @@ const s = {
   refreshTimer: null,
   clockTimer: null,
   loadToken: 0,
+  quietLive: false,    // live view had no fires, so we switched to the last big fire day by ourselves
+  autoTried: false,
 };
 
 export const stateMode = {
@@ -46,6 +49,23 @@ export const stateMode = {
   },
 };
 
+/** The top-ranked incident of the state view on screen (or of the last big fire day), for INCIDENT with nothing picked. */
+export async function topIncident() {
+  let at = s.at, data = s.data && s.data._at === s.at ? s.data : null;
+  if (!data?.incidents?.length) {
+    at = latestExample()?.at ?? null;
+    if (!at) return null;
+    try { data = await api.getState(at); } catch { return null; }
+  }
+  const inc = (data.incidents || []).slice().sort((a, b) => a.rank - b.rank)[0];
+  return inc ? { id: inc.id, at, label: `near ${inc.nearest_town}` } : null;
+}
+
+/** The most recent archive example (the last big fire day we have saved). */
+function latestExample() {
+  return (app.config.archive_examples || []).slice().sort((a, b) => b.at.localeCompare(a.at))[0];
+}
+
 /** Label of an archive example, e.g. "25 Jul 2024, 3:00 PM PDT" */
 function archiveExample(at) { return (app.config.archive_examples || []).find(e => e.at === at); }
 export function archiveWhen(at) {
@@ -62,7 +82,9 @@ async function load() {
   if (fresh) { s.data = null; app.view.clearState(); }
   draw();
   if (fresh) setLoading(s.at ? 'Downloading GOES-18 scans from the archive… (about 10 s the first time)' : 'Reading the latest GOES-18 scans…');
-  setBanner(s.at ? `ARCHIVE · ${archiveWhen(s.at)} · same pipeline on past GOES-18 data` : null);
+  setBanner(s.at ? (s.quietLive && s.at === latestExample()?.at
+    ? `No fires in California right now · showing the last big fire day: ${archiveWhen(s.at)}`
+    : `ARCHIVE · ${archiveWhen(s.at)} · same pipeline on past GOES-18 data`) : null);
   try {
     const data = await api.getState(s.at);
     if (token !== s.loadToken) return;
@@ -73,6 +95,13 @@ async function load() {
     s.error = e.message;
   }
   s.loading = false;
+  // Nothing burning in California right now: an empty map tells a visitor nothing, so show the most recent
+  // big fire day instead, with a clear banner. Pressing LIVE NOW still shows the (empty) live view.
+  if (!s.at && !s.autoTried && s.data && !s.data.incidents.length && latestExample()) {
+    s.autoTried = true; s.quietLive = true;
+    s.at = latestExample().at;
+    return load();
+  }
   setLoading(null);
   showData(); draw();
   if (!s.at && !s.data?.static_snapshot) s.refreshTimer = setTimeout(load, ((s.data?.refresh_s || app.config.refresh_s || 300)) * 1000);
@@ -120,6 +149,7 @@ async function loadTriageLines(token) {
 function triageLine(id) {
   const t = s.triage.get(id);
   if (!t) return null;
+  if (t.state === 'offline' && STATIC) return null;     // hosted demo: no saved line for this fire, so show nothing
   if (t.state === 'loading') return h('div', { class: 'ai-line' }, h('span', { class: 'ai-tag' }, 'AI'), h('span', { class: 'skel skel-inline' }));
   return h('div', { class: 'ai-line' + (t.state === 'offline' ? ' muted' : ''), title: t.model ? `${t.model}${t.cached ? ' · cached' : ''}` : '' },
     h('span', { class: 'ai-tag' }, 'AI'), h('span', {}, t.text));
@@ -141,7 +171,7 @@ function sourcePicker() {
     h('span', { class: 'radio' }), h('span', { class: 'source-title' }, title), h('span', { class: 'source-sub mono' }, sub));
   return section('Data', 'GOES-18 ABI fire product · every 5 min',
     h('div', { class: 'source-list' },
-      option(null, 'LIVE NOW', 'latest scans'),
+      option(null, 'LIVE NOW', s.quietLive ? 'no fires right now' : 'latest scans'),
       (app.config.archive_examples || []).map(ex => {
         const [name, ...when] = ex.label.split(' - ');
         return option(ex.at, name, 'ARCHIVE · ' + when.join(' - '));

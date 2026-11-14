@@ -39,7 +39,7 @@ async function openResults() {
     try { data = await api.getResults(); }
     catch (e) { return fill(drawer, head(), h('div', { class: 'note note-red' }, `Could not load results: ${e.message}`)); }
   }
-  fill(drawer, head(), h('div', { class: 'results-body' }, summary(), mainTable(), perFireTable(), ablationTable(), notes()));
+  fill(drawer, head(), h('div', { class: 'results-body' }, plainSummary(), summary(), mainTable(), perFireTable(), ablationTable(), notes()));
 }
 
 function closeResults() {
@@ -53,6 +53,40 @@ function head() {
     h('div', {}, h('h2', {}, 'Test results'),
       h('div', { class: 'src' }, data ? `${data.test_fires.length} unseen California fires, 2024-2025 · main model: ${data.main_model} · town cut-off ${data.town_threshold}` : '')),
     h('button', { class: 'btn', id: 'results-close', onclick: closeResults }, 'Close'));
+}
+
+/** The results in plain words, with bars, computed from the same numbers as the tables below. */
+function plainSummary() {
+  const us = data.table[data.main_model], grow = data.table.grow_1km, still = data.table.persistence;
+  const pct = v => Math.round((v || 0) * 100);
+  const row = (label, v, max, text, ours) => h('div', { class: 'rb-row' + (ours ? ' ours' : '') },
+    h('span', { class: 'rb-label' }, label),
+    h('span', { class: 'rb-track' }, h('i', { style: `width:${Math.max(1, Math.min(100, (v / max) * 100))}%` })),
+    h('span', { class: 'rb-n mono' }, text));
+  const group = (title, explain, rows) => h('div', { class: 'rb-group' }, h('div', { class: 'rb-title' }, title), h('div', { class: 'rb-explain' }, explain), rows);
+  return h('section', { class: 'res-sec res-plain' }, h('h3', {}, 'In plain words'),
+    h('p', { class: 'res-lead' },
+      `We tested Emberline on ${data.test_fires.length} California fires from 2024 and 2025 that it never saw while learning. `,
+      `It warned ${us.towns_warned} of the ${us.towns_reached} towns the fire reached before it got there, about ${us.mean_lead_h.toFixed(1)} hours early. `,
+      `It is better than simple guesses at spotting where new fire will start, but it gives more false alarms, on purpose.`),
+    h('div', { class: 'rb-grid' },
+      group('Towns warned before the fire arrived', 'Higher is better.', [
+        row('Emberline', pct(us.town_recall), 100, `${pct(us.town_recall)}%`, true),
+        row('Grows 1 km/h', pct(grow.town_recall), 100, `${pct(grow.town_recall)}%`),
+        row('Stays put', pct(still.town_recall), 100, `${pct(still.town_recall)}%`)]),
+      group('Spotting new fire', 'Score 0 to 1 for squares that were not burning yet. Higher is better.', [
+        row('Emberline', us['F1 new (2km)'], 1, us['F1 new (2km)'].toFixed(2), true),
+        row('Grows 1 km/h', grow['F1 new (2km)'], 1, grow['F1 new (2km)'].toFixed(2)),
+        row('Stays put', still['F1 new (2km)'] || 0, 1, (still['F1 new (2km)'] || 0).toFixed(2))]),
+      group('Fire shape 3 hours ahead', 'How much the forecast and the real fire overlap. Higher is better.', [
+        row('Emberline', pct(us['IoU +3h']), 100, `${pct(us['IoU +3h'])}%`, true),
+        row('Grows 1 km/h', pct(grow['IoU +3h']), 100, `${pct(grow['IoU +3h'])}%`),
+        row('Stays put', pct(still['IoU +3h']), 100, `${pct(still['IoU +3h'])}%`)]),
+      group('False alarms per fire-day', 'Town-hours on WARNING where the fire never came. Lower is better.', [
+        row('Emberline', us.false_alarms_per_fire_day, 40, us.false_alarms_per_fire_day.toFixed(0), true),
+        row('Grows 1 km/h', grow.false_alarms_per_fire_day, 40, grow.false_alarms_per_fire_day.toFixed(0)),
+        row('Stays put', still.false_alarms_per_fire_day, 40, still.false_alarms_per_fire_day.toFixed(0))])),
+    h('div', { class: 'src' }, '"Stays put" never warns anyone, so it has no false alarms and warns 0 towns. The full numbers are below.'));
 }
 
 function summary() {

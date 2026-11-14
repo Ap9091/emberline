@@ -49,6 +49,7 @@ Why it is different: fire apps show where a fire is now; research models predict
 - Overall fire shape is only as good as "stays put".
 - The satellite sees 2 to 4 km pixels; smoke, clouds and night hide fire. Wind comes from one weather point per fire, so local gusts like Santa Ana winds are missed. Ember jumps beyond 6 km are missed.
 - Good satellite data only since 2018, so there are only so many fires to learn from.
+- Replays use historical weather records (ERA5), which are a bit better than the forecast crews had that night; the live app uses the Open-Meteo forecast. So replay results may be slightly better than real-time use would be.
 - Saved AI answers on the website cover the Park Fire's first 30 hours and the Eaton Fire's first hours; elsewhere the copilot says "AI offline" on the website (the full app makes new answers).
 
 # The screens

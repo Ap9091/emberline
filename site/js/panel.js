@@ -15,6 +15,12 @@ export function section(title, caption, ...body) {
 /** Small mono caption that says where a number comes from. */
 export const src = text => h('div', { class: 'src' }, text);
 
+/** One plain-English sentence under a section title: what this card shows. */
+export const plain = (...text) => h('p', { class: 'plain' }, ...text);
+
+/** Technical detail folded away behind a small "Details" toggle (model names, cut-offs, scores). */
+export const tech = (...body) => h('details', { class: 'tech' }, h('summary', {}, 'Details'), ...body);
+
 // ── source captions (every number shows its source and time) ─────────────────
 function fireSource(sit) {
   return sit.scan_time_utc ? `GOES-18 · scan ${utcHM(sit.scan_time_utc)} UTC` : `GOES-18 hourly · ${localHMZone(sit.time_local)}`;
@@ -65,8 +71,10 @@ export function numbersCard(sit, modelName) {
     h('div', { class: 'tiles five' },
       tile('Burning now', fmtKm2(n.fire_area_km2), 'km²'),
       tile('Last hour', (growth > 0 ? '+' : growth < 0 ? '−' : '') + fmtKm2(Math.abs(growth ?? 0)), 'km²'),
-      [1, 2, 3].map(k => tile(`Fcst +${k} h`, fc.length ? fmtKm2(fc[k - 1]) : '-', 'km²', 'tile-small'))),
-    src(`Forecast: model · ${modelName || 'logreg'}` + (cut ? ` · square cut-offs ${cut.burn} burning / ${cut.new} new` : '')));
+      [1, 2, 3].map(k => tile(`In ${k} h`, fc.length ? fmtKm2(fc[k - 1]) : '-', 'km²', 'tile-small'))),
+    plain('How much land is burning now, and how much our model expects to be burning in 1, 2 and 3 hours.'),
+    tech(src(`Forecast model: ${modelName || 'logreg'} (logistic regression)` +
+      (cut ? ` · a square counts as burning at chance ≥ ${cut.burn} (already burning) / ≥ ${cut.new} (new)` : '') + ' · 1 km² ≈ 250 acres')));
 }
 
 // ── 4. town countdowns ───────────────────────────────────────────────────────
@@ -127,8 +135,12 @@ export function townsCard(sit, modelName, ui, onSelect, onToggleMonitor) {
       h('span', { class: 'fold-arrow' }, open ? '▾' : '▸'), `${monitor.length} town${monitor.length > 1 ? 's' : ''} on MONITOR (fire within 20 km)`));
     if (open) rows.push(...monitor.flatMap(t => townRow(sit, t, ui.selected === t.name, onSelect)));
   }
-  return section('Town countdowns', `Census 2024 · Model · ${modelName || 'logreg'} · cut-off ${cut ?? '-'}`,
-    summary, head, h('div', { class: 'town-list' }, rows));
+  return section('Town countdowns', 'Census 2024 + our forecast',
+    plain(h('b', {}, 'EVACUATE'), ': fire is there or expected within 1 hour. ', h('b', {}, 'WARNING'),
+      ': it could get there within 3 hours. Click a town to see its roads out.'),
+    summary, head, h('div', { class: 'town-list' }, rows),
+    tech(src(`People = residents (Census 2024). Chance = the model's highest chance of fire on any 2 km square within 1 km of the town in the next 3 h. ` +
+      `WARNING from a chance of ${cut ?? '-'} up (set on past fires, so few towns are missed). Model: ${modelName || 'logreg'}.`)));
 }
 
 // ── the whole situation block ────────────────────────────────────────────────

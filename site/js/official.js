@@ -7,7 +7,7 @@
 // Towns we flagged later, or never, are listed too. If there are no official times yet, nothing is invented.
 // ─────────────────────────────────────────────────────────────────────────────
 import { h, fmtInt, pacific, fmtHours } from './util.js';
-import { section, src } from './panel.js';
+import { section, src, plain, tech } from './panel.js';
 
 export function officialCard(meta, hourIso) {
   const cmp = meta.official_comparison;
@@ -52,14 +52,16 @@ export function officialCard(meta, hourIso) {
     h('div', { class: 'big mono' }, `${cmp.towns_flagged_earlier}/${cmp.towns_compared}`),
     h('div', {},
       h('div', {}, `towns flagged before the first official order or warning`),
-      h('div', { class: 'sub mono' },
-        `median ${fmtHours(cmp.median_lead_h)} · the fire reached ${cmp.towns_flagged_earlier_and_reached} of them`))) : null;
+      h('div', { class: 'sub' },
+        `usually by about ${Math.round(cmp.median_lead_h * 60)} minutes · the fire reached ${cmp.towns_flagged_earlier_and_reached} of them`))) : null;
 
   return section('Emberline vs official orders', 'public records · PT',
+    plain('When Emberline first flagged each town, next to when the real evacuation order or warning came. ',
+      '"Earlier" means Emberline was first.'),
     summary,
     h('div', { class: 'off-rows' }, body),
     others.length ? h('div', { class: 'off-others' }, h('div', { class: 'stat-label' }, 'Also published (not in our town list)'), others) : null,
-    src('Emberline = first WARNING/EVACUATE, timed at the end of the satellite hour it was made from. Official = first ' +
+    tech(src('Emberline = first WARNING/EVACUATE, timed at the end of the satellite hour it was made from. Official = first ' +
         'published order/warning for that place (some cover only part of a town). Early flags only help if the fire came. ' +
-        'Greyed = not yet happened at the replay time.'));
+        'Greyed = not yet happened at the replay time. Each row links to its public source.')));
 }

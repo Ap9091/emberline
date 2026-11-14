@@ -236,14 +236,16 @@ function drawPeople() {
   fill(s.slots.people, h('div', { class: 'people' },
     h('div', { class: 'people-main' },
       h('div', { class: 'people-n mono' }, reachedSoFar.length ? `${warnedSoFar.length}/${reachedSoFar.length}` : '–'),
-      h('div', { class: 'people-label' }, reachedSoFar.length ? TEXT.peopleLabel : 'no town reached by the fire yet at this hour')),
-    h('div', { class: 'people-sub mono' },
-      `by ${localHM(s.sit.time_local)} · whole replay ${warnedFirst.length} of ${reached.length} · ` +
-      `${fmtInt(sum(warnedFirst))} residents live in those towns (Census 2024; whole-town count, an upper bound: ` +
-      `the fire may only have touched a town's edge)`),
-    orders.length && s.meta.official_comparison ? h('div', { class: 'people-sub mono' },
-      `flagged before the first official order or warning: ${s.meta.official_comparison.towns_flagged_earlier} of ` +
-      `${s.meta.official_comparison.towns_compared} towns with published times`) : null));
+      h('div', { class: 'people-label' }, reachedSoFar.length
+        ? `towns the fire has reached so far that Emberline warned first`
+        : 'the fire has not reached a town yet at this hour')),
+    h('div', { class: 'people-sub' },
+      `Whole fire: ${warnedFirst.length} of ${reached.length} towns warned before the fire got there` +
+      (orders.length && s.meta.official_comparison ? ` · ${s.meta.official_comparison.towns_flagged_earlier} of ` +
+        `${s.meta.official_comparison.towns_compared} flagged before the official order` : '') + '.'),
+    h('details', { class: 'tech' }, h('summary', {}, 'Details'),
+      h('div', { class: 'src' }, `"Reached" = a 2 km square within 1 km of the town burned (GOES-18). ` +
+        `${fmtInt(sum(warnedFirst))} people live in the towns warned in time (Census 2024, whole towns, so an upper bound).`))));
 }
 
 // ── "was it right?" card ─────────────────────────────────────────────────────

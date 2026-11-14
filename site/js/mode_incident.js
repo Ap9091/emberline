@@ -10,7 +10,7 @@ import { TEXT } from './config.js';
 import { WhatIf } from './whatif.js';
 import { SituationPanel } from './panel.js';
 import { Copilot } from './copilot.js';
-import { archiveWhen } from './mode_state.js';
+import { archiveWhen, topIncident } from './mode_state.js';
 
 const s = {
   id: null, at: null, label: '',
@@ -25,7 +25,17 @@ export const incidentMode = {
     setLegend('situation'); setToggles();
     const changed = args.id && args.id !== s.id;
     if (changed) { s.id = args.id; s.at = args.at || null; s.label = args.label || ''; s.sit = null; s.copilot = null; }
-    if (!s.id) return drawEmpty();
+    if (!s.id) {
+      // Nothing picked yet: open the top fire from STATE instead of an empty screen.
+      drawEmpty();
+      topIncident().then(top => {
+        if (!top || app.mode !== 'incident' || s.id) return;
+        s.id = top.id; s.at = top.at; s.label = top.label; s.sit = null; s.copilot = null;
+        load();
+        s.clockTimer = setInterval(updateClock, 20000);
+      });
+      return;
+    }
     if (s.sit) show(true);          // coming back to the same incident: no reload
     else load();
     s.clockTimer = setInterval(updateClock, 20000);

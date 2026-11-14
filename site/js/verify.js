@@ -13,7 +13,7 @@
 // "new squares": only squares that had never burned before - the hard, useful part of a forecast.
 // ─────────────────────────────────────────────────────────────────────────────
 import { h, fmtInt } from './util.js';
-import { section, src } from './panel.js';
+import { section, src, plain, tech } from './panel.js';
 
 const METHODS = [['model', 'Emberline'], ['grow', 'Grow 1 km/h'], ['persistence', 'Looks like now']];
 
@@ -79,13 +79,16 @@ export function verifyCard({ sit, meta, hour, k, showOnMap, onToggleMap }) {
   const cell = (x, best) => h('td', { class: 'mono' + (x !== null && x !== undefined && best !== null && Math.abs(x - best) < 1e-9 ? ' best' : '') }, num(x));
 
   const c = v.model.all;
+  const made = meta.hours[hour].time_local.slice(-5);
   return section('Was it right?', `GOES-18 at ${later} · +${k} h`,
+    plain(`The forecast made at ${made}, checked square by square against what the satellite really saw at ${later}.`),
     h('div', { class: 'verify-counts' },
       h('span', { class: 'vc vc-hit' }, h('i'), `${fmtInt(c.tp)} hit`),
       h('span', { class: 'vc vc-missed' }, h('i'), `${fmtInt(c.fn)} missed`),
       h('span', { class: 'vc vc-false' }, h('i'), `${fmtInt(c.fp)} false alarm`),
       h('button', { class: 'btn btn-small' + (showOnMap ? ' on' : ''), onclick: () => onToggleMap(!showOnMap) },
         showOnMap ? 'Hide on map' : 'Show on map')),
+    h('details', { class: 'tech' }, h('summary', {}, 'Scores vs two simple guesses'),
     h('table', { class: 'verify-table' },
       h('thead', {},
         h('tr', {}, h('th', {}), h('th', { colspan: 3, class: 'grp' }, 'This hour'), h('th', { colspan: 2, class: 'grp' }, `So far · ${hours} h`)),
@@ -94,6 +97,6 @@ export function verifyCard({ sit, meta, hour, k, showOnMap, onToggleMap }) {
         h('td', { class: 'method' }, r.label),
         r.now.map((x, i) => cell(x, bestNow[i])),
         r.soFar.map((x, i) => cell(x, bestSoFar[i])))))),
-    src(`Forecast made at ${meta.hours[hour].time_local.slice(-5)} vs the 2 km squares GOES-18 saw burning at ${later}. ` +
-        `F1: 1 = perfect. "new" = squares that had never burned (Looks like now always scores 0 there). Underlined = best.`));
+    src(`Score (F1) from 0 to 1, 1 = perfect. "2 km" = a square counts if real fire was within one square (GOES pixels are 2-4 km). ` +
+        `"new" = squares that had never burned ("Looks like now" can never score there). Underlined = best.`)));
 }

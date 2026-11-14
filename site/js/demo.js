@@ -36,11 +36,16 @@ const bar = (label, pct, ours) => h('div', { class: 'dm-bar' + (ours ? ' ours' :
   h('span', { class: 'dm-bar-label' }, label), h('span', { class: 'dm-bar-track' }, h('i', { style: `width:${pct}%` })),
   h('span', { class: 'dm-bar-n mono' }, pct + '%'));
 
+const see = (...c) => h('div', { class: 'dm-see' }, h('span', { class: 'dm-lab' }, 'What you see'), h('div', {}, ...c));
+const why = (...c) => h('div', { class: 'dm-why' }, h('span', { class: 'dm-lab' }, 'Why it matters'), h('div', {}, ...c));
+const key = (cls, ...c) => h('div', {}, h('span', { class: 'dm-key ' + cls }), h('span', {}, ...c));
+const num = (n, ...c) => h('div', {}, h('span', { class: 'dm-key n' }, n), h('span', {}, ...c));
+
 const STEPS = [
   {
     title: 'One real place: California',
-    body: () => [p('Emberline works on one state, ', b('California'), ', where the biggest wildfires in the US happen.'),
-      p('Our story happens here, in ', b('Los Angeles'), '.')],
+    body: () => [see('Only California is on the map. The glowing outline is ', b('Los Angeles County'), '.'),
+      why('We kept the project to one real place, so we could test it properly on real fires.')],
     async run(d) {
       await d.replay(EATON, 1, { fire: true, forecast: false });
       app.view.setGroup('towns', false);
@@ -50,10 +55,10 @@ const STEPS = [
     },
   },
   {
-    title: 'Jan 7, 2025: the Eaton Fire starts',
-    body: () => [p('Very strong winds are blowing, with gusts near 100 km/h.'),
-      p('A weather satellite far above the Earth sees the fire’s heat every few minutes. ',
-        h('span', { class: 'dm-key fire' }), b('Red squares'), ' are burning right now. Each square is 2 km wide.')],
+    title: 'Jan 7, 2025, 6 pm: the Eaton Fire',
+    body: () => [see(h('span', { class: 'dm-key fire' }), b('Red squares'), ' are land burning right now. Each one is 2 km wide. ',
+        'A NOAA weather satellite spots the heat every 5 minutes, while winds gust near 100 km/h.'),
+      why('Emberline always starts from where the fire really is, straight from space.')],
     async run(d) {
       await d.replay(EATON, 1, { fire: true, forecast: false });
       d.frameFire(1400);
@@ -61,11 +66,12 @@ const STEPS = [
   },
   {
     title: 'Emberline guesses the next 3 hours',
-    body: () => [h('div', { class: 'dm-legend' },
-        h('div', {}, h('span', { class: 'dm-key fire' }), h('span', {}, b('Red'), ': burning now')),
-        h('div', {}, h('span', { class: 'dm-key forecast' }), h('span', {}, b('Orange'), ': Emberline thinks it may burn soon (darker = more likely)')),
-        h('div', {}, h('span', { class: 'dm-key ring' }), h('span', {}, b('Dotted lines'), ': where the fire’s edge should be in 1, 2 and 3 hours'))),
-      p('To guess, it looks at the wind, the slopes, the plants and how dry the air is. It learned this from ', b('40 past California fires'), '.')],
+    body: () => [see(h('div', { class: 'dm-legend' },
+        key('fire', b('Red'), ': burning now'),
+        key('forecast', b('Orange'), ': may burn soon (darker = more likely)'),
+        key('ring', b('Dotted lines'), ': where the edge should be in 1, 2 and 3 hours'))),
+      why('Towns see the danger before it arrives. The model learned from ', b('40 past California fires'),
+        ', using wind, slopes, plants and how dry the air is.')],
     async run(d) {
       await d.replay(EATON, 2, { fire: true, forecast: true });
       d.frameFire(900);
@@ -73,11 +79,12 @@ const STEPS = [
   },
   {
     title: 'Was the guess right?',
-    body: () => [p(b('Left:'), ' only what the satellite saw at 7 pm. ', b('Right:'), ' the dotted line is where Emberline said the fire would be by 10 pm. ',
-        h('span', { class: 'dm-key actual' }), b('Dark squares'), ' show where the fire really was at 10 pm.'),
+    body: () => [see(b('Left:'), ' what the satellite saw at 7 pm. ', b('Right:'), ' the dotted line is our guess for 10 pm, and the ',
+        h('span', { class: 'dm-key actual' }), b('dark squares'), ' are where the fire really was at 10 pm.'),
       h('div', { class: 'dm-bars' }, h('div', { class: 'dm-bars-title' }, 'How much the guess and the real fire overlap (100% = perfect)'),
         bar('Emberline', 76, true), bar('Guess “fire stays put”', 65), bar('Guess “grows 1 km/h”', 31)),
-      h('div', { class: 'dm-honest' }, b('This is one of our best hours. '), 'Across all 18 test fires, the average overlap is 45%.')],
+      why('Anyone can check the forecast against what really happened. ', b('This is one of our best hours'),
+        '; across all 18 test fires the average overlap is 45%.')],
     async run(d) {
       await d.replay(EATON, 2, { fire: true, forecast: true }, { split: true });
       d.frameFire(0);
@@ -86,12 +93,12 @@ const STEPS = [
   },
   {
     title: 'Square by square',
-    body: () => [p('Here is the same 3-hour guess, checked one square at a time against the real fire:'),
-      h('div', { class: 'dm-legend' },
-        h('div', {}, h('span', { class: 'dm-key hit' }), h('span', {}, b('13 green'), ': we said fire, and fire came')),
-        h('div', {}, h('span', { class: 'dm-key missed' }), h('span', {}, b('4 pink'), ': fire came, but we missed it')),
-        h('div', {}, h('span', { class: 'dm-key false' }), h('span', {}, b('0 grey'), ': we said fire, but none came'))),
-      p('So 13 of the 17 squares that burned were called 3 hours ahead, with no false alarms.')],
+    body: () => [see('The same guess, checked one square at a time:', h('div', { class: 'dm-legend' },
+        key('hit', b('13 green'), ': we said fire, and fire came'),
+        key('missed', b('4 pink'), ': fire came, but we missed it'),
+        key('false', b('0 grey'), ': we said fire, but none came'))),
+      why('Every pink square touches a green one, so the guess was never more than ', b('one square (2 km) off'),
+        ', about as sharp as the satellite can see. And it raised no false alarms.')],
     async run(d) {
       await d.replay(EATON, 2, { fire: false, forecast: false, verify: true });
       d.frameFire(900);
@@ -100,15 +107,14 @@ const STEPS = [
   },
   {
     title: 'It warns towns before the fire arrives',
-    body: () => [p('Emberline checks every town near the fire and gives it a colour: ',
-        h('span', { class: 'dm-tag evac' }, 'EVACUATE'), ' ', h('span', { class: 'dm-tag warn' }, 'WARNING'), ' or ',
-        h('span', { class: 'dm-tag mon' }, 'MONITOR'), '.'),
-      p('Here it says ', b('Sierra Madre'), ' (10,775 people) should ', b('evacuate'), ': the fire could be there within about an hour.'),
+    body: () => [see('Every nearby town gets a colour: ', h('span', { class: 'dm-tag evac' }, 'EVACUATE'), ' ',
+        h('span', { class: 'dm-tag warn' }, 'WARNING'), ' or ', h('span', { class: 'dm-tag mon' }, 'MONITOR'),
+        '. ', b('Sierra Madre'), ' (10,775 people) is told to evacuate. The lines are its roads out.'),
       h('div', { class: 'dm-legend' },
-        h('div', {}, h('span', { class: 'dm-key n' }, '1'), h('span', {}, b('People'), ': how many live in the town')),
-        h('div', {}, h('span', { class: 'dm-key n' }, '2'), h('span', {}, b('Chance'), ': how likely the fire reaches it in the next 3 hours')),
-        h('div', {}, h('span', { class: 'dm-key n' }, '3'), h('span', {}, b('Dist.'), ': how far the fire is right now')),
-        h('div', {}, h('span', { class: 'dm-key n' }, '4'), h('span', {}, b('Roads'), ': the main ways out. Grey = clear, red = fire is near it')))],
+        num('1', b('People'), ': how many live there'),
+        num('2', b('Chance'), ': how likely the fire reaches it in 3 hours'),
+        num('3', b('Dist.'), ': how far the fire is now')),
+      why('People get a clear answer, leave now or get ready, not just a map.')],
     async run(d) {
       await d.replay(EATON, 2, { fire: true, forecast: true });
       R.town('Sierra Madre');
@@ -117,18 +123,14 @@ const STEPS = [
     },
   },
   {
-    title: 'The official order came later',
-    body: () => [h('div', { class: 'dm-times' },
+    title: 'Real proof: we were hours early',
+    body: () => [see(h('div', { class: 'dm-times' },
         h('div', { class: 'dm-time ours' }, h('span', { class: 'mono' }, '7:00 pm'), h('span', {}, 'Emberline warns Sierra Madre')),
         h('div', { class: 'dm-time' }, h('span', { class: 'mono' }, '8–9 pm'), h('span', {}, 'Satellite sees fire at the edge of town')),
-        h('div', { class: 'dm-time official' }, h('span', { class: 'mono' }, '9:26 pm'), h('span', {}, 'Official evacuation order'))),
-      p('That is almost ', b('2½ hours earlier'), '.'),
-      h('div', { class: 'dm-legend' },
-        h('div', {}, h('span', { class: 'dm-key n' }, '5/5'), h('span', {}, 'Of the 5 towns with a published order time, Emberline flagged all 5 first')),
-        h('div', {}, h('span', { class: 'dm-key n' }, '+h'), h('span', {}, b('“+2.4 h earlier”'), ' = how long before the official order we flagged it. Most were about half an hour early')),
-        h('div', {}, h('span', { class: 'dm-key n' }, '🔥'), h('span', {}, b('“Fire reached it”'), ' tells you if the fire really came. An early warning only helps if it did')),
-        h('div', {}, h('span', { class: 'dm-key n' }, '↗'), h('span', {}, b('Source'), ' opens the official public record for that time'))),
-      h('div', { class: 'dm-src' }, 'Order times: LA County report on the Eaton Fire evacuation alerts.')],
+        h('div', { class: 'dm-time official' }, h('span', { class: 'mono' }, '9:26 pm'), h('span', {}, 'Official evacuation order')))),
+      why('Emberline flagged Sierra Madre ', b('almost 2½ hours before the official order'), '. On this fire it was first for ',
+        b('all 5 towns'), ' with public order times, usually by about half an hour.'),
+      h('div', { class: 'dm-src' }, 'The panel lists each town, our time, the official time, and a link to the public record (LA County report).')],
     async run(d) {
       await d.replay(EATON, 2, { fire: true, forecast: true });
       d.focus(R.state.slots.official);
@@ -141,13 +143,12 @@ const STEPS = [
   },
   {
     title: 'The bar at the bottom tells the whole story',
-    body: () => [p('It shows the whole fire, hour by hour, from left to right:'),
-      h('div', { class: 'dm-legend' },
-        h('div', {}, h('span', { class: 'dm-key tick warn' }), h('span', {}, b('Orange ticks'), ': when Emberline first warned a town')),
-        h('div', {}, h('span', { class: 'dm-key tick arrive' }), h('span', {}, b('Red ticks'), ': when the fire really reached a town')),
-        h('div', {}, h('span', { class: 'dm-key tick official' }), h('span', {}, b('White ticks'), ': official orders and warnings')),
-        h('div', {}, h('span', { class: 'dm-key hill' }), h('span', {}, b('The brown hill'), ': how big the fire was'))),
-      p('Orange before red means the town was warned before the fire got there.')],
+    body: () => [see('The whole fire, hour by hour, left to right:', h('div', { class: 'dm-legend' },
+        key('tick warn', b('Orange ticks'), ': Emberline warns a town'),
+        key('tick arrive', b('Red ticks'), ': the fire reaches a town'),
+        key('tick official', b('White ticks'), ': official orders'),
+        key('hill', b('Brown hill'), ': how big the fire was'))),
+      why('Orange before red means a town was warned in time.')],
     async run(d) {
       await d.replay(EATON, 4, { fire: true, forecast: true });
       d.focus($('#timeline'));
@@ -156,13 +157,12 @@ const STEPS = [
   {
     title: 'AI writes the plan. Code checks it.',
     kicker: 'Another real fire: Park Fire, July 2024',
-    body: () => [p('The AI writes an evacuation plan: which towns leave, and by which road. Then plain code checks every road against the forecast.'),
-      p('Here the AI sent Butte Creek Canyon out on Highway 32 west, but the fire is about to cross that road. The code said ',
-        h('span', { class: 'dm-tag evac' }, 'REJECTED'), ', and the AI had to pick a safe road north instead.'),
-      h('div', { class: 'dm-legend' },
-        h('div', {}, h('span', { class: 'dm-key evacbox' }), h('span', {}, b('Red box'), ': the plan the code rejected, and why')),
-        h('div', {}, h('span', { class: 'dm-key okbox' }), h('span', {}, b('Green box'), ': the fixed plan that passed the check')),
-        h('div', {}, h('span', { class: 'dm-key n' }, '✓'), h('span', {}, b('Approve plan'), ': nothing happens until a person presses this')))],
+    body: () => [see('The AI wrote an evacuation plan that sent Butte Creek Canyon out on Highway 32 west, but the fire was about to cross that road.',
+        h('div', { class: 'dm-legend' },
+          key('evacbox', b('Red box'), ': the plan our code ', h('span', { class: 'dm-tag evac' }, 'REJECTED'), ', and why'),
+          key('okbox', b('Green box'), ': the fixed plan (Highway 32 north) that passed'),
+          num('✓', b('Approve plan'), ': nothing happens until a person presses it'))),
+      why('The AI never acts alone. Code checks every road, and a person makes the final call.')],
     async run(d) {
       await d.replay(PARK, 2, { fire: true, forecast: true });
       d.frameFire(900);
@@ -172,12 +172,11 @@ const STEPS = [
   },
   {
     title: 'What if the wind changes?',
-    body: () => [p('Back on the Eaton Fire. What if the wind had blown ', b('twice as hard'), '?'),
-      p('Emberline re-runs its guess in about a second:'),
+    body: () => [see('Back on the Eaton Fire, the wind now blows ', b('twice as hard'), '. The map and the towns update in about a second:'),
       h('div', { class: 'dm-compare' },
         h('div', {}, h('span', { class: 'dm-big mono' }, '6'), h('span', {}, 'towns in danger with the real wind (29 km/h)')),
         h('div', { class: 'hot' }, h('span', { class: 'dm-big mono' }, '20'), h('span', {}, 'towns in danger at 60 km/h'))),
-      p('On the right, drag the ', b('compass'), ' to change where the wind comes from, and the ', b('slider'), ' to change how strong it is. The table shows which towns change colour.')],
+      why('Teams can plan for a worse wind before it happens. Drag the compass on the right to try any wind.')],
     async run(d) {
       await d.replay(EATON, 2, { fire: true, forecast: true });
       d.frameFire(900);
@@ -191,16 +190,14 @@ const STEPS = [
   },
   {
     title: 'Not one lucky fire: we tested 18',
-    body: () => [p('We trained Emberline on 40 fires from 2018–2022, tuned it on 12 from 2023, then tested it on ',
-        b('18 fires from 2024–2025 it had never seen'), ' (the dots). We compared it with two simple guesses:'),
+    body: () => [see('The dots are ', b('18 fires from 2024 and 2025 the model never saw'), '. We trained on 40 older fires, then compared it with two simple guesses:'),
       h('table', { class: 'dm-table' },
         h('thead', {}, h('tr', {}, h('th'), h('th', { class: 'ours' }, 'Emberline'), h('th', {}, 'Grows 1 km/h'), h('th', {}, 'Stays put'))),
         h('tbody', {},
           h('tr', {}, h('td', {}, 'Towns warned before the fire came'), h('td', { class: 'ours mono' }, '18 / 20'), h('td', { class: 'mono' }, '18 / 20'), h('td', { class: 'mono' }, '0 / 20')),
           h('tr', {}, h('td', {}, 'How early, on average'), h('td', { class: 'ours mono' }, '2.8 h'), h('td', { class: 'mono' }, '2.5 h'), h('td', { class: 'mono' }, '–')),
-          h('tr', {}, h('td', {}, 'Spotting new fire'), h('td', { class: 'ours mono' }, '0.41'), h('td', { class: 'mono' }, '0.24'), h('td', { class: 'mono' }, '0')))),
-      h('div', { class: 'dm-src' }, '“Spotting new fire” is a score from 0 to 1 for guessing squares that were not burning yet. 1 would be perfect. ',
-        'Emberline is about 1.7 times better at it than the simple rule.')],
+          h('tr', {}, h('td', {}, 'Spotting new fire (0 to 1)'), h('td', { class: 'ours mono' }, '0.41'), h('td', { class: 'mono' }, '0.24'), h('td', { class: 'mono' }, '0')))),
+      why('It works across many fires, not just one: 90% of towns warned, almost 3 hours early, and about 1.7 times better at spotting new fire.')],
     async run(d) {
       R.realWind();
       d.focus(null);
@@ -213,36 +210,39 @@ const STEPS = [
   {
     title: 'Where it gets things wrong',
     body: () => [h('ul', { class: 'dm-list' },
-        h('li', {}, b('False alarms. '), 'It warns some towns the fire never reaches, more often than the simple rule. We chose this on purpose: missing a town is worse than an extra warning.'),
-        h('li', {}, b('Fire shape. '), 'For the overall shape it is about as good as “the fire stays put” (45% vs 47% overlap). Its strength is spotting new spread and warning towns.'),
-        h('li', {}, b('Blurry eyes. '), 'The satellite sees 2 km squares, and smoke, clouds and night can hide fire. Wind comes from one weather point per fire, so local gusts are missed.'),
+        h('li', {}, b('False alarms. '), 'It warns some towns the fire never reaches, more often than the simple rule. We chose this: missing a town is worse than an extra warning.'),
+        h('li', {}, b('Fire shape. '), 'For the overall shape it is about as good as “the fire stays put” (45% vs 47%). Its strength is new spread and town warnings.'),
+        h('li', {}, b('Blurry eyes. '), 'The satellite sees 2 km squares, and smoke, clouds and night can hide fire. Local wind gusts are missed.'),
         h('li', {}, b('Few fires. '), 'Good satellite data only goes back to 2018, so there are only so many fires to learn from.')),
       h('div', { class: 'dm-honest' }, 'Emberline is a research demo. In a real fire, follow official orders.')],
     async run(d) {
       d.focus(null);
-      await d.replay(EATON, 3, { fire: true, forecast: true });
-      d.frameFire(1200);
+      await d.replay(EATON, 2, { fire: true, forecast: true });
+      app.view.setGroup('towns', false);
+      d.dots(TEST_FIRES);
+      d.frame(CA, 0);
     },
   },
   {
     title: 'Ask Emberline anything',
-    body: () => [p('Stuck? The ', b('✦ Ask Emberline'), ' button opens an AI guide (Claude Sonnet 5.5).'),
-      p('Ask a question in plain words, or ask it to take you somewhere. It answers with our real numbers and ', b('moves the app for you'), '.'),
-      p('Here it answers a hard one: ', h('i', {}, '“Did Emberline just get lucky with Sierra Madre?”'))],
+    body: () => [see('The ', b('✦ Ask Emberline'), ' guide (Claude Sonnet 5.5) answers in plain words, using our real results, and ', b('moves the app'), ' to the proof.'),
+      p('Watch it take a hard one: ', h('i', {}, '“Did Emberline just get lucky with Sierra Madre?”')),
+      why('Anyone can explore Emberline without knowing anything about wildfires.')],
     async run(d) {
       d.focus(null);
       await sleep(700); if (!d.alive()) return;
       await ask('Did Emberline just get lucky with Sierra Madre?', { fromDemo: true });
       if (d.alive() && R.state?.slots) d.focus(R.state.slots.verify);
     },
+    dock: 'right',
   },
   {
     title: 'Your turn',
     body: () => [h('div', { class: 'dm-modes' },
         h('div', {}, b('REPLAY'), h('span', {}, 'Past fires hour by hour. You are here.')),
         h('div', {}, b('INCIDENT'), h('span', {}, 'One fire up close, with the AI copilot.')),
-        h('div', {}, b('STATE'), h('span', {}, 'Every fire in California at once.'))),
-      p('Ask the ', b('✦ Ask Emberline'), ' guide anything, and watch this demo again any time from the ', b('⚙ menu'), '.')],
+        h('div', {}, b('STATE'), h('span', {}, 'All of California at once.'))),
+      p('Ask the ', b('✦ Ask Emberline'), ' guide anything, and replay this demo any time from the ', b('⚙ menu'), '.')],
     async run(d) {
       d.focus($('#mode-tabs'));
       await d.replay(EATON, 2, { fire: true, forecast: true });
@@ -402,6 +402,8 @@ export function showWelcome() {
       h('div', { class: 'wl-brand' }, h('span', { class: 'brand-mark' }), 'EMBERLINE'),
       h('h1', { id: 'welcome-title' }, 'See a wildfire’s next 3 hours'),
       h('p', {}, 'Emberline is a wildfire copilot for California. It guesses where a fire will spread, warns towns early, and checks that the escape roads are safe.'),
+      h('div', { class: 'wl-proof' }, h('b', {}, '2½ h'),
+        h('span', {}, 'Replaying the 2025 Eaton Fire, Emberline flagged Sierra Madre almost 2½ hours before the official evacuation order.')),
       h('div', { class: 'wl-points' },
         h('div', {}, h('b', {}, '1'), 'Satellites spot the fire'),
         h('div', {}, h('b', {}, '2'), 'Emberline forecasts the spread'),
