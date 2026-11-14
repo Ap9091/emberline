@@ -102,8 +102,12 @@ const STEPS = [
     body: () => [p('Emberline checks every town near the fire and gives it a colour: ',
         h('span', { class: 'dm-tag evac' }, 'EVACUATE'), ' ', h('span', { class: 'dm-tag warn' }, 'WARNING'), ' or ',
         h('span', { class: 'dm-tag mon' }, 'MONITOR'), '.'),
-      p('Here it says ', b('Sierra Madre'), ' (10,775 people) should ', b('evacuate'), ': the fire could be there within about an hour. ',
-        'The lines on the map are the main roads out of town.')],
+      p('Here it says ', b('Sierra Madre'), ' (10,775 people) should ', b('evacuate'), ': the fire could be there within about an hour.'),
+      h('div', { class: 'dm-legend' },
+        h('div', {}, h('span', { class: 'dm-key n' }, '1'), h('span', {}, b('People'), ': how many live in the town')),
+        h('div', {}, h('span', { class: 'dm-key n' }, '2'), h('span', {}, b('Chance'), ': how likely the fire reaches it in the next 3 hours')),
+        h('div', {}, h('span', { class: 'dm-key n' }, '3'), h('span', {}, b('Dist.'), ': how far the fire is right now')),
+        h('div', {}, h('span', { class: 'dm-key n' }, '4'), h('span', {}, b('Roads'), ': the main ways out. Grey = clear, red = fire is near it')))],
     async run(d) {
       await d.replay(EATON, 2, { fire: true, forecast: true });
       R.town('Sierra Madre');
@@ -117,8 +121,12 @@ const STEPS = [
         h('div', { class: 'dm-time ours' }, h('span', { class: 'mono' }, '7:00 pm'), h('span', {}, 'Emberline warns Sierra Madre')),
         h('div', { class: 'dm-time' }, h('span', { class: 'mono' }, '8–9 pm'), h('span', {}, 'Satellite sees fire at the edge of town')),
         h('div', { class: 'dm-time official' }, h('span', { class: 'mono' }, '9:26 pm'), h('span', {}, 'Official evacuation order'))),
-      p('That is almost ', b('2½ hours earlier'), '. On this fire, Emberline flagged ', b('all 5 towns'),
-        ' with published order times before the official order (usually by about half an hour).'),
+      p('That is almost ', b('2½ hours earlier'), '.'),
+      h('div', { class: 'dm-legend' },
+        h('div', {}, h('span', { class: 'dm-key n' }, '5/5'), h('span', {}, 'Of the 5 towns with a published order time, Emberline flagged all 5 first')),
+        h('div', {}, h('span', { class: 'dm-key n' }, '+h'), h('span', {}, b('“+2.4 h earlier”'), ' = how long before the official order we flagged it. Most were about half an hour early')),
+        h('div', {}, h('span', { class: 'dm-key n' }, '🔥'), h('span', {}, b('“Fire reached it”'), ' tells you if the fire really came. An early warning only helps if it did')),
+        h('div', {}, h('span', { class: 'dm-key n' }, '↗'), h('span', {}, b('Source'), ' opens the official public record for that time'))),
       h('div', { class: 'dm-src' }, 'Order times: LA County report on the Eaton Fire evacuation alerts.')],
     async run(d) {
       await d.replay(EATON, 2, { fire: true, forecast: true });
@@ -150,7 +158,10 @@ const STEPS = [
     body: () => [p('The AI writes an evacuation plan: which towns leave, and by which road. Then plain code checks every road against the forecast.'),
       p('Here the AI sent Butte Creek Canyon out on Highway 32 west, but the fire is about to cross that road. The code said ',
         h('span', { class: 'dm-tag evac' }, 'REJECTED'), ', and the AI had to pick a safe road north instead.'),
-      p(b('A person always makes the final call.'))],
+      h('div', { class: 'dm-legend' },
+        h('div', {}, h('span', { class: 'dm-key evacbox' }), h('span', {}, b('Red box'), ': the plan the code rejected, and why')),
+        h('div', {}, h('span', { class: 'dm-key okbox' }), h('span', {}, b('Green box'), ': the fixed plan that passed the check')),
+        h('div', {}, h('span', { class: 'dm-key n' }, '✓'), h('span', {}, b('Approve plan'), ': nothing happens until a person presses this')))],
     async run(d) {
       await d.replay(PARK, 2, { fire: true, forecast: true });
       d.frameFire(900);
@@ -165,7 +176,7 @@ const STEPS = [
       h('div', { class: 'dm-compare' },
         h('div', {}, h('span', { class: 'dm-big mono' }, '6'), h('span', {}, 'towns in danger with the real wind (29 km/h)')),
         h('div', { class: 'hot' }, h('span', { class: 'dm-big mono' }, '20'), h('span', {}, 'towns in danger at 60 km/h'))),
-      p('Teams can plan for the worst case before it happens.')],
+      p('On the right, drag the ', b('compass'), ' to change where the wind comes from, and the ', b('slider'), ' to change how strong it is. The table shows which towns change colour.')],
     async run(d) {
       await d.replay(EATON, 2, { fire: true, forecast: true });
       d.frameFire(900);

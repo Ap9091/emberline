@@ -611,6 +611,10 @@ ul, ol { margin: 0; padding-left: 16px; }
 .dm-legend { display: grid; gap: 7px; margin: 2px 0 10px; background: var(--bg-0); border: 1px solid var(--line); border-radius: 6px; padding: 9px 11px; }
 .dm-legend > div { display: grid; grid-template-columns: 20px 1fr; align-items: center; gap: 4px; font-size: 13px; color: #d3d8dd; }
 .dm-legend .dm-key { margin-right: 0; }
+.dm-legend > div { grid-template-columns: 28px 1fr; }
+.dm-key.n { width: auto; height: auto; background: none; font: 600 11px var(--mono); color: var(--ring); text-align: center; }
+.dm-key.evacbox { background: var(--evacuate); }
+.dm-key.okbox { background: #2f5d43; border: 1px solid #447a5b; }
 .dm-tag { display: inline-block; font: 600 11px var(--mono); padding: 1px 6px; border-radius: 3px; color: #14171a; }
 .dm-tag.evac { background: var(--evacuate); color: #fff; }
 .dm-tag.warn { background: var(--warning); }
