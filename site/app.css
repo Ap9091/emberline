@@ -599,13 +599,25 @@ ul, ol { margin: 0; padding-left: 16px; }
 .dm-key.fire { background: var(--fire); }
 .dm-key.forecast { background: var(--forecast); opacity: .8; }
 .dm-key.actual { background: var(--actual); border: 1px solid #8a4a4a; }
+.dm-key.ring { background: none; border-top: 2.5px dotted var(--ring); border-radius: 0; height: 0; width: 14px; vertical-align: 3px; }
+.dm-key.hit { background: var(--hit, #3f9e78); }
+.dm-key.missed { background: var(--missed, #b0306a); }
+.dm-key.false { background: var(--falseAlarm, #9aa3ab); }
+.dm-key.tick { width: 5px; height: 13px; border-radius: 1px; margin: 0 8px 0 4px; }
+.dm-key.tick.warn { background: var(--warning); }
+.dm-key.tick.arrive { background: var(--evacuate); }
+.dm-key.tick.official { background: #fff; }
+.dm-key.hill { background: linear-gradient(180deg, #a2421c, #4a1d0d); border-radius: 6px 6px 1px 1px; }
+.dm-legend { display: grid; gap: 7px; margin: 2px 0 10px; background: var(--bg-0); border: 1px solid var(--line); border-radius: 6px; padding: 9px 11px; }
+.dm-legend > div { display: grid; grid-template-columns: 20px 1fr; align-items: center; gap: 4px; font-size: 13px; color: #d3d8dd; }
+.dm-legend .dm-key { margin-right: 0; }
 .dm-tag { display: inline-block; font: 600 11px var(--mono); padding: 1px 6px; border-radius: 3px; color: #14171a; }
 .dm-tag.evac { background: var(--evacuate); color: #fff; }
 .dm-tag.warn { background: var(--warning); }
 .dm-tag.mon { background: var(--monitor); color: #fff; }
 .dm-bars { background: var(--bg-0); border: 1px solid var(--line); border-radius: 6px; padding: 9px 11px; margin: 4px 0 8px; display: grid; gap: 6px; }
 .dm-bars-title { font-size: 11px; color: var(--text-3); }
-.dm-bar { display: grid; grid-template-columns: 112px 1fr 38px; align-items: center; gap: 8px; font-size: 12.5px; color: var(--text-2); }
+.dm-bar { display: grid; grid-template-columns: 150px 1fr 38px; align-items: center; gap: 8px; font-size: 12.5px; color: var(--text-2); }
 .dm-bar-track { height: 8px; background: var(--bg-3); border-radius: 4px; overflow: hidden; }
 .dm-bar-track i { display: block; height: 100%; background: #6a7178; border-radius: 4px; animation: dm-grow .9s ease-out; }
 .dm-bar.ours { color: var(--text); font-weight: 600; }
@@ -640,6 +652,7 @@ ul, ol { margin: 0; padding-left: 16px; }
 /* while the demo runs: hide the busy bits, spotlight what the card talks about */
 body.demo-on #layer-toggles, body.demo-on #legend, body.demo-on #ai-chip, body.demo-on #demo-btn, body.demo-on #results-btn { display: none !important; }
 body.demo-on #timeline { pointer-events: none; opacity: .6; }
+body.demo-on #timeline.demo-focus { opacity: 1; outline-offset: -3px; animation: dm-glow 1.6s ease-in-out infinite; }
 body.demo-on #mode-tabs { pointer-events: none; }
 body.demo-on #map-banner { left: 400px; }
 #panel.demo-dim #panel-body > * { opacity: .22; transition: opacity .3s; }

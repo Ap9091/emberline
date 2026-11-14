@@ -5,7 +5,8 @@
 // (2024), where the saved copilot run shows the safety check rejecting an AI plan.
 // Every number in the cards comes from the replay data or the test results (results/metrics.json):
 //   * Eaton hour 2: the 3-hour forecast overlapped 76% with what really burned (fire stays put 65%,
-//     grow 1 km/h 31%). Across all 18 test fires the average +3 h overlap is 45%: we say so on screen.
+//     grow 1 km/h 31%); one of the best +3 h hours of the Eaton Fire (not the top one). Square check: 13 hit, 4 missed, 0 false alarms.
+//     Across all 18 test fires the average +3 h overlap (IoU) is 45%: we say so on screen.
 //   * Sierra Madre: Emberline warning 7:00 pm (end of the satellite hour it was made from), fire within
 //     1 km of town in the 8-9 pm satellite hour, first published evacuation order 9:26 pm (LA County report).
 //   * What-if: same wind direction, 60 instead of 29 km/h → towns in danger 6 → 20, +3 h area 52 → 184 km²
@@ -59,9 +60,11 @@ const STEPS = [
   },
   {
     title: 'Emberline guesses the next 3 hours',
-    body: () => [p('Every hour, Emberline guesses where the fire will be ', b('1, 2 and 3 hours'), ' from now: ',
-        h('span', { class: 'dm-key forecast' }), b('the orange area'), ' and the rings.'),
-      p('It looks at the wind, the slopes, the plants and how dry the air is. It learned this from ', b('40 past California fires'), '.')],
+    body: () => [h('div', { class: 'dm-legend' },
+        h('div', {}, h('span', { class: 'dm-key fire' }), h('span', {}, b('Red'), ': burning now')),
+        h('div', {}, h('span', { class: 'dm-key forecast' }), h('span', {}, b('Orange'), ': Emberline thinks it may burn soon (darker = more likely)')),
+        h('div', {}, h('span', { class: 'dm-key ring' }), h('span', {}, b('Dotted lines'), ': where the fire’s edge should be in 1, 2 and 3 hours'))),
+      p('To guess, it looks at the wind, the slopes, the plants and how dry the air is. It learned this from ', b('40 past California fires'), '.')],
     async run(d) {
       await d.replay(EATON, 2, { fire: true, forecast: true });
       d.frameFire(900);
@@ -69,16 +72,30 @@ const STEPS = [
   },
   {
     title: 'Was the guess right?',
-    body: () => [p(b('Left:'), ' what people could see at 7 pm. ', b('Right:'), ' Emberline’s guess, with the ',
-        h('span', { class: 'dm-key actual' }), b('real fire 3 hours later'), ' fading in. They line up.'),
-      h('div', { class: 'dm-bars' }, h('div', { class: 'dm-bars-title' }, 'How much the guess matched what really burned'),
-        bar('Emberline', 76, true), bar('Fire stays put', 65), bar('Fire grows 1 km/h', 31)),
-      h('div', { class: 'dm-honest' }, b('Honest note: '), 'this is one of our best hours. Across all 18 test fires, the average match is 45%.')],
+    body: () => [p(b('Left:'), ' only what the satellite saw at 7 pm. ', b('Right:'), ' the dotted line is where Emberline said the fire would be by 10 pm. ',
+        h('span', { class: 'dm-key actual' }), b('Dark squares'), ' show where the fire really was at 10 pm.'),
+      h('div', { class: 'dm-bars' }, h('div', { class: 'dm-bars-title' }, 'How much the guess and the real fire overlap (100% = perfect)'),
+        bar('Emberline', 76, true), bar('Guess “fire stays put”', 65), bar('Guess “grows 1 km/h”', 31)),
+      h('div', { class: 'dm-honest' }, b('This is one of our best hours. '), 'Across all 18 test fires, the average overlap is 45%.')],
     async run(d) {
       await d.replay(EATON, 2, { fire: true, forecast: true }, { split: true });
       d.frameFire(0);
     },
     dock: 'right',
+  },
+  {
+    title: 'Square by square',
+    body: () => [p('Here is the same 3-hour guess, checked one square at a time against the real fire:'),
+      h('div', { class: 'dm-legend' },
+        h('div', {}, h('span', { class: 'dm-key hit' }), h('span', {}, b('13 green'), ': we said fire, and fire came')),
+        h('div', {}, h('span', { class: 'dm-key missed' }), h('span', {}, b('4 pink'), ': fire came, but we missed it')),
+        h('div', {}, h('span', { class: 'dm-key false' }), h('span', {}, b('0 grey'), ': we said fire, but none came'))),
+      p('So 13 of the 17 squares that burned were called 3 hours ahead, with no false alarms.')],
+    async run(d) {
+      await d.replay(EATON, 2, { fire: false, forecast: false, verify: true });
+      d.frameFire(900);
+      d.focus(R.state.slots.verify);
+    },
   },
   {
     title: 'It warns towns before the fire arrives',
@@ -111,6 +128,20 @@ const STEPS = [
         await sleep(1600); if (!d.alive()) return;
         await R.hour(hr);
       }
+    },
+  },
+  {
+    title: 'The bar at the bottom tells the whole story',
+    body: () => [p('It shows the whole fire, hour by hour, from left to right:'),
+      h('div', { class: 'dm-legend' },
+        h('div', {}, h('span', { class: 'dm-key tick warn' }), h('span', {}, b('Orange ticks'), ': when Emberline first warned a town')),
+        h('div', {}, h('span', { class: 'dm-key tick arrive' }), h('span', {}, b('Red ticks'), ': when the fire really reached a town')),
+        h('div', {}, h('span', { class: 'dm-key tick official' }), h('span', {}, b('White ticks'), ': official orders and warnings')),
+        h('div', {}, h('span', { class: 'dm-key hill' }), h('span', {}, b('The brown hill'), ': how big the fire was'))),
+      p('Orange before red means the town was warned before the fire got there.')],
+    async run(d) {
+      await d.replay(EATON, 4, { fire: true, forecast: true });
+      d.focus($('#timeline'));
     },
   },
   {
@@ -149,14 +180,15 @@ const STEPS = [
   {
     title: 'Not one lucky fire: we tested 18',
     body: () => [p('We trained Emberline on 40 fires from 2018–2022, tuned it on 12 from 2023, then tested it on ',
-        b('18 fires from 2024–2025 it had never seen'), ' (the dots).'),
+        b('18 fires from 2024–2025 it had never seen'), ' (the dots). We compared it with two simple guesses:'),
       h('table', { class: 'dm-table' },
         h('thead', {}, h('tr', {}, h('th'), h('th', { class: 'ours' }, 'Emberline'), h('th', {}, 'Grows 1 km/h'), h('th', {}, 'Stays put'))),
         h('tbody', {},
           h('tr', {}, h('td', {}, 'Towns warned before the fire came'), h('td', { class: 'ours mono' }, '18 / 20'), h('td', { class: 'mono' }, '18 / 20'), h('td', { class: 'mono' }, '0 / 20')),
-          h('tr', {}, h('td', {}, 'Warning time'), h('td', { class: 'ours mono' }, '2.8 h'), h('td', { class: 'mono' }, '2.5 h'), h('td', { class: 'mono' }, '–')),
-          h('tr', {}, h('td', {}, 'Spotting new fire (0–1)'), h('td', { class: 'ours mono' }, '0.41'), h('td', { class: 'mono' }, '0.24'), h('td', { class: 'mono' }, '0')))),
-      h('div', { class: 'dm-src' }, 'The two simple guesses are what a fair test compares against.')],
+          h('tr', {}, h('td', {}, 'How early, on average'), h('td', { class: 'ours mono' }, '2.8 h'), h('td', { class: 'mono' }, '2.5 h'), h('td', { class: 'mono' }, '–')),
+          h('tr', {}, h('td', {}, 'Spotting new fire'), h('td', { class: 'ours mono' }, '0.41'), h('td', { class: 'mono' }, '0.24'), h('td', { class: 'mono' }, '0')))),
+      h('div', { class: 'dm-src' }, '“Spotting new fire” is a score from 0 to 1 for guessing squares that were not burning yet. 1 would be perfect. ',
+        'Emberline is about 1.7 times better at it than the simple rule.')],
     async run(d) {
       R.realWind();
       d.focus(null);
@@ -170,7 +202,7 @@ const STEPS = [
     title: 'Where it gets things wrong',
     body: () => [h('ul', { class: 'dm-list' },
         h('li', {}, b('False alarms. '), 'It warns some towns the fire never reaches, more often than the simple rule. We chose this on purpose: missing a town is worse than an extra warning.'),
-        h('li', {}, b('Fire shape. '), 'For the overall shape it is about as good as “the fire stays put” (45% vs 47%). Its strength is spotting new spread and warning towns.'),
+        h('li', {}, b('Fire shape. '), 'For the overall shape it is about as good as “the fire stays put” (45% vs 47% overlap). Its strength is spotting new spread and warning towns.'),
         h('li', {}, b('Blurry eyes. '), 'The satellite sees 2 km squares, and smoke, clouds and night can hide fire. Wind comes from one weather point per fire, so local gusts are missed.'),
         h('li', {}, b('Few fires. '), 'Good satellite data only goes back to 2018, so there are only so many fires to learn from.')),
       h('div', { class: 'dm-honest' }, 'Emberline is a research demo. In a real fire, follow official orders.')],
