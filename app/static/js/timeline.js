@@ -6,7 +6,7 @@
 // The timeline does not know about the map. It calls the functions in `on` (given by mode_replay.js):
 //   on.hour(h)  on.playToggle()  on.step(±1)  on.speed(i)  on.split()  on.copilot()  on.fire(id)
 // ─────────────────────────────────────────────────────────────────────────────
-import { h, svg, fill, $, fmtInt, showTooltip, hideTooltip } from './util.js';
+import { h, svg, fill, $, fmtInt, showTooltip, hideTooltip, pacific } from './util.js';
 import { segmented } from './app.js';
 
 const ICON = {
@@ -27,7 +27,10 @@ export class Timeline {
   build(fires, meta, ui) {
     this.meta = meta;
     const n = meta.hours.length;
-    this.pct = hr => (hr / (n - 1)) * 100;
+    this.pct = hr => Math.max(0, Math.min(100, (hr / (n - 1)) * 100));
+    // position of an exact time (official orders are published to the minute)
+    const t0 = new Date(meta.hours[0].time_utc).getTime();
+    this.hourOf = iso => (new Date(iso).getTime() - t0) / 3600000;
 
     // ── left: controls ──
     const fireSelect = h('select', { id: 'tl-fire', title: 'Replay fire', onchange: e => this.on.fire(e.target.value) },
@@ -50,7 +53,7 @@ export class Timeline {
     const orders = meta.official_orders || [];
     this.cursor = h('div', { class: 'tl-cursor' });
     this.track = h('div', { class: 'tl-track' },
-      this._lane('warn', this._marks(meta.timeline, 'first_warning_hour', 'first warning')),
+      this._lane('warn', this._marks(meta.timeline, 'first_warning_hour', 'first flagged by Emberline')),
       this._lane('arrive', this._marks(meta.timeline, 'fire_arrival_hour', 'fire reached town')),
       orders.length
         ? this._lane('official', this._orderMarks(orders))
@@ -62,7 +65,7 @@ export class Timeline {
 
     const labels = h('div', { class: 'tl-labels' },
       h('span', { class: 'lab-warn' }, 'Our first warning'), h('span', { class: 'lab-arrive' }, 'Fire reaches town'),
-      h('span', { class: 'lab-official' }, 'Official order'), h('span', { class: 'lab-spark' }, 'Fire area'),
+      h('span', { class: 'lab-official' }, 'Official order / warning'), h('span', { class: 'lab-spark' }, 'Fire area'),
       h('span', { class: 'lab-peak mono' }, `peak ${fmtInt(Math.max(...meta.hours.map(x => x.fire_area_km2)))} km²`));
     fill(this.root, left, labels, h('div', { class: 'tl-track-wrap' }, this.track));
     this.update(ui);
@@ -96,28 +99,28 @@ export class Timeline {
       byHour.get(t[field]).push(t);
     }
     return [...byHour].map(([hour, towns]) => {
-      const when = this.meta.hours[hour]?.time_local || `hour ${hour}`;
+      // a warning made from hour h's satellite data can only go out when hour h ends
+      const issued = field === 'first_warning_hour';
+      const at = issued ? hour + 1 : hour;
+      const when = issued ? pacific(towns[0].first_warning_issued_utc) : (this.meta.hours[hour]?.time_local || `hour ${hour}`);
       const names = towns.map(t => t.town + (field === 'fire_arrival_hour' && t.lead_h > 0 ? ` (warned ${t.lead_h} h before)` : '')).join(', ');
-      return this._tick(hour, `${names} · ${what} ${when}`);
+      return this._tick(at, `${names} · ${what} ${when}`);
     });
   }
 
-  /** Official orders come from data/evac_orders.csv; we accept a few possible column names for the time. */
+  /** Official orders/warnings from data/evac_orders.csv, placed at their published time (to the minute). */
   _orderMarks(orders) {
     return orders.map(o => {
-      let hour = o.hour_idx ?? o.hour;
-      const iso = o.time_utc || o.order_time_utc || o.order_utc;
-      if ((hour === undefined || hour === '') && iso) {
-        const t = new Date(iso).getTime();
-        hour = this.meta.hours.findIndex(x => Math.abs(new Date(x.time_utc).getTime() - t) < 30 * 60000);
-      }
-      if (hour === undefined || hour === '' || hour < 0) return null;
-      return this._tick(Number(hour), `${o.town || o.area || 'Official order'} · official evacuation order ${this.meta.hours[hour]?.time_local || ''}`);
+      if (!o.order_time_utc) return null;
+      const at = this.hourOf(o.order_time_utc);
+      if (at < 0 || at > this.meta.hours.length - 1) return null;
+      return this._tick(at, `${o.town} · official evacuation ${o.order_type} ${pacific(o.order_time_utc)}` +
+        (o.precision === 'approx' ? ' (approximate)' : ''), o.order_type === 'warning' ? 'tl-tick-soft' : '');
     });
   }
 
-  _tick(hour, tip) {
-    return h('span', { class: 'tl-tick', style: `left:${this.pct(hour)}%`,
+  _tick(hour, tip, extra = '') {
+    return h('span', { class: 'tl-tick ' + extra, style: `left:${this.pct(hour)}%`,
       onmouseenter: e => { const r = e.target.getBoundingClientRect(); showTooltip(tip, r.left + r.width / 2, r.top); },
       onmouseleave: hideTooltip });
   }

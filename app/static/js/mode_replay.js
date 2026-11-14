@@ -7,11 +7,14 @@
 import * as api from './api.js';
 import { app, setClock, setLoading, setBanner, setToggles, setLegend, toggleRow, segmented } from './app.js';
 import { REPLAY_SPEEDS, TEXT } from './config.js';
-import { h, fill, $, fmtInt, localHM } from './util.js';
+import { h, fill, $, fmtInt, localHM, compass } from './util.js';
 import { MapView, syncMaps } from './mapview.js';
 import { SituationPanel } from './panel.js';
 import { Copilot } from './copilot.js';
 import { Timeline } from './timeline.js';
+import { WhatIf } from './whatif.js';
+import { verifyCard } from './verify.js';
+import { officialCard } from './official.js';
 
 const s = {
   fires: null,                 // /api/replay
@@ -19,7 +22,8 @@ const s = {
   hour: 0, sit: null,
   playing: false, speedIdx: 0, playTimer: null,
   split: false, left: null, stopSync: null,      // split screen: second map + camera sync
-  toggles: { fire: true, forecast: true, baseline: false, actual: false },
+  toggles: { fire: true, forecast: true, baseline: false, actual: false, verify: false },
+  whatif: null,                // "what if the wind changes?" control (js/whatif.js)
   horizon: 3,
   panel: null, copilot: null,
   copilots: new Map(),         // fire id → Copilot (so each fire keeps its own plans and log)
@@ -51,18 +55,28 @@ export const replayMode = {
   },
   leave() {
     pause(); s.token++;
+    setBanner(null);
     if (s.split) setSplit(false);
     document.removeEventListener('keydown', onKey);
-    app.view.setGroup('baseline', false); app.view.setGroup('actual', false);
+    app.view.setGroup('baseline', false); app.view.setGroup('actual', false); app.view.setGroup('verify', false);
     app.view.onTownClick = null; app.on3DChange = null;
     setLoading(null);
   },
 };
 
-// ── panel skeleton: people counter · situation · copilot · log ───────────────
+// ── panel skeleton: people counter · situation · what-if · was it right · official orders · copilot · log ──
 function buildPanel() {
-  s.slots = { people: h('div'), sit: h('div'), ai: h('div', { id: 'copilot-slot' }), log: h('div') };
-  fill($('#panel-body'), s.slots.people, s.slots.sit, s.slots.ai, s.slots.log);
+  s.slots = { people: h('div'), sit: h('div'), whatif: h('div'), verify: h('div'), official: h('div'),
+              ai: h('div', { id: 'copilot-slot' }), log: h('div') };
+  fill($('#panel-body'), s.slots.people, s.slots.sit, s.slots.whatif, s.slots.verify, s.slots.official, s.slots.ai, s.slots.log);
+  s.whatif = new WhatIf(s.slots.whatif, {
+    run: (fromDeg, speed) => api.whatIf({ ...baseRef(), wind_from_deg: fromDeg, wind_speed_kmh: speed }),
+    onScenario: sc => {
+      if (sc) s.copilot?.log('info', `What-if: wind ${Math.round(sc.whatif.speed_kmh)} km/h from ${compass(sc.whatif.from_deg)} ` +
+        `→ +3 h forecast ${sc.numbers.forecast_area_km2[2]} km² (real wind ${s.sit.numbers.forecast_area_km2[2]} km²)`);
+      if (s.sit) show();
+    },
+  });
   s.panel = new SituationPanel(s.slots.sit, { modelName: app.modelName, onTownSelect: town => {
     app.view.setSelectedTown(town?.name || null);
     if (town) { pause(); app.view.flyToTown(town); }
@@ -113,19 +127,27 @@ async function setHour(hour) {
   if (token !== s.token) return;
   setLoading(null);
   s.sit = sit;
+  s.whatif.setBase(sit);                              // an active what-if re-runs itself for the new hour
   for (let k = 1; k <= 3; k++) if (hour + k < s.meta.hours.length) api.getReplayHour(s.fireId, hour + k).catch(() => {});   // warm the next hours
   show();
 }
 
-/** Draw the current hour everywhere. */
+const baseRef = () => ({ mode: 'replay', fire_id: s.fireId, hour: s.hour });
+
+/** Draw the current hour everywhere. With an active what-if, the map, panel and copilot show the scenario. */
 function show() {
-  const sit = s.sit;
+  const real = s.sit;
+  const sc = s.whatif.active ? s.whatif.scenario : null;
+  const sit = sc || real;
   app.view.showSituation(sit);
-  s.panel.update(sit, 'REPLAY');
-  s.copilot.setSituation(sit, { mode: 'replay', fire_id: s.fireId, hour: s.hour });
+  s.panel.update(sit, sc ? 'WHAT-IF' : 'REPLAY');
+  s.copilot.setSituation(sit, sc ? { ...baseRef(), wind_from_deg: sc.whatif.from_deg, wind_speed_kmh: sc.whatif.speed_kmh } : baseRef());
+  setBanner(sc ? TEXT.whatIfBanner(Math.round(sc.whatif.speed_kmh), compass(sc.whatif.from_deg)) : null);
   drawPeople();
+  drawVerify();
+  fill(s.slots.official, officialCard(s.meta, real.time_utc));
   drawToggles();
-  setClock(`REPLAY · ${sit.time_local} · GOES-18`, 'archive');
+  setClock(`REPLAY · ${real.time_local} · GOES-18`, 'archive');
   s.timeline.update(timelineUi());
   if (s.split) showSplit();
 }
@@ -196,29 +218,29 @@ function drawPeople() {
       h('div', { class: 'people-label' }, TEXT.peopleLabel)),
     h('div', { class: 'people-sub mono' },
       `by ${localHM(s.sit.time_local)}: ${soFar.length} of ${reached.length} towns the fire reached · whole replay ${fmtInt(sum(warnedFirst))} · Census 2024`),
-    orders.length ? h('div', { class: 'people-sub mono' }, `flagged before the official order: ${fmtInt(flaggedBeforeOrder(tl, orders))} residents`) : null));
+    orders.length && s.meta.official_comparison ? h('div', { class: 'people-sub mono' },
+      `flagged before the first official order or warning: ${s.meta.official_comparison.towns_flagged_earlier} of ` +
+      `${s.meta.official_comparison.towns_compared} towns · ${fmtInt(s.meta.official_comparison.residents_flagged_earlier)} residents`) : null));
 }
 
-/** Residents of towns that we warned before their official order (only when real order times exist). */
-function flaggedBeforeOrder(tl, orders) {
-  let total = 0;
-  for (const t of tl) {
-    const o = orders.find(x => x.town === t.town);
-    const oh = o && (o.hour_idx ?? o.hour);
-    if (o && oh !== undefined && oh !== '' && t.first_warning_hour !== null && t.first_warning_hour < Number(oh)) total += t.population || 0;
-  }
-  return total;
+// ── "was it right?" card ─────────────────────────────────────────────────────
+function drawVerify() {
+  fill(s.slots.verify, verifyCard({ sit: s.sit, meta: s.meta, hour: s.hour, k: s.horizon, showOnMap: s.toggles.verify,
+    onToggleMap: on => { s.toggles.verify = on; applyLayers(); drawToggles(); drawVerify(); } }));
 }
 
 // ── layer toggles ────────────────────────────────────────────────────────────
 function applyLayers() {
   const v = app.view, t = s.toggles;
+  const check = t.verify && !s.split;                 // "was it right?" view: hit / missed / false-alarm squares
   v.cancelFade();
-  v.setGroup('fire', t.fire);
-  v.setGroup('forecast', t.forecast && !s.split);     // split screen: rings only, no squares
-  v.setGroup('rings', t.forecast || s.split);
-  v.setGroup('baseline', t.baseline && !s.split);
-  v.setGroup('actual', t.actual || s.split);
+  v.setGroup('fire', t.fire && !check);
+  v.setGroup('forecast', t.forecast && !s.split && !check);     // split screen: rings only, no squares
+  v.setGroup('rings', (t.forecast || s.split) && !check);
+  v.setGroup('baseline', t.baseline && !s.split && !check);
+  v.setGroup('actual', (t.actual || s.split) && !check);
+  v.setGroup('verify', check);
+  setLegend(check ? 'replayVerify' : 'replay');
   v.setGroup('towns', true);
   v.setGroup('exits', !s.split);
   v.setHorizon(s.split ? 3 : s.horizon);
@@ -234,8 +256,9 @@ function drawToggles() {
     toggleRow('Our forecast', t.forecast, set('forecast'), 'sw-forecast'),
     toggleRow('Baseline: grow 1 km/h', t.baseline, set('baseline'), 'sw-baseline'),
     toggleRow(`Real fire +${s.horizon} h (hindsight)`, t.actual, set('actual'), 'sw-actual'),
+    toggleRow('Was it right? (hit / miss)', t.verify, on => { t.verify = on; applyLayers(); drawVerify(); }, 'sw-verify'),
     h('div', { class: 'toggle-sub' }, h('span', {}, 'Compare at'),
-      segmented([[1, '+1 h'], [2, '+2 h'], [3, '+3 h']], s.horizon, k => { s.horizon = k; applyLayers(); drawToggles(); })));
+      segmented([[1, '+1 h'], [2, '+2 h'], [3, '+3 h']], s.horizon, k => { s.horizon = k; applyLayers(); drawToggles(); drawVerify(); })));
 }
 
 // ── split screen ─────────────────────────────────────────────────────────────

@@ -25,6 +25,7 @@ const GROUPS = {
   actual: ['actual-fill', 'actual-line'],
   exits: ['exit-casing', 'exit-clear', 'exit-blocked', 'exit-approved-casing', 'exit-approved'],
   pixels: ['pixel-glow', 'pixel-core'],
+  verify: ['verify-fill', 'verify-line'],
 };
 
 export class MapView {
@@ -37,7 +38,7 @@ export class MapView {
     this.options = options;
     this.sit = null;                 // situation on screen
     this.horizon = 3;                // forecast hour shown as squares: 1, 2 or 3
-    this.visible = { fire: true, forecast: true, rings: true, baseline: false, actual: false, exits: true, pixels: true, towns: true };
+    this.visible = { fire: true, forecast: true, rings: true, baseline: false, actual: false, exits: true, pixels: true, towns: true, verify: false };
     this.selectedTown = null;        // town whose exits are shown
     this.plan = null;                // AI plan on screen (its evacuation towns also show exits)
     this.approved = false;           // plan approved → highlight the chosen routes
@@ -61,7 +62,7 @@ export class MapView {
   // ── set-up: all sources and layers, bottom to top ──────────────────────────
   _addLayers() {
     const m = this.map;
-    for (const id of ['forecast', 'actual', 'fire', 'baseline', 'ring-1', 'ring-2', 'ring-3', 'exits', 'pixels']) {
+    for (const id of ['forecast', 'actual', 'fire', 'verify', 'baseline', 'ring-1', 'ring-2', 'ring-3', 'exits', 'pixels']) {
       m.addSource(id, { type: 'geojson', data: EMPTY });
     }
 
@@ -78,6 +79,15 @@ export class MapView {
     // fire now
     m.addLayer({ id: 'fire-fill', type: 'fill', source: 'fire', paint: { 'fill-color': COLORS.fire, 'fill-opacity': 0.82 } });
     m.addLayer({ id: 'fire-line', type: 'line', source: 'fire', paint: { 'line-color': COLORS.fireEdge, 'line-width': 0.7, 'line-opacity': 0.7 } });
+
+    // "Was it right?" (replay): every square of the forecast or of the real fire k hours later
+    const byResult = ['match', ['get', 'result'], 'hit', COLORS.hit, 'missed', COLORS.missed, COLORS.falseAlarm];
+    m.addLayer({ id: 'verify-fill', type: 'fill', source: 'verify', paint: {
+      'fill-color': byResult,
+      'fill-opacity': ['match', ['get', 'result'], 'false_alarm', 0.32, 0.78] } });
+    m.addLayer({ id: 'verify-line', type: 'line', source: 'verify', paint: {
+      'line-color': byResult, 'line-width': ['match', ['get', 'result'], 'false_alarm', 1.2, 0.6],
+      'line-opacity': 0.95 } });
 
     // baseline "grow 1 km/h" ring for the selected hour
     m.addLayer({ id: 'baseline', type: 'line', source: 'baseline', layout: { 'line-cap': 'butt' },
@@ -239,6 +249,7 @@ export class MapView {
     if (this.map.getLayer('forecast-fill')) this.map.setFilter('forecast-fill', ['==', ['get', 'k'], this.horizon]);
     this._setData('baseline', L.baseline_rings?.[this.horizon - 1]);
     this._setData('actual', L.actual_future?.[this.horizon - 1]);
+    this._setData('verify', L.verify?.[this.horizon - 1]);
   }
 
   // ── exits ──────────────────────────────────────────────────────────────────

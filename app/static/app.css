@@ -467,3 +467,80 @@ ul, ol { margin: 0; padding-left: 16px; }
 .res-table th.group { text-align: center; border-left: 1px solid var(--line-2); color: var(--text-2); }
 .res-table th.ours, .res-small td.ours { background: rgba(255, 255, 255, .04); }
 .res-sec > .src { margin-top: 8px; }
+
+/* ── 12. features: what-if wind · was it right? · official orders ───────────── */
+.dim { color: var(--text-3); }
+.chip-status[data-status="NONE"] { background: transparent; color: var(--text-3); border: 1px dashed var(--line-2); }
+
+/* what if the wind changes? */
+.wi-body { display: grid; grid-template-columns: 112px 1fr; gap: 12px; align-items: center; padding: 6px 8px;
+  background: var(--bg-3); border: 1px solid var(--line); border-radius: var(--r); }
+.wi-body.active { border-color: rgba(232, 163, 61, .55); box-shadow: inset 3px 0 0 var(--warning); }
+.wi-dial svg { display: block; cursor: grab; touch-action: none; user-select: none; }
+.wi-dial svg:active { cursor: grabbing; }
+.wi-dial .ring { fill: var(--bg-0); stroke: var(--line-2); stroke-width: 1; }
+.wi-dial .tick { stroke: var(--line-2); stroke-width: 1; }
+.wi-dial .tick.major { stroke: var(--text-3); stroke-width: 1.4; }
+.wi-dial .lab { fill: var(--text-3); font: 600 8.5px var(--mono); text-anchor: middle; dominant-baseline: central; }
+.wi-dial .arrow line, .wi-dial .arrow path { stroke-width: 2.6; stroke-linecap: round; fill: none; }
+.wi-dial .arrow.current line, .wi-dial .arrow.current path { stroke: var(--text); }
+.wi-dial .arrow.scenario line, .wi-dial .arrow.scenario path { stroke: var(--warning); stroke-width: 3; }
+.wi-dial .arrow.real line, .wi-dial .arrow.real path { stroke: var(--text-3); stroke-width: 1.6; stroke-dasharray: 2 2.5; }
+.wi-dial .hub { fill: var(--text-2); }
+.wi-side { display: grid; gap: 7px; min-width: 0; }
+.wi-readout { font-size: 11.5px; color: var(--text-2); line-height: 1.45; }
+.wi-big { font-size: 22px; font-weight: 500; color: var(--text); line-height: 1.1; }
+.wi-big .unit { font-size: 11px; margin-left: 3px; color: var(--text-3); }
+.wi-speed { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 8px; }
+.wi-slider { width: 100%; accent-color: var(--warning); }
+.wi-presets { display: flex; flex-wrap: wrap; gap: 4px; }
+.wi-presets .btn-small { font-size: 11px; padding: 2px 7px; }
+.wi-compare { margin-top: 8px; display: grid; gap: 8px; }
+.wi-table, .verify-table, .official-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.wi-table th, .verify-table th, .official-table th { font: 600 9.5px var(--sans); letter-spacing: .08em; text-transform: uppercase;
+  color: var(--text-3); text-align: right; padding: 3px 4px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+.wi-table th:first-child, .verify-table th:first-child, .official-table th:first-child { text-align: left; }
+.wi-table td, .verify-table td { padding: 3px 4px; text-align: right; border-bottom: 1px solid var(--line); }
+.wi-table td:first-child { text-align: left; color: var(--text-2); }
+.wi-table .up { color: #f2b766; } .wi-table .down { color: #8fb4d6; }
+.wi-towns { display: grid; gap: 4px; }
+.wi-town { display: grid; grid-template-columns: 1fr auto 74px 14px 74px; gap: 6px; align-items: center; }
+.wi-town .name { font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.wi-town .sub, .official-table .sub, .official-summary .sub { font-size: 10.5px; color: var(--text-3); }
+.wi-town .arrow { color: var(--text-3); text-align: center; }
+.wi-town .chip-status { padding: 2px 0; }
+
+/* was it right? */
+.verify-counts { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; font: 11.5px var(--mono); color: var(--text-2); }
+.verify-counts .btn { margin-left: auto; }
+.vc { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
+.vc i { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+.vc-hit i { background: var(--hit, #3f9e78); }
+.vc-missed i { background: var(--missed, #b0306a); }
+.vc-false i { background: rgba(154, 163, 171, .35); border: 1px solid var(--falseAlarm, #9aa3ab); }
+.verify-table th.grp { text-align: center; color: var(--text-2); border-bottom: 0; padding-bottom: 0; }
+.verify-table .th-sub { display: block; font-size: 8.5px; letter-spacing: .04em; color: var(--text-3); text-transform: none; font-weight: 400; }
+.verify-table td.method { text-align: left; color: var(--text-2); white-space: nowrap; }
+.verify-table tr.ours td { color: var(--text); font-weight: 500; }
+.verify-table tr.ours td.method { box-shadow: inset 2px 0 0 var(--ring); padding-left: 7px; }
+.verify-table td.best { text-decoration: underline; text-decoration-color: var(--text-2); text-underline-offset: 3px; }
+
+/* official orders */
+.official-summary { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: center; background: var(--bg-0);
+  border: 1px solid var(--line); border-radius: var(--r); padding: 6px 10px; margin-bottom: 6px; font-size: 12px; }
+.official-summary .big { font-size: 22px; font-weight: 500; }
+.official-table td { padding: 4px 4px; border-bottom: 1px solid var(--line); vertical-align: top; text-align: right; font-size: 11.5px; }
+.official-table td.town { text-align: left; font-weight: 500; font-size: 12px; }
+.official-table .kind { color: var(--text-3); font-size: 10px; text-transform: uppercase; letter-spacing: .05em; }
+.official-table .future { opacity: .45; }
+.official-table .lead-early { color: var(--text); font-weight: 600; }
+.official-table .lead-late { color: var(--text-2); }
+.srclink { color: var(--text-2); font-size: 11px; text-decoration: underline; text-underline-offset: 2px; }
+.srclink:hover { color: var(--text); }
+
+/* legend swatches + timeline */
+.sw-hit { background: var(--hit, #3f9e78); }
+.sw-missed { background: var(--missed, #b0306a); }
+.sw-false { background: rgba(154, 163, 171, .35); border: 1px solid var(--falseAlarm, #9aa3ab); }
+.sw-verify { background: linear-gradient(90deg, var(--hit, #3f9e78) 0 50%, var(--missed, #b0306a) 50%); }
+.tl-lane-official .tl-tick.tl-tick-soft { background: transparent; border: 1.5px solid #fff; }

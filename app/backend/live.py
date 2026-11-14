@@ -450,12 +450,14 @@ def incident_situation(incident_id):
     towns = near[["name", "lat", "lon", "population"]].to_dict(orient="records")
     prev = float((burning.hour_idx == h_now - 1).sum() * 4) if fire.has_data[h_now - 1] else None
     wx = weather.iloc[h_now]
-    sit = S.build(fire_id=incident_id, name=f"Incident near {inc['nearest_town']}", mode="live",
-                  time_utc=str(pd.Timestamp(scan)), xmin=xmin, ymax=ymax, now=now, ever=ever, probs=probs, grow=grow,
-                  th=th, t_town=t_town, towns=towns, prev_area_km2=prev, data_note=note, scan_time_utc=scan,
-                  wind={"speed_kmh": round(float(wx.wind_speed_kmh), 1), "gust_kmh": round(float(wx.wind_gust_kmh), 1),
-                        "from_deg": round(float(wx.wind_dir_deg)), "humidity_pct": round(float(wx.humidity_pct)),
-                        "temp_c": round(float(wx.temp_c), 1)})
+    ctx = dict(fire_id=incident_id, name=f"Incident near {inc['nearest_town']}", mode="live",
+               time_utc=str(pd.Timestamp(scan)), xmin=xmin, ymax=ymax, now=now, ever=ever, probs=probs, grow=grow,
+               th=th, t_town=t_town, towns=towns, prev_area_km2=prev, data_note=note, scan_time_utc=scan,
+               wind={"speed_kmh": round(float(wx.wind_speed_kmh), 1), "gust_kmh": round(float(wx.wind_gust_kmh), 1),
+                     "from_deg": round(float(wx.wind_dir_deg)), "humidity_pct": round(float(wx.humidity_pct)),
+                     "temp_c": round(float(wx.temp_c), 1)})
+    sit = S.build(**ctx)
+    sit["_ctx"], sit["_h"], sit["_fire"] = ctx, h_now, fire       # kept for what-if scenarios
     sit["incident"] = inc
     sit["archive"] = at is not None
     sit["history"] = [{"hour_idx": int(r.hour_idx), "time_utc": str(r.time_utc), "n_files": int(r.n_files),

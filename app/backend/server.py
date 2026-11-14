@@ -8,6 +8,7 @@ Emberline copilot API (FastAPI). Serves the one-page app from app/static/ and th
   GET  /api/replay/{fire_id}/hour/{h}    the situation at hour h (map layers, towns, exits, numbers)
   GET  /api/state                        LIVE: every active fire in California from the latest GOES-18 scans
   GET  /api/incident/{incident_id}       LIVE: the situation of one live incident (model forecast on live data)
+  POST /api/whatif                       re-run the forecast with another wind  body: + wind_from_deg, wind_speed_kmh
   POST /api/ai/briefing                  AI situation briefing          body: {"mode": "replay", "fire_id", "hour"}
   POST /api/ai/plan                      AI plan + safety check (+retries)    or {"mode": "live", "incident_id"}
   POST /api/ai/alert                     AI alert draft after Approve   body: same + {"plan": {...}}
@@ -25,7 +26,7 @@ from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from . import ai, copilot, store
+from . import ai, copilot, store, whatif
 from . import situation as S
 from .paths import RESULTS, STATIC_DIR
 
@@ -41,11 +42,11 @@ def _replay_sit(fire_id, h):
     return S.replay_situation(fire_id, h)
 
 
-def _situation(req):
+def _base_situation(req):
     if req.mode == "replay":
         try:
             return _replay_sit(req.fire_id, int(req.hour))
-        except KeyError:
+        except (KeyError, TypeError):
             raise HTTPException(404, "unknown fire or hour")
     if req.mode == "live":
         from . import live
@@ -54,6 +55,24 @@ def _situation(req):
             raise HTTPException(404, "unknown or expired incident")
         return sit
     raise HTTPException(400, "mode must be 'replay' or 'live'")
+
+
+_whatif_cache = {}
+
+
+def _situation(req):
+    """The situation for a request; with wind_from_deg + wind_speed_kmh it is the what-if scenario."""
+    sit = _base_situation(req)
+    if req.wind_from_deg is None or req.wind_speed_kmh is None:
+        return sit
+    if sit.get("numbers", {}).get("forecast_area_km2") == [] and sit["_ctx"]["probs"] is None:
+        raise HTTPException(409, "no forecast at this moment, so there is nothing to re-run")
+    key = (req.mode, req.fire_id, req.hour, req.incident_id, round(req.wind_from_deg / 5) * 5, round(req.wind_speed_kmh))
+    if key not in _whatif_cache:
+        if len(_whatif_cache) > 300:
+            _whatif_cache.clear()
+        _whatif_cache[key] = whatif.scenario(sit, key[4], key[5])
+    return _whatif_cache[key]
 
 
 def _offline(e):
@@ -65,6 +84,8 @@ class SitReq(BaseModel):
     fire_id: str | None = None
     hour: int | None = None
     incident_id: str | None = None
+    wind_from_deg: float | None = None     # what-if: wind direction (degrees it blows FROM) for the next 3 h
+    wind_speed_kmh: float | None = None    # what-if: wind speed
 
 
 class AlertReq(SitReq):
@@ -166,6 +187,14 @@ def incident(incident_id: str):
     if sit is None:
         raise HTTPException(404, "unknown or expired incident")
     return S.public(sit)
+
+
+@app.post("/api/whatif")
+def what_if(req: SitReq):
+    """Re-run the model's forecast with a different wind (same fire, terrain and towns)."""
+    if req.wind_from_deg is None or req.wind_speed_kmh is None:
+        raise HTTPException(400, "wind_from_deg and wind_speed_kmh are required")
+    return S.public(_situation(req))
 
 
 @app.post("/api/ai/briefing")

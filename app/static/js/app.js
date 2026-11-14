@@ -68,9 +68,12 @@ const LEGENDS = {
     ['sw sw-exit', 'Exit: clear / fire within 1 h'],
   ],
   replayExtra: [['sw sw-baseline', 'Baseline: grow 1 km/h'], ['sw sw-actual', 'Real fire later (hindsight)']],
+  verify: [['sw sw-hit', 'Hit: forecast fire, real fire came'], ['sw sw-missed', 'Missed: real fire, not forecast'],
+    ['sw sw-false', 'False alarm: forecast fire, none came'], ['sw sw-town', 'Town: evacuate / warning / monitor']],
 };
 
 export function setLegend(kind) {
-  const rows = kind === 'state' ? LEGENDS.state : kind === 'replay' ? [...LEGENDS.situation, ...LEGENDS.replayExtra] : LEGENDS.situation;
+  const rows = kind === 'state' ? LEGENDS.state : kind === 'replay' ? [...LEGENDS.situation, ...LEGENDS.replayExtra]
+    : kind === 'replayVerify' ? LEGENDS.verify : LEGENDS.situation;
   fill($('#legend'), h('div', { class: 'card-title' }, 'Legend'), rows.map(([sw, label]) => h('div', { class: 'legend-row' }, h('span', { class: sw }), h('span', {}, label))));
 }

@@ -49,6 +49,7 @@ export function getReplayHour(fireId, hour) {
 // `ref` says which situation the AI should look at:
 //   replay:   {mode: 'replay', fire_id, hour}
 //   incident: {mode: 'live', incident_id}
+export const whatIf = ref => post('/api/whatif', ref);
 export const aiBriefing = ref => post('/api/ai/briefing', ref);
 export const aiPlan = ref => post('/api/ai/plan', ref);
 export const aiAlert = (ref, plan) => post('/api/ai/alert', { ...ref, plan });

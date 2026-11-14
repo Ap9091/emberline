@@ -23,6 +23,10 @@ export const COLORS = {
   exitBlocked: '#d64541',
   exitApproved: '#f4f6f8',
   ok: '#7fa58a',            // "passed safety check" green-grey
+  // "Was it right?" (replay hindsight check) - kept apart from the status colours on purpose
+  hit: '#3f9e78',           // forecast said fire, fire came
+  missed: '#b0306a',        // fire came, forecast did not say so
+  falseAlarm: '#9aa3ab',    // forecast said fire, no fire came
 };
 
 export const STATUS_ORDER = ['EVACUATE', 'WARNING', 'MONITOR'];
@@ -48,4 +52,8 @@ export const TEXT = {
   alertLabel: 'Draft for county alert system, not sent',
   aiOffline: 'AI offline, forecast only',
   peopleLabel: 'residents in towns warned before fire arrival (GOES-based arrival time)',
+  whatIfBanner: (speed, dir) => `WHAT-IF · wind ${speed} km/h from ${dir} for the next 3 h · forecast re-run by the model · not real data`,
 };
+
+// What-if wind
+export const WHATIF = { maxSpeed: 100, debounceMs: 350 };

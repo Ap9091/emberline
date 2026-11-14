@@ -108,3 +108,15 @@ export function showTooltip(text, x, y) {
   tip.style.top = (y - tip.offsetHeight - 10) + 'px';
 }
 export function hideTooltip() { $('#tooltip').hidden = true; }
+
+/** '2024-07-24T23:40:00Z' -> '24 Jul 16:40' in California time (PDT/PST). */
+const PACIFIC = new Intl.DateTimeFormat('en-GB', { timeZone: 'America/Los_Angeles', day: '2-digit', month: 'short',
+  hour: '2-digit', minute: '2-digit', hour12: false });
+export function pacific(iso) {
+  if (!iso) return '-';
+  const parts = Object.fromEntries(PACIFIC.formatToParts(new Date(iso)).map(p => [p.type, p.value]));
+  return `${parts.day} ${parts.month} ${parts.hour}:${parts.minute}`;
+}
+
+/** A signed number of hours: +2.5 h / −0.5 h */
+export const fmtHours = x => (x === null || x === undefined) ? '-' : `${x > 0 ? '+' : x < 0 ? '−' : ''}${Math.abs(x).toFixed(1)} h`;

@@ -100,12 +100,65 @@ def town_statuses(towns, xmin, ymax, now, probs, rings, t_town):
     return out
 
 
+# ---------------------------------------------------------------------------
+# "Was it right?" - compare a forecast with what really burned (replay only)
+# ---------------------------------------------------------------------------
+def _dilate(a):
+    """Squares within 2 km (centre to centre) of a True square: itself + its 4 side neighbours."""
+    out = a.copy()
+    out[1:, :] |= a[:-1, :]
+    out[:-1, :] |= a[1:, :]
+    out[:, 1:] |= a[:, :-1]
+    out[:, :-1] |= a[:, 1:]
+    return out
+
+
+def counts(P, A, ever):
+    """True positives / false positives / misses for all squares and for NEW squares (never burned before)."""
+    def c(p, a):
+        return {"tp": int((p & a).sum()), "fp": int((p & ~a).sum()), "fn": int((~p & a).sum()),
+                # 'within 2 km': a forecast square counts as right if real fire is within one square of it
+                "tp_p2": int((p & _dilate(a)).sum()), "tp_r2": int((a & _dilate(p)).sum())}
+    return {"all": c(P, A), "new": c(P & ~ever, A & ~ever)}
+
+
+def f1(c, near=False):
+    """F1 from counts (None if there was nothing to score)."""
+    tp_p, tp_r = (c["tp_p2"], c["tp_r2"]) if near else (c["tp"], c["tp"])
+    n_p, n_r = c["tp"] + c["fp"], c["tp"] + c["fn"]
+    if n_p == 0 and n_r == 0:
+        return None
+    p = tp_p / n_p if n_p else 0.0
+    r = tp_r / n_r if n_r else 0.0
+    return round(2 * p * r / (p + r), 3) if p + r > 0 else 0.0
+
+
+def verify(now, ever, rings, grow, actual, actual_ok):
+    """Per forecast hour (+1/+2/+3): counts for our model, 'grow 1 km/h' and 'looks like now'."""
+    out = []
+    for k in range(3):
+        row = {"k": k + 1, "ok": bool(actual_ok[k]) and bool(rings)}
+        if row["ok"]:
+            row["model"] = counts(rings[k], actual[k], ever)
+            row["grow"] = counts(grow[k], actual[k], ever) if grow else None
+            row["persistence"] = counts(now, actual[k], ever)
+            for m in ("model", "grow", "persistence"):
+                if row[m]:
+                    row[m]["f1"] = f1(row[m]["all"])
+                    row[m]["f1_2km"] = f1(row[m]["all"], near=True)
+                    row[m]["f1_new"] = f1(row[m]["new"])
+        out.append(row)
+    return out
+
+
 def build(*, fire_id, name, mode, time_utc, xmin, ymax, now, ever, probs, grow, th, t_town, wind,
-          towns, prev_area_km2=None, actual_future=None, data_note=None, scan_time_utc=None):
+          towns, prev_area_km2=None, actual_future=None, actual_ok=None, data_note=None, scan_time_utc=None,
+          check=True):
     """
     now, ever: (40, 40) bool. probs: (3, 40, 40) or None. grow: list of 3 masks (baseline) or None.
     towns: list of {name, population, lat, lon} in or near the box.
-    actual_future: list of 3 masks (what really burned at +1/+2/+3 h; replay only).
+    actual_future: list of 3 masks (what really burned at +1/+2/+3 h; replay only), actual_ok: whether each of those
+    hours had satellite data. check=False skips the "was it right?" comparison (used for what-if scenarios).
     """
     rings = forecast_rings(now, ever, probs, th)
     t = town_statuses(towns, xmin, ymax, now, probs, rings, t_town)
@@ -155,7 +208,22 @@ def build(*, fire_id, name, mode, time_utc, xmin, ymax, now, ever, probs, grow, 
         "towns": {"type": "FeatureCollection", "features": [
             {"type": "Feature", "properties": {k: v for k, v in tw.items() if k not in ("lat", "lon")},
              "geometry": {"type": "Point", "coordinates": [tw["lon"], tw["lat"]]}} for tw in towns_out]},
+        "verify": [],
     }
+    verification = None
+    if check and actual_future and rings:
+        ok = actual_ok if actual_ok is not None else [True] * 3
+        verification = verify(now, ever, rings, grow, actual_future, ok)
+        # map layer: each square of the forecast or of the real fire, marked hit / missed / false alarm
+        for k in range(3):
+            P, A = rings[k], actual_future[k]
+            cells = ([(r, c, "hit") for r, c in np.argwhere(P & A)] + [(r, c, "missed") for r, c in np.argwhere(~P & A)] +
+                     [(r, c, "false_alarm") for r, c in np.argwhere(P & ~A)]) if ok[k] else []
+            layers["verify"].append(geo.squares_fc(xmin, ymax, [(r, c) for r, c, _ in cells],
+                                                   props=None))
+            for feat, (_, _, res) in zip(layers["verify"][-1]["features"], cells):
+                feat["properties"]["result"] = res
+                feat["properties"]["k"] = k + 1
     numbers = {
         "fire_area_km2": round(area, 1),
         "growth_last_hour_km2": None if prev_area_km2 is None else round(float(area - prev_area_km2), 1),
@@ -171,7 +239,7 @@ def build(*, fire_id, name, mode, time_utc, xmin, ymax, now, ever, probs, grow, 
         "thresholds": {"squares": th, "town_warning": t_town},
         "towns": sorted(towns_out, key=lambda x: ({"EVACUATE": 0, "WARNING": 1, "MONITOR": 2}.get(x["status"], 3),
                                                   x.get("eta_h") or 9, -(x["population"] or 0))),
-        "exits": exits_out, "layers": layers,
+        "exits": exits_out, "layers": layers, "verification": verification,
         "_masks": {"now": now, "danger_1h": danger_1h, "xmin": xmin, "ymax": ymax},
     }
 
@@ -211,12 +279,29 @@ def _replay_probs(fr):
     return probs
 
 
-def _replay_status(rp, h, masks):
+def _replay_hour(rp, h, masks):
+    """Town statuses and the hour's 'was it right?' counts (cheap: no exits, no map layers)."""
     g, fr = rp["grid"], rp["hours"][h]
     probs = _replay_probs(fr)
     ever = np.logical_or.reduce(masks[:h + 1])
     rings = forecast_rings(masks[h], ever, probs, rp["rollout_threshold"])
-    return town_statuses(rp["towns"], g["xmin"], g["ymax"], masks[h], probs, rings, rp["town_threshold"])
+    statuses = town_statuses(rp["towns"], g["xmin"], g["ymax"], masks[h], probs, rings, rp["town_threshold"])
+    grow = [mask_of(fr["baseline_grow_1km"][str(k + 1)]) for k in range(3)] if fr["baseline_grow_1km"] else None
+    future, ok = _future(rp, h, masks)
+    ver = verify(masks[h], ever, rings, grow, future, ok) if rings else None
+    return statuses, ver
+
+
+def _future(rp, h, masks):
+    """What really burned 1, 2, 3 h after hour h, and whether those hours had satellite data."""
+    frames = rp["hours"]
+    future = [masks[h + k] if h + k < len(masks) else np.zeros((N, N), bool) for k in (1, 2, 3)]
+    ok = [h + k < len(frames) and frames[h + k]["has_data"] for k in (1, 2, 3)]
+    return future, ok
+
+
+def _utc(t):
+    return pd.Timestamp(t).tz_convert("UTC")
 
 
 def replay_meta(fire_id):
@@ -226,8 +311,12 @@ def replay_meta(fire_id):
     town_pos = {t["name"]: t for t in rp["towns"]}
     # Timeline: for each town, our first WARNING/EVACUATE and the hour fire first reached it
     first_warn, first_evac, arrival = {}, {}, {}
+    by_hour = []
     for fr in rp["hours"]:
-        for tw in _replay_status(rp, fr["hour_idx"], masks):
+        statuses, ver = _replay_hour(rp, fr["hour_idx"], masks)
+        if ver:
+            by_hour.append({"hour_idx": fr["hour_idx"], "k": ver})
+        for tw in statuses:
             n, h = tw["name"], fr["hour_idx"]
             if tw["status"] == "EVACUATE" and tw["eta_h"] == 0:
                 arrival.setdefault(n, h)
@@ -236,12 +325,47 @@ def replay_meta(fire_id):
                     first_warn.setdefault(n, h)
                 if tw["status"] == "EVACUATE" and n not in arrival:
                     first_evac.setdefault(n, h)
+    # Times: a forecast made from the satellite data of hour h can only be ISSUED when that hour ends,
+    # so our warning time = end of the data hour. Fire arrival = start of the hour GOES first saw fire near the town.
+    hour_t = [_utc(fr["time_utc"]) for fr in rp["hours"]]
+    orders = store.evac_orders(fire_id)
+    official = {}
+    for o in orders:
+        try:
+            t = _utc(o["order_time_utc"])
+        except Exception:
+            continue
+        cur = official.setdefault(o["town"], {})
+        if o["order_type"] not in cur or t < cur[o["order_type"]]["t"]:
+            cur[o["order_type"]] = {"t": t, "url": o.get("source_url"), "precision": o.get("precision")}
     timeline = []
-    for n in sorted(set(first_warn) | set(arrival), key=lambda n: min(first_warn.get(n, 99), arrival.get(n, 99))):
-        timeline.append({"town": n, "population": town_pos.get(n, {}).get("population"),
-                         "first_warning_hour": first_warn.get(n), "first_evacuate_hour": first_evac.get(n),
-                         "fire_arrival_hour": arrival.get(n),
-                         "lead_h": (arrival[n] - first_warn[n]) if n in arrival and n in first_warn else None})
+    for n in sorted(set(first_warn) | set(arrival) | set(official),
+                    key=lambda n: min(first_warn.get(n, 99), arrival.get(n, 99))):
+        issued = hour_t[first_warn[n]] + pd.Timedelta(hours=1) if n in first_warn else None
+        off = official.get(n, {})
+        first_off = min((v["t"] for v in off.values()), default=None)
+        timeline.append({
+            "town": n, "population": town_pos.get(n, {}).get("population"),
+            "first_warning_hour": first_warn.get(n), "first_evacuate_hour": first_evac.get(n),
+            "fire_arrival_hour": arrival.get(n),
+            "lead_h": (arrival[n] - first_warn[n]) if n in arrival and n in first_warn else None,
+            "first_warning_issued_utc": issued.isoformat() if issued is not None else None,
+            "fire_arrival_utc": hour_t[arrival[n]].isoformat() if n in arrival else None,
+            "official_order_utc": off["order"]["t"].isoformat() if "order" in off else None,
+            "official_warning_utc": off["warning"]["t"].isoformat() if "warning" in off else None,
+            "official_source_url": next((v["url"] for v in off.values() if v.get("url")), None),
+            # > 0: we flagged the town that many hours BEFORE the first official order or warning
+            "lead_vs_official_h": round((first_off - issued).total_seconds() / 3600, 1)
+            if first_off is not None and issued is not None else None})
+    compared = [t for t in timeline if t["lead_vs_official_h"] is not None]
+    earlier = [t for t in compared if t["lead_vs_official_h"] > 0]
+    official_comparison = {
+        "towns_compared": len(compared), "towns_flagged_earlier": len(earlier),
+        "towns_flagged_later_or_same": len(compared) - len(earlier),
+        "residents_flagged_earlier": int(sum(t["population"] or 0 for t in earlier)),
+        "median_lead_h": float(np.median([t["lead_vs_official_h"] for t in compared])) if compared else None,
+        "note": "Our warning time = end of the satellite hour it was made from. Official times as published, "
+                "with sources. Not-flagged towns and later flags are counted too."} if compared else None
     per_fire = next((r for r in store.metrics().get("test_per_fire", []) if r["fire"] == fire_id), None)
     return {
         "fire_id": fire_id, "name": rp["name"], "split": rp["split"], "model": rp["model"],
@@ -251,8 +375,9 @@ def replay_meta(fire_id):
                    "has_data": fr["has_data"], "has_forecast": fr["forecast"] is not None,
                    "fire_area_km2": round(float(masks[i].sum() * CELL_KM2), 1)} for i, fr in enumerate(rp["hours"])],
         "default_hour": next((fr["hour_idx"] for fr in rp["hours"] if fr["forecast"] is not None), 0),
-        "timeline": timeline, "official_orders": store.evac_orders(fire_id),
-        "official_orders_note": None if store.evac_orders(fire_id) else
+        "timeline": timeline, "official_orders": orders, "official_comparison": official_comparison,
+        "verification_by_hour": by_hour,
+        "official_orders_note": None if orders else
             "Official evacuation times not added yet (data/evac_orders.csv). We only show real public times.",
         "results": per_fire,
     }
@@ -269,12 +394,15 @@ def replay_situation(fire_id, h):
     ever = np.logical_or.reduce(masks[:h + 1]) if h >= 0 else now
     probs = _replay_probs(fr)
     grow = [mask_of(fr["baseline_grow_1km"][str(k + 1)]) for k in range(3)] if fr["baseline_grow_1km"] else None
-    future = [masks[h + k] if h + k < len(masks) else np.zeros((N, N), bool) for k in (1, 2, 3)]
+    future, ok = _future(rp, h, masks)
     prev = next((masks[j].sum() * CELL_KM2 for j in range(h - 1, -1, -1) if frames[j]["has_data"]), None)
     note = None if fr["has_data"] else "No satellite data this hour (outage): showing the last known fire."
     if fr["forecast"] is None and fr["has_data"]:
         note = "No forecast this hour (no fire pixels seen)."
-    return build(fire_id=fire_id, name=rp["name"], mode="replay", time_utc=fr["time_utc"], xmin=g["xmin"],
-                 ymax=g["ymax"], now=now, ever=ever, probs=probs, grow=grow, th=rp["rollout_threshold"],
-                 t_town=rp["town_threshold"], wind=fr["wind"], towns=rp["towns"],
-                 prev_area_km2=prev, actual_future=future, data_note=note)
+    ctx = dict(fire_id=fire_id, name=rp["name"], mode="replay", time_utc=fr["time_utc"], xmin=g["xmin"],
+               ymax=g["ymax"], now=now, ever=ever, probs=probs, grow=grow, th=rp["rollout_threshold"],
+               t_town=rp["town_threshold"], wind=fr["wind"], towns=rp["towns"],
+               prev_area_km2=prev, actual_future=future, actual_ok=ok, data_note=note)
+    sit = build(**ctx)
+    sit["_ctx"], sit["_h"], sit["_fire"] = ctx, h, None      # what-if loads the fire's model inputs when needed
+    return sit

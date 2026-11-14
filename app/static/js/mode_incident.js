@@ -5,7 +5,9 @@
 // ─────────────────────────────────────────────────────────────────────────────
 import * as api from './api.js';
 import { app, setClock, setLoading, setBanner, setToggles, setLegend, toggleRow, segmented } from './app.js';
-import { h, fill, $, utcHM, utcDate } from './util.js';
+import { h, fill, $, utcHM, utcDate, compass } from './util.js';
+import { TEXT } from './config.js';
+import { WhatIf } from './whatif.js';
 import { SituationPanel } from './panel.js';
 import { Copilot } from './copilot.js';
 import { archiveWhen } from './mode_state.js';
@@ -13,7 +15,7 @@ import { archiveWhen } from './mode_state.js';
 const s = {
   id: null, at: null, label: '',
   sit: null,
-  panel: null, copilot: null,
+  panel: null, copilot: null, whatif: null,
   loadToken: 0, refreshTimer: null, clockTimer: null,
   horizon: 3,
 };
@@ -61,6 +63,7 @@ async function load(isRefresh = false) {
     if (token !== s.loadToken) return;
     s.sit = sit;
     setLoading(null);
+    if (isRefresh) s.whatif?.setBase(sit);
     show(!isRefresh);
   } catch (e) {
     if (token !== s.loadToken) return;
@@ -74,8 +77,11 @@ async function load(isRefresh = false) {
 
 /** Put the loaded situation on the map and in the panel. firstTime = also move the camera and start the AI. */
 function show(firstTime) {
-  const sit = s.sit, view = app.view;
-  setBanner(sit.archive ? `ARCHIVE · ${archiveWhen(s.at)} · same pipeline on past GOES-18 data` : null);
+  const real = s.sit, view = app.view;
+  const sc = s.whatif?.active ? s.whatif.scenario : null;      // "what if the wind changes?" scenario
+  const sit = sc || real;
+  setBanner(sc ? TEXT.whatIfBanner(Math.round(sc.whatif.speed_kmh), compass(sc.whatif.from_deg))
+    : real.archive ? `ARCHIVE · ${archiveWhen(s.at)} · same pipeline on past GOES-18 data` : null);
   updateClock();
 
   // map
@@ -93,8 +99,17 @@ function show(firstTime) {
   const body = $('#panel-body');
   if (firstTime || !s.panel || !body.contains(s.panel.container)) {
     const back = h('button', { class: 'link-back', onclick: () => app.go('state') }, '← State list');
-    const sitSlot = h('div'), aiSlot = h('div', { id: 'copilot-slot' }), logSlot = h('div');
-    fill(body, back, sitSlot, aiSlot, logSlot);
+    const sitSlot = h('div'), whatifSlot = h('div'), aiSlot = h('div', { id: 'copilot-slot' }), logSlot = h('div');
+    fill(body, back, sitSlot, whatifSlot, aiSlot, logSlot);
+    s.whatif = new WhatIf(whatifSlot, {
+      run: (fromDeg, speed) => api.whatIf({ mode: 'live', incident_id: s.id, wind_from_deg: fromDeg, wind_speed_kmh: speed }),
+      onScenario: scn => {
+        if (scn) s.copilot?.log('info', `What-if: wind ${Math.round(scn.whatif.speed_kmh)} km/h from ${compass(scn.whatif.from_deg)} ` +
+          `→ +3 h forecast ${scn.numbers.forecast_area_km2[2]} km² (real wind ${s.sit.numbers.forecast_area_km2[2]} km²)`);
+        show(false);
+      },
+    });
+    s.whatif.setBase(real);
     s.panel = new SituationPanel(sitSlot, { modelName: app.modelName, onTownSelect: town => {
       view.setSelectedTown(town?.name || null);
       if (town) view.flyToTown(town);
@@ -106,9 +121,10 @@ function show(firstTime) {
       s.copilot.log('info', `Data loaded: ${sit.name}, GOES-18 scan ${utcHM(sit.scan_time_utc)} UTC`);
     } else { s.copilot.slot = aiSlot; s.copilot.logSlot = logSlot; }
   }
-  s.panel.update(sit, sit.archive ? 'ARCHIVE' : null);
+  s.panel.update(sit, sc ? 'WHAT-IF' : real.archive ? 'ARCHIVE' : null);
   view.setSelectedTown(s.panel.ui.selected);
-  const ref = { mode: 'live', incident_id: s.id };
+  const ref = sc ? { mode: 'live', incident_id: s.id, wind_from_deg: sc.whatif.from_deg, wind_speed_kmh: sc.whatif.speed_kmh }
+    : { mode: 'live', incident_id: s.id };
   s.copilot.setSituation(sit, ref);
   s.copilot.drawLog();
   // In INCIDENT the copilot starts by itself (in REPLAY the operator presses "Run copilot").
@@ -116,7 +132,7 @@ function show(firstTime) {
 
   // live incidents are refreshed like the state view; archive ones never change
   clearTimeout(s.refreshTimer);
-  if (!sit.archive) s.refreshTimer = setTimeout(() => load(true), (app.config.refresh_s || 300) * 1000);
+  if (!real.archive) s.refreshTimer = setTimeout(() => load(true), (app.config.refresh_s || 300) * 1000);
 }
 
 function updateClock() {
