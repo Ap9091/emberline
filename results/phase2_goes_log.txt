@@ -48,3 +48,11 @@ park_fire_2024: already done, skipping
 [46/69] klamathon_fire_2018: 888 files (0 failed), 2507 fire pixels, fire in 66/74 hours, max 28 squares in one hour, 71 squares ever, gap-filled 13 square-hours (2 whole hours), 26 s
 [47/69] apple_fire_2020: 888 files (0 failed), 8627 fire pixels, fire in 74/74 hours, max 38 squares in one hour, 59 squares ever, gap-filled 22 square-hours (0 whole hours), 25 s
 [48/69] mineral_fire_2020: 888 files (0 failed), 3212 fire pixels, fire in 68/74 hours, max 21 squares in one hour, 33 squares ever, gap-filled 18 square-hours (1 whole hours), 25 s
+[49/69] sheep_fire_2020: 672 files (0 failed), 3934 fire pixels, fire in 53/74 hours, max 39 squares in one hour, 53 squares ever, gap-filled 11 square-hours (1 whole hours), 19 s
+[50/69] fairview_fire_2022: 875 files (0 failed), 3905 fire pixels, fire in 71/74 hours, max 24 squares in one hour, 42 squares ever, gap-filled 28 square-hours (2 whole hours), 25 s
+[51/69] lava_fire_2021: 888 files (0 failed), 3016 fire pixels, fire in 50/74 hours, max 36 squares in one hour, 40 squares ever, gap-filled 6 square-hours (0 whole hours), 24 s
+[52/69] holy_fire_2018: 886 files (0 failed), 4118 fire pixels, fire in 73/74 hours, max 17 squares in one hour, 29 squares ever, gap-filled 23 square-hours (1 whole hours), 26 s
+[53/69] el_dorado_fire_2020: 888 files (0 failed), 4519 fire pixels, fire in 69/74 hours, max 15 squares in one hour, 31 squares ever, gap-filled 23 square-hours (2 whole hours), 24 s
+[54/69] butte_tehama_glenn_lightning_complex_tehama_glenn_zone_2020: 672 files (0 failed), 14489 fire pixels, fire in 53/74 hours, max 72 squares in one hour, 127 squares ever, gap-filled 52 square-hours (0 whole hours), 18 s
+[55/69] gold_fire_2020: 885 files (0 failed), 1963 fire pixels, fire in 47/74 hours, max 14 squares in one hour, 33 squares ever, gap-filled 8 square-hours (0 whole hours), 25 s
+[56/69] alisal_fire_2021: 672 files (0 failed), 4427 fire pixels, fire in 46/74 hours, max 27 squares in one hour, 31 squares ever, gap-filled 9 square-hours (1 whole hours), 18 s
