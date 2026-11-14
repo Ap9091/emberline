@@ -56,3 +56,17 @@ park_fire_2024: already done, skipping
 [54/69] butte_tehama_glenn_lightning_complex_tehama_glenn_zone_2020: 672 files (0 failed), 14489 fire pixels, fire in 53/74 hours, max 72 squares in one hour, 127 squares ever, gap-filled 52 square-hours (0 whole hours), 18 s
 [55/69] gold_fire_2020: 885 files (0 failed), 1963 fire pixels, fire in 47/74 hours, max 14 squares in one hour, 33 squares ever, gap-filled 8 square-hours (0 whole hours), 25 s
 [56/69] alisal_fire_2021: 672 files (0 failed), 4427 fire pixels, fire in 46/74 hours, max 27 squares in one hour, 31 squares ever, gap-filled 9 square-hours (1 whole hours), 18 s
+[57/69] oak_fire_2022: 888 files (0 failed), 9202 fire pixels, fire in 73/74 hours, max 27 squares in one hour, 34 squares ever, gap-filled 17 square-hours (0 whole hours), 25 s
+[58/69] smith_river_complex_2023: 888 files (0 failed), 1641 fire pixels, fire in 55/74 hours, max 27 squares in one hour, 48 squares ever, gap-filled 39 square-hours (4 whole hours), 26 s
+[59/69] srf_lightning_complex_2023: 886 files (0 failed), 35 fire pixels, fire in 6/74 hours, max 1 squares in one hour, 1 squares ever, gap-filled 0 square-hours (0 whole hours), 24 s
+[60/69] happy_camp_complex_2023: 888 files (0 failed), 736 fire pixels, fire in 40/74 hours, max 10 squares in one hour, 20 squares ever, gap-filled 7 square-hours (4 whole hours), 23 s
+[61/69] rabbit_fire_2023: 887 files (0 failed), 1075 fire pixels, fire in 31/74 hours, max 13 squares in one hour, 30 squares ever, gap-filled 4 square-hours (0 whole hours), 26 s
+[62/69] plant_fire_2023: 887 files (0 failed), 407 fire pixels, fire in 8/74 hours, max 18 squares in one hour, 18 squares ever, gap-filled 18 square-hours (1 whole hours), 24 s
+[63/69] almond_fire_2023: 887 files (0 failed), 153 fire pixels, fire in 4/74 hours, max 11 squares in one hour, 15 squares ever, gap-filled 0 square-hours (0 whole hours), 25 s
+[64/69] deep_fire_2023: 888 files (0 failed), 821 fire pixels, fire in 48/74 hours, max 13 squares in one hour, 13 squares ever, gap-filled 12 square-hours (0 whole hours), 24 s
+[65/69] south_fork_complex_2023: 888 files (0 failed), 1115 fire pixels, fire in 61/74 hours, max 10 squares in one hour, 11 squares ever, gap-filled 7 square-hours (3 whole hours), 27 s
+[66/69] 3_9_fire_2023: 888 files (0 failed), 1059 fire pixels, fire in 56/74 hours, max 10 squares in one hour, 11 squares ever, gap-filled 7 square-hours (3 whole hours), 25 s
+[67/69] south_fire_2023: 888 files (0 failed), 160 fire pixels, fire in 14/74 hours, max 6 squares in one hour, 8 squares ever, gap-filled 1 square-hours (0 whole hours), 25 s
+[68/69] highland_fire_2023: 888 files (0 failed), 348 fire pixels, fire in 26/74 hours, max 7 squares in one hour, 11 squares ever, gap-filled 6 square-hours (2 whole hours), 25 s
+[69/69] bonny_fire_2023: 888 files (0 failed), 993 fire pixels, fire in 31/74 hours, max 8 squares in one hour, 14 squares ever, gap-filled 1 square-hours (0 whole hours), 23 s
+All done in 7.7 minutes. Summary: /home/user/emberline/results/phase2_goes_summary.csv

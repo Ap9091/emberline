@@ -56,3 +56,16 @@ el_dorado_fire_2020,train,noaa-goes17,888,0,0,4519,69,15,31,567,23,2,23.7
 butte_tehama_glenn_lightning_complex_tehama_glenn_zone_2020,train,noaa-goes17,672,0,18,14489,53,72,127,1762,52,0,17.6
 gold_fire_2020,train,noaa-goes17,885,0,0,1963,47,14,33,269,8,0,25.4
 alisal_fire_2021,train,noaa-goes17,672,0,18,4427,46,27,31,471,9,1,18.5
+oak_fire_2022,train,noaa-goes17,888,0,0,9202,73,27,34,940,17,0,25.2
+smith_river_complex_2023,val,noaa-goes18,888,0,0,1641,55,27,48,364,39,4,25.9
+srf_lightning_complex_2023,val,noaa-goes18,886,0,0,35,6,1,1,6,0,0,24.3
+happy_camp_complex_2023,val,noaa-goes18,888,0,0,736,40,10,20,125,7,4,22.9
+rabbit_fire_2023,val,noaa-goes18,887,0,0,1075,31,13,30,156,4,0,25.9
+plant_fire_2023,val,noaa-goes18,887,0,0,407,8,18,18,74,18,1,24.0
+almond_fire_2023,val,noaa-goes18,887,0,0,153,4,11,15,27,0,0,25.1
+deep_fire_2023,val,noaa-goes18,888,0,0,821,48,13,13,148,12,0,23.8
+south_fork_complex_2023,val,noaa-goes18,888,0,0,1115,61,10,11,139,7,3,26.7
+3_9_fire_2023,val,noaa-goes18,888,0,0,1059,56,10,11,138,7,3,24.9
+south_fire_2023,val,noaa-goes18,888,0,0,160,14,6,8,29,1,0,25.4
+highland_fire_2023,val,noaa-goes18,888,0,0,348,26,7,11,63,6,2,25.2
+bonny_fire_2023,val,noaa-goes18,888,0,0,993,31,8,14,130,1,0,22.7

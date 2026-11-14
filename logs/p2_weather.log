@@ -1,48 +1,39 @@
   [1/70] park_fire_2024: wind mean 14.2 max 23.8 km/h, gust 54.0, min humidity 10%, max temp 39.9 C
   [2/70] gifford_fire_2025: wind mean 8.7 max 16.5 km/h, gust 38.5, min humidity 18%, max temp 32.9 C
   [3/70] madre_fire_2025: wind mean 9.0 max 20.5 km/h, gust 45.4, min humidity 20%, max temp 31.9 C
-    (rate limited, waiting 15s)
   [4/70] garnet_fire_2025: wind mean 8.6 max 15.2 km/h, gust 42.1, min humidity 19%, max temp 38.4 C
-    (try 1 failed: ConnectionError, retrying in 2s)
   [5/70] borel_fire_2024: wind mean 9.3 max 18.9 km/h, gust 44.3, min humidity 13%, max temp 40.8 C
-    (try 1 failed: ConnectionError, retrying in 2s)
   [6/70] bridge_fire_2024: wind mean 7.2 max 17.2 km/h, gust 47.9, min humidity 3%, max temp 38.3 C
   [7/70] line_fire_2024: wind mean 8.0 max 21.0 km/h, gust 56.2, min humidity 9%, max temp 42.4 C
   [8/70] lake_fire_2024: wind mean 8.9 max 18.3 km/h, gust 49.0, min humidity 8%, max temp 41.9 C
   [9/70] 2024_sqf_lightning_complex_2024: wind mean 5.8 max 15.0 km/h, gust 42.8, min humidity 20%, max temp 27.9 C
-    (try 1 failed: ConnectionError, retrying in 2s)
-    (rate limited, waiting 30s)
-    (rate limited, waiting 45s)
   [10/70] salt_fire_2025: wind mean 6.1 max 15.5 km/h, gust 30.6, min humidity 8%, max temp 37.4 C
-    (rate limited, waiting 15s)
   [11/70] airport_fire_2024: wind mean 7.6 max 15.3 km/h, gust 34.6, min humidity 20%, max temp 38.2 C
   [12/70] palisades_fire_2025: wind mean 16.8 max 36.9 km/h, gust 86.0, min humidity 6%, max temp 20.4 C
   [13/70] orleans_complex_2025: wind mean 5.3 max 11.1 km/h, gust 39.6, min humidity 20%, max temp 36.7 C
-    (rate limited, waiting 15s)
   [14/70] mountain_fire_2024: wind mean 15.2 max 38.3 km/h, gust 88.6, min humidity 8%, max temp 23.9 C
   [15/70] sites_fire_2024: wind mean 10.6 max 21.0 km/h, gust 55.1, min humidity 5%, max temp 31.8 C
   [16/70] green_fire_2025: wind mean 8.7 max 18.3 km/h, gust 46.1, min humidity 12%, max temp 37.0 C
   [17/70] boone_fire_2024: wind mean 6.1 max 16.3 km/h, gust 41.8, min humidity 10%, max temp 39.7 C
   [18/70] eaton_fire_2025: wind mean 16.1 max 41.6 km/h, gust 123.1, min humidity 6%, max temp 15.6 C
   [19/70] august_complex_includes_doe_fire_2020: wind mean 7.7 max 15.3 km/h, gust 64.1, min humidity 10%, max temp 31.7 C
-    (rate limited, waiting 15s)
-    (rate limited, waiting 30s)
   [20/70] dixie_fire_2021: wind mean 7.2 max 13.9 km/h, gust 46.4, min humidity 9%, max temp 33.3 C
   [21/70] ranch_fire_mendocino_complex_2018: wind mean 5.4 max 14.8 km/h, gust 44.6, min humidity 13%, max temp 36.7 C
-    (try 1 failed: ConnectionError, retrying in 2s)
-    (try 2 failed: ConnectionError, retrying in 4s)
-    (rate limited, waiting 45s)
   [22/70] scu_lightning_complex_2020: wind mean 15.9 max 24.7 km/h, gust 53.3, min humidity 8%, max temp 42.2 C
   [23/70] creek_fire_2020: wind mean 8.3 max 16.7 km/h, gust 50.8, min humidity 9%, max temp 35.7 C
-    (rate limited, waiting 15s)
   [24/70] lnu_lightning_complex_2020: wind mean 10.1 max 17.3 km/h, gust 50.4, min humidity 8%, max temp 41.5 C
-    (try 1 failed: ConnectionError, retrying in 2s)
   [25/70] carr_fire_2018: wind mean 8.6 max 15.8 km/h, gust 55.8, min humidity 8%, max temp 42.7 C
   [26/70] monument_fire_2021: wind mean 6.6 max 16.9 km/h, gust 59.8, min humidity 9%, max temp 35.5 C
-    (rate limited, waiting 15s)
   [27/70] caldor_fire_2021: wind mean 9.9 max 17.3 km/h, gust 44.3, min humidity 16%, max temp 36.6 C
-    (rate limited, waiting 15s)
-    (rate limited, waiting 30s)
-    (rate limited, waiting 45s)
   [28/70] river_complex_2021: wind mean 6.0 max 14.1 km/h, gust 49.0, min humidity 8%, max temp 27.0 C
-    (rate limited, waiting 15s)
+  [29/70] camp_fire_2018: wind mean 16.7 max 33.4 km/h, gust 92.9, min humidity 9%, max temp 21.4 C
+  [30/70] antelope_fire_2021: wind mean 9.5 max 20.3 km/h, gust 59.4, min humidity 6%, max temp 30.7 C
+  [31/70] beckwourth_complex_2021: wind mean 8.8 max 21.4 km/h, gust 49.7, min humidity 5%, max temp 33.5 C
+  [32/70] woolsey_fire_2018: wind mean 19.1 max 34.8 km/h, gust 78.1, min humidity 5%, max temp 23.9 C
+  [33/70] county_fire_2018: wind mean 10.2 max 21.3 km/h, gust 57.2, min humidity 10%, max temp 41.6 C
+    (try 1 failed: ConnectionError, retrying in 5s)
+  [34/70] july_complex_2020: wind mean 10.3 max 25.0 km/h, gust 43.9, min humidity 12%, max temp 32.4 C
+    (try 1 failed: ConnectionError, retrying in 5s)
+  [35/70] kincade_fire_2019: wind mean 11.7 max 31.3 km/h, gust 90.7, min humidity 10%, max temp 30.2 C
+    (rate limited: {"error":true,"reason":"Daily API request limit exceeded. Please try again tomor - waiting 5s)
+    (rate limited: {"error":true,"reason":"Daily API request limit exceeded. Please try again tomor - waiting 10s)

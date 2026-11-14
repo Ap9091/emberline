@@ -40,14 +40,16 @@ RENAME = {
 }
 
 
-def fetch(params, tries=8):
-    """Ask Open-Meteo, retrying. On HTTP 429 ("too many requests") wait longer each time."""
+def fetch(params, tries=30):
+    """Ask Open-Meteo, retrying. HTTP 429 means "too many requests": wait and try again.
+    (Our network goes out through shared addresses; some of them have used up Open-Meteo's
+    free daily allowance, so a retry a few seconds later often works.)"""
     for attempt in range(1, tries + 1):
+        wait = min(5 * attempt, 60)   # wait a little longer after each failed try
         try:
-            r = requests.get(URL, params=params, timeout=120)
+            r = requests.get(URL, params=params, timeout=45)
             if r.status_code == 429:
-                wait = 15 * attempt
-                print(f"    (rate limited, waiting {wait}s)")
+                print(f"    (rate limited: {r.text[:80].strip()} - waiting {wait}s)")
                 time.sleep(wait)
                 continue
             r.raise_for_status()
@@ -55,9 +57,9 @@ def fetch(params, tries=8):
         except requests.RequestException as e:
             if attempt == tries:
                 raise
-            print(f"    (try {attempt} failed: {type(e).__name__}, retrying in {2 * attempt}s)")
-            time.sleep(2 * attempt)
-    raise RuntimeError("Open-Meteo kept rate-limiting us")
+            print(f"    (try {attempt} failed: {type(e).__name__}, retrying in {wait}s)")
+            time.sleep(wait)
+    raise RuntimeError("Open-Meteo kept rate-limiting us - run the script again later (it skips finished fires)")
 
 
 def weather_for_fire(f):
