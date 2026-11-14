@@ -228,12 +228,12 @@ const STEPS = [
     title: 'Ask Emberline anything',
     body: () => [p('Stuck? The ', b('✦ Ask Emberline'), ' button opens an AI guide (Claude Sonnet 5.5).'),
       p('Ask a question in plain words, or ask it to take you somewhere. It answers with our real numbers and ', b('moves the app for you'), '.'),
-      p('Here it is answering: ', h('i', {}, '“Show me the AI plan that got rejected.”'))],
+      p('Here it answers a hard one: ', h('i', {}, '“Did Emberline just get lucky with Sierra Madre?”'))],
     async run(d) {
       d.focus(null);
       await sleep(700); if (!d.alive()) return;
-      await ask('Show me the AI plan that got rejected', { fromDemo: true });
-      if (d.alive() && R.state?.slots) d.focus(R.state.slots.ai);
+      await ask('Did Emberline just get lucky with Sierra Madre?', { fromDemo: true });
+      if (d.alive() && R.state?.slots) d.focus(R.state.slots.verify);
     },
   },
   {

@@ -107,6 +107,8 @@ async function runActions(actions, { fromDemo = false } = {}) {
 // ── built-in answers (no server, no key, or the server is busy) ───────────────
 const A = (type, target = '', hour = -1, from_deg = -1, speed_kmh = -1) => ({ type, target, hour, from_deg, speed_kmh });
 const FAQ = [
+  [/lucky|luck|fluke|chance/i, 'Not just luck. At 7 pm Emberline predicted 13 of the 17 squares that burned by 10 pm, with zero false alarms, and each miss was right next to a predicted square. That is one of its best hours, so we also tested 18 fires it never saw: it warned 18 of 20 towns, about 2.8 hours early.',
+    [A('fire', 'eaton_fire_2025', 2), A('show', 'check')], ['Where does it fail?', 'Show the official orders']],
   [/reject|safety|unsafe|bad plan|road|copilot|plan|code/i, 'On the Park Fire at 3 pm, the AI first sent Butte Creek Canyon out on Highway 32 west, but that road ran into the forecast fire. Plain code checked it and said REJECTED, so the AI picked Highway 32 north instead. A person still has to press Approve.',
     [A('fire', 'park_fire_2024', 2), A('copilot'), A('show', 'copilot')], ['What does the code check?', 'How accurate is it?']],
   [/real wind|go back/i, 'Back to the real wind.', [A('real_wind')], ['What if the wind doubled?', 'How accurate is it?']],
