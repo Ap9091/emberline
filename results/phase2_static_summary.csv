@@ -1,0 +1,71 @@
+fire_id,mean_elevation_m,min_elevation_m,max_elevation_m,mean_slope_deg,majority_veg,majority_veg_share,frac_tree,frac_shrub,frac_grass,frac_crop,frac_built,frac_bare,frac_water,seconds,notes
+park_fire_2024,459.7,22.0,2097.3,6.89,Tree cover,0.602,0.551,0.0,0.263,0.152,0.013,0.004,0.017,3.5,42 terrain tiles
+eaton_fire_2025,653.4,0.0,2728.7,9.67,Built-up,0.409,0.165,0.28,0.138,0.003,0.364,0.03,0.021,2.3,36 terrain tiles; 0.4% of points are sea (sea floor depth replaced by 0 m)
+palisades_fire_2025,245.5,0.0,1797.7,5.86,Water,0.315,0.148,0.113,0.124,0.004,0.289,0.01,0.312,0.7,"36 terrain tiles; 0.0% of points had no WorldCover data (open sea), counted as water; 2.8% of points are sea (sea floor depth replaced by 0 m)"
+gifford_fire_2025,593.5,40.1,1541.3,10.38,Grassland,0.668,0.22,0.103,0.61,0.034,0.012,0.02,0.002,2.5,36 terrain tiles
+madre_fire_2025,644.3,76.6,1547.5,10.31,Grassland,0.686,0.198,0.1,0.629,0.03,0.003,0.04,0.001,0.8,42 terrain tiles
+garnet_fire_2025,1609.1,94.6,3804.8,15.34,Tree cover,0.644,0.587,0.001,0.279,0.025,0.006,0.093,0.01,2.2,36 terrain tiles
+borel_fire_2024,896.8,87.4,2599.0,10.61,Grassland,0.582,0.27,0.047,0.549,0.061,0.041,0.027,0.005,0.7,36 terrain tiles
+bridge_fire_2024,809.0,19.8,2728.7,8.97,Built-up,0.361,0.15,0.301,0.153,0.009,0.305,0.079,0.002,0.6,42 terrain tiles
+line_fire_2024,1039.4,171.8,3218.7,8.85,Shrubland,0.283,0.183,0.286,0.224,0.018,0.189,0.093,0.007,2.4,42 terrain tiles
+lake_fire_2024,537.4,0.0,1871.5,12.15,Grassland,0.501,0.341,0.112,0.446,0.034,0.021,0.004,0.042,0.9,36 terrain tiles; 1.8% of points are sea (sea floor depth replaced by 0 m)
+2024_sqf_lightning_complex_2024,1814.2,594.8,3303.4,15.46,Tree cover,0.586,0.522,0.095,0.285,0.001,0.002,0.089,0.006,1.0,36 terrain tiles
+salt_fire_2025,424.5,57.2,1429.6,7.01,Grassland,0.734,0.131,0.018,0.687,0.109,0.006,0.048,0.001,2.7,36 terrain tiles
+airport_fire_2024,285.5,0.0,1442.0,5.92,Built-up,0.338,0.202,0.116,0.204,0.021,0.279,0.017,0.162,0.7,36 terrain tiles; 1.4% of points are sea (sea floor depth replaced by 0 m)
+orleans_complex_2025,1096.6,128.8,2378.5,22.41,Tree cover,0.981,0.94,0.0,0.051,0.0,0.0,0.006,0.002,2.9,42 terrain tiles
+mountain_fire_2024,490.9,0.0,2091.3,10.49,Tree cover,0.311,0.274,0.145,0.257,0.023,0.083,0.011,0.207,1.1,36 terrain tiles; 2.0% of points are sea (sea floor depth replaced by 0 m)
+sites_fire_2024,467.8,11.6,2012.9,8.58,Tree cover,0.413,0.405,0.0,0.379,0.169,0.007,0.003,0.036,1.0,49 terrain tiles
+green_fire_2025,871.7,129.1,2372.7,12.54,Tree cover,0.909,0.844,0.0,0.121,0.003,0.01,0.002,0.02,0.7,42 terrain tiles
+boone_fire_2024,497.8,62.1,1429.6,9.25,Grassland,0.774,0.158,0.026,0.709,0.068,0.003,0.032,0.003,0.8,36 terrain tiles
+august_complex_includes_doe_fire_2020,765.5,31.0,2135.9,11.75,Tree cover,0.598,0.584,0.0,0.371,0.035,0.002,0.003,0.004,0.8,36 terrain tiles
+dixie_fire_2021,1062.5,30.0,2194.2,13.06,Tree cover,0.868,0.817,0.0,0.134,0.022,0.004,0.002,0.02,0.6,42 terrain tiles
+ranch_fire_mendocino_complex_2018,650.3,79.4,2012.9,14.29,Tree cover,0.844,0.769,0.0,0.192,0.004,0.006,0.001,0.029,2.6,42 terrain tiles
+scu_lightning_complex_2020,291.7,1.6,1122.8,7.38,Grassland,0.499,0.282,0.003,0.489,0.147,0.057,0.009,0.013,0.6,36 terrain tiles
+creek_fire_2020,1697.2,112.7,3701.8,13.98,Tree cover,0.724,0.646,0.001,0.27,0.003,0.004,0.062,0.014,0.7,42 terrain tiles
+lnu_lightning_complex_2020,171.6,-1.5,933.8,6.16,Grassland,0.378,0.33,0.004,0.38,0.183,0.045,0.004,0.055,0.7,42 terrain tiles; 0.5% of points are sea (sea floor depth replaced by 0 m)
+carr_fire_2018,733.7,107.1,2378.5,14.46,Tree cover,0.818,0.75,0.0,0.199,0.004,0.012,0.008,0.026,0.9,49 terrain tiles
+monument_fire_2021,1043.1,128.8,2378.5,19.65,Tree cover,0.981,0.937,0.0,0.053,0.0,0.001,0.008,0.001,0.9,49 terrain tiles
+caldor_fire_2021,1150.0,70.3,2731.8,11.37,Tree cover,0.871,0.809,0.0,0.164,0.001,0.004,0.013,0.009,0.7,36 terrain tiles
+river_complex_2021,1292.2,246.6,2279.9,20.7,Tree cover,0.941,0.883,0.0,0.1,0.011,0.001,0.004,0.001,0.8,36 terrain tiles
+camp_fire_2018,910.8,23.5,2097.3,12.02,Tree cover,0.814,0.767,0.0,0.157,0.049,0.008,0.002,0.017,0.7,36 terrain tiles
+antelope_fire_2021,1471.7,755.5,3729.5,6.61,Tree cover,0.774,0.739,0.0,0.204,0.019,0.001,0.03,0.006,0.7,42 terrain tiles
+beckwourth_complex_2021,1716.5,1082.1,2518.6,10.26,Tree cover,0.612,0.567,0.046,0.348,0.006,0.005,0.019,0.01,2.4,49 terrain tiles
+woolsey_fire_2018,367.1,0.0,1756.1,8.54,Grassland,0.241,0.207,0.152,0.222,0.016,0.194,0.012,0.197,0.6,36 terrain tiles; 2.1% of points are sea (sea floor depth replaced by 0 m)
+county_fire_2018,245.1,6.8,1009.9,7.01,Tree cover,0.385,0.393,0.001,0.342,0.223,0.015,0.005,0.021,0.7,36 terrain tiles
+july_complex_2020,1428.3,1189.4,2258.9,3.33,Tree cover,0.465,0.454,0.0,0.437,0.063,0.001,0.022,0.023,2.4,42 terrain tiles
+kincade_fire_2019,410.8,0.0,1219.0,11.59,Tree cover,0.701,0.62,0.001,0.3,0.019,0.018,0.001,0.042,0.7,42 terrain tiles; 0.8% of points are sea (sea floor depth replaced by 0 m)
+mosquito_fire_2022,1063.9,53.0,2505.7,12.22,Tree cover,0.954,0.869,0.0,0.099,0.0,0.015,0.003,0.014,0.8,36 terrain tiles
+tamarack_fire_2021,2143.0,1113.2,3217.1,13.32,Tree cover,0.698,0.613,0.028,0.288,0.008,0.004,0.041,0.018,0.8,42 terrain tiles
+glass_fire_2020,295.3,0.8,1195.4,9.69,Tree cover,0.549,0.51,0.001,0.384,0.049,0.036,0.001,0.018,0.7,36 terrain tiles; 0.1% of points are sea (sea floor depth replaced by 0 m)
+delta_fire_2018,967.7,154.2,2245.2,16.22,Tree cover,0.933,0.861,0.0,0.103,0.0,0.005,0.004,0.027,1.2,49 terrain tiles
+mckinney_fire_2022,1142.8,422.2,2234.0,17.24,Tree cover,0.816,0.765,0.0,0.213,0.015,0.003,0.002,0.002,2.8,42 terrain tiles
+zogg_fire_2020,604.8,85.8,2109.4,12.26,Tree cover,0.754,0.7,0.0,0.257,0.005,0.012,0.002,0.024,0.8,49 terrain tiles
+walker_fire_2019,1593.7,972.0,2351.9,10.35,Tree cover,0.742,0.693,0.015,0.227,0.009,0.002,0.013,0.041,0.6,42 terrain tiles
+river_fire_mendocino_complex_2018,519.9,0.0,2012.9,13.97,Tree cover,0.829,0.741,0.0,0.207,0.005,0.007,0.0,0.041,0.8,49 terrain tiles; 0.3% of points are sea (sea floor depth replaced by 0 m)
+river_fire_2020,274.0,0.0,1337.6,8.39,Grassland,0.321,0.273,0.029,0.319,0.129,0.03,0.004,0.215,1.1,36 terrain tiles; 2.4% of points are sea (sea floor depth replaced by 0 m)
+loyalton_fire_2020,1784.7,1189.6,2953.8,9.34,Tree cover,0.491,0.452,0.04,0.441,0.005,0.036,0.015,0.01,0.8,49 terrain tiles
+klamathon_fire_2018,1197.4,499.8,2253.3,11.72,Tree cover,0.724,0.69,0.0,0.284,0.017,0.004,0.002,0.003,0.7,36 terrain tiles
+apple_fire_2020,1122.0,196.5,3218.7,11.05,Shrubland,0.422,0.192,0.388,0.193,0.024,0.122,0.07,0.011,0.8,36 terrain tiles
+lake_fire_2020,902.5,165.2,2191.2,9.88,Grassland,0.554,0.146,0.22,0.499,0.006,0.046,0.079,0.005,0.6,36 terrain tiles
+mineral_fire_2020,479.9,64.4,1429.6,8.71,Grassland,0.758,0.151,0.022,0.7,0.08,0.005,0.038,0.003,0.6,36 terrain tiles
+sheep_fire_2020,1613.4,913.4,2351.9,8.84,Tree cover,0.684,0.641,0.008,0.288,0.008,0.002,0.008,0.046,0.7,36 terrain tiles
+fairview_fire_2022,845.4,96.6,3002.9,9.47,Shrubland,0.482,0.125,0.436,0.213,0.024,0.111,0.082,0.008,0.8,36 terrain tiles
+lava_fire_2021,1382.7,652.6,3729.5,11.68,Tree cover,0.786,0.745,0.0,0.223,0.013,0.003,0.014,0.002,0.6,42 terrain tiles
+holy_fire_2018,320.0,0.0,1442.0,6.18,Built-up,0.361,0.203,0.126,0.22,0.025,0.294,0.019,0.113,0.6,36 terrain tiles; 1.2% of points are sea (sea floor depth replaced by 0 m)
+el_dorado_fire_2020,1146.5,228.6,3218.7,10.39,Shrubland,0.364,0.185,0.344,0.199,0.019,0.124,0.121,0.006,0.8,49 terrain tiles
+gold_fire_2020,1525.1,998.8,2138.9,5.28,Grassland,0.509,0.459,0.0,0.498,0.033,0.0,0.003,0.008,0.7,36 terrain tiles
+butte_tehama_glenn_lightning_complex_tehama_glenn_zone_2020,424.0,42.0,2135.9,7.32,Grassland,0.512,0.466,0.0,0.481,0.039,0.006,0.002,0.005,0.6,49 terrain tiles
+oak_fire_2022,962.5,59.7,3033.0,11.3,Tree cover,0.65,0.578,0.0,0.388,0.012,0.002,0.01,0.01,0.7,36 terrain tiles
+alisal_fire_2021,297.8,0.0,1848.9,8.08,Water,0.357,0.248,0.073,0.28,0.025,0.017,0.002,0.354,0.8,36 terrain tiles; 3.0% of points are sea (sea floor depth replaced by 0 m)
+smith_river_complex_2023,622.3,0.0,1751.6,16.39,Tree cover,0.858,0.798,0.0,0.08,0.001,0.002,0.002,0.117,0.8,49 terrain tiles; 6.6% of points are sea (sea floor depth replaced by 0 m)
+srf_lightning_complex_2023,786.2,0.0,1961.3,19.67,Tree cover,0.988,0.958,0.0,0.035,0.0,0.001,0.001,0.005,0.7,49 terrain tiles; 0.3% of points are sea (sea floor depth replaced by 0 m)
+happy_camp_complex_2023,1171.4,282.2,2234.0,19.6,Tree cover,0.935,0.872,0.0,0.112,0.011,0.001,0.002,0.001,0.4,36 terrain tiles
+rabbit_fire_2023,920.6,208.5,3218.7,9.85,Shrubland,0.347,0.202,0.336,0.217,0.026,0.172,0.036,0.012,0.8,36 terrain tiles
+plant_fire_2023,799.4,88.6,2005.9,11.6,Grassland,0.628,0.235,0.103,0.584,0.018,0.003,0.056,0.002,0.8,36 terrain tiles
+almond_fire_2023,306.4,56.9,1195.5,3.52,Grassland,0.731,0.077,0.013,0.688,0.108,0.004,0.105,0.005,0.8,36 terrain tiles
+deep_fire_2023,1205.8,260.6,2378.5,20.73,Tree cover,0.962,0.906,0.0,0.072,0.0,0.0,0.01,0.011,0.8,49 terrain tiles
+south_fork_complex_2023,748.4,0.0,1961.3,16.52,Tree cover,0.966,0.912,0.0,0.072,0.001,0.003,0.002,0.01,0.8,49 terrain tiles; 0.3% of points are sea (sea floor depth replaced by 0 m)
+3_9_fire_2023,834.0,27.1,1961.3,17.27,Tree cover,0.986,0.933,0.0,0.063,0.0,0.0,0.001,0.002,0.7,42 terrain tiles
+south_fire_2023,491.6,0.0,2091.3,10.48,Tree cover,0.314,0.274,0.143,0.256,0.023,0.076,0.011,0.217,1.0,36 terrain tiles; 2.0% of points are sea (sea floor depth replaced by 0 m)
+highland_fire_2023,838.3,59.3,2493.9,9.97,Shrubland,0.493,0.211,0.453,0.194,0.014,0.076,0.047,0.006,1.0,36 terrain tiles
+bonny_fire_2023,880.5,14.5,3002.9,10.52,Shrubland,0.502,0.182,0.459,0.172,0.013,0.06,0.108,0.005,0.9,36 terrain tiles

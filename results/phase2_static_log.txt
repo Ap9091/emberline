@@ -1,0 +1,71 @@
+[1/70] park_fire_2024: elev 460 m (22-2097), slope 6.9 deg, mostly Tree cover 60%, 4s | 42 terrain tiles
+[2/70] eaton_fire_2025: elev 653 m (0-2729), slope 9.7 deg, mostly Built-up 41%, 2s | 36 terrain tiles; 0.4% of points are sea (sea floor depth replaced by 0 m)
+[3/70] palisades_fire_2025: elev 246 m (0-1798), slope 5.9 deg, mostly Water 32%, 1s | 36 terrain tiles; 0.0% of points had no WorldCover data (open sea), counted as water; 2.8% of points are sea (sea floor depth replaced by 0 m)
+[4/70] gifford_fire_2025: elev 594 m (40-1541), slope 10.4 deg, mostly Grassland 67%, 3s | 36 terrain tiles
+[5/70] madre_fire_2025: elev 644 m (77-1548), slope 10.3 deg, mostly Grassland 69%, 1s | 42 terrain tiles
+[6/70] garnet_fire_2025: elev 1609 m (95-3805), slope 15.3 deg, mostly Tree cover 64%, 2s | 36 terrain tiles
+[7/70] borel_fire_2024: elev 897 m (87-2599), slope 10.6 deg, mostly Grassland 58%, 1s | 36 terrain tiles
+[8/70] bridge_fire_2024: elev 809 m (20-2729), slope 9.0 deg, mostly Built-up 36%, 1s | 42 terrain tiles
+[9/70] line_fire_2024: elev 1039 m (172-3219), slope 8.8 deg, mostly Shrubland 28%, 2s | 42 terrain tiles
+[10/70] lake_fire_2024: elev 537 m (0-1872), slope 12.2 deg, mostly Grassland 50%, 1s | 36 terrain tiles; 1.8% of points are sea (sea floor depth replaced by 0 m)
+[11/70] 2024_sqf_lightning_complex_2024: elev 1814 m (595-3303), slope 15.5 deg, mostly Tree cover 59%, 1s | 36 terrain tiles
+[12/70] salt_fire_2025: elev 424 m (57-1430), slope 7.0 deg, mostly Grassland 73%, 3s | 36 terrain tiles
+[13/70] airport_fire_2024: elev 286 m (0-1442), slope 5.9 deg, mostly Built-up 34%, 1s | 36 terrain tiles; 1.4% of points are sea (sea floor depth replaced by 0 m)
+[14/70] orleans_complex_2025: elev 1097 m (129-2378), slope 22.4 deg, mostly Tree cover 98%, 3s | 42 terrain tiles
+[15/70] mountain_fire_2024: elev 491 m (0-2091), slope 10.5 deg, mostly Tree cover 31%, 1s | 36 terrain tiles; 2.0% of points are sea (sea floor depth replaced by 0 m)
+[16/70] sites_fire_2024: elev 468 m (12-2013), slope 8.6 deg, mostly Tree cover 41%, 1s | 49 terrain tiles
+[17/70] green_fire_2025: elev 872 m (129-2373), slope 12.5 deg, mostly Tree cover 91%, 1s | 42 terrain tiles
+[18/70] boone_fire_2024: elev 498 m (62-1430), slope 9.2 deg, mostly Grassland 77%, 1s | 36 terrain tiles
+[19/70] august_complex_includes_doe_fire_2020: elev 766 m (31-2136), slope 11.8 deg, mostly Tree cover 60%, 1s | 36 terrain tiles
+[20/70] dixie_fire_2021: elev 1062 m (30-2194), slope 13.1 deg, mostly Tree cover 87%, 1s | 42 terrain tiles
+[21/70] ranch_fire_mendocino_complex_2018: elev 650 m (79-2013), slope 14.3 deg, mostly Tree cover 84%, 3s | 42 terrain tiles
+[22/70] scu_lightning_complex_2020: elev 292 m (2-1123), slope 7.4 deg, mostly Grassland 50%, 1s | 36 terrain tiles
+[23/70] creek_fire_2020: elev 1697 m (113-3702), slope 14.0 deg, mostly Tree cover 72%, 1s | 42 terrain tiles
+[24/70] lnu_lightning_complex_2020: elev 172 m (-2-934), slope 6.2 deg, mostly Grassland 38%, 1s | 42 terrain tiles; 0.5% of points are sea (sea floor depth replaced by 0 m)
+[25/70] carr_fire_2018: elev 734 m (107-2378), slope 14.5 deg, mostly Tree cover 82%, 1s | 49 terrain tiles
+[26/70] monument_fire_2021: elev 1043 m (129-2378), slope 19.6 deg, mostly Tree cover 98%, 1s | 49 terrain tiles
+[27/70] caldor_fire_2021: elev 1150 m (70-2732), slope 11.4 deg, mostly Tree cover 87%, 1s | 36 terrain tiles
+[28/70] river_complex_2021: elev 1292 m (247-2280), slope 20.7 deg, mostly Tree cover 94%, 1s | 36 terrain tiles
+[29/70] camp_fire_2018: elev 911 m (24-2097), slope 12.0 deg, mostly Tree cover 81%, 1s | 36 terrain tiles
+[30/70] antelope_fire_2021: elev 1472 m (756-3730), slope 6.6 deg, mostly Tree cover 77%, 1s | 42 terrain tiles
+[31/70] beckwourth_complex_2021: elev 1716 m (1082-2519), slope 10.3 deg, mostly Tree cover 61%, 2s | 49 terrain tiles
+[32/70] woolsey_fire_2018: elev 367 m (0-1756), slope 8.5 deg, mostly Grassland 24%, 1s | 36 terrain tiles; 2.1% of points are sea (sea floor depth replaced by 0 m)
+[33/70] county_fire_2018: elev 245 m (7-1010), slope 7.0 deg, mostly Tree cover 38%, 1s | 36 terrain tiles
+[34/70] july_complex_2020: elev 1428 m (1189-2259), slope 3.3 deg, mostly Tree cover 46%, 2s | 42 terrain tiles
+[35/70] kincade_fire_2019: elev 411 m (0-1219), slope 11.6 deg, mostly Tree cover 70%, 1s | 42 terrain tiles; 0.8% of points are sea (sea floor depth replaced by 0 m)
+[36/70] mosquito_fire_2022: elev 1064 m (53-2506), slope 12.2 deg, mostly Tree cover 95%, 1s | 36 terrain tiles
+[37/70] tamarack_fire_2021: elev 2143 m (1113-3217), slope 13.3 deg, mostly Tree cover 70%, 1s | 42 terrain tiles
+[38/70] glass_fire_2020: elev 295 m (1-1195), slope 9.7 deg, mostly Tree cover 55%, 1s | 36 terrain tiles; 0.1% of points are sea (sea floor depth replaced by 0 m)
+[39/70] delta_fire_2018: elev 968 m (154-2245), slope 16.2 deg, mostly Tree cover 93%, 1s | 49 terrain tiles
+[40/70] mckinney_fire_2022: elev 1143 m (422-2234), slope 17.2 deg, mostly Tree cover 82%, 3s | 42 terrain tiles
+[41/70] zogg_fire_2020: elev 605 m (86-2109), slope 12.3 deg, mostly Tree cover 75%, 1s | 49 terrain tiles
+[42/70] walker_fire_2019: elev 1594 m (972-2352), slope 10.3 deg, mostly Tree cover 74%, 1s | 42 terrain tiles
+[43/70] river_fire_mendocino_complex_2018: elev 520 m (0-2013), slope 14.0 deg, mostly Tree cover 83%, 1s | 49 terrain tiles; 0.3% of points are sea (sea floor depth replaced by 0 m)
+[44/70] river_fire_2020: elev 274 m (0-1338), slope 8.4 deg, mostly Grassland 32%, 1s | 36 terrain tiles; 2.4% of points are sea (sea floor depth replaced by 0 m)
+[45/70] loyalton_fire_2020: elev 1785 m (1190-2954), slope 9.3 deg, mostly Tree cover 49%, 1s | 49 terrain tiles
+[46/70] klamathon_fire_2018: elev 1197 m (500-2253), slope 11.7 deg, mostly Tree cover 72%, 1s | 36 terrain tiles
+[47/70] apple_fire_2020: elev 1122 m (196-3219), slope 11.1 deg, mostly Shrubland 42%, 1s | 36 terrain tiles
+[48/70] lake_fire_2020: elev 902 m (165-2191), slope 9.9 deg, mostly Grassland 55%, 1s | 36 terrain tiles
+[49/70] mineral_fire_2020: elev 480 m (64-1430), slope 8.7 deg, mostly Grassland 76%, 1s | 36 terrain tiles
+[50/70] sheep_fire_2020: elev 1613 m (913-2352), slope 8.8 deg, mostly Tree cover 68%, 1s | 36 terrain tiles
+[51/70] fairview_fire_2022: elev 845 m (97-3003), slope 9.5 deg, mostly Shrubland 48%, 1s | 36 terrain tiles
+[52/70] lava_fire_2021: elev 1383 m (653-3730), slope 11.7 deg, mostly Tree cover 79%, 1s | 42 terrain tiles
+[53/70] holy_fire_2018: elev 320 m (0-1442), slope 6.2 deg, mostly Built-up 36%, 1s | 36 terrain tiles; 1.2% of points are sea (sea floor depth replaced by 0 m)
+[54/70] el_dorado_fire_2020: elev 1146 m (229-3219), slope 10.4 deg, mostly Shrubland 36%, 1s | 49 terrain tiles
+[55/70] gold_fire_2020: elev 1525 m (999-2139), slope 5.3 deg, mostly Grassland 51%, 1s | 36 terrain tiles
+[56/70] butte_tehama_glenn_lightning_complex_tehama_glenn_zone_2020: elev 424 m (42-2136), slope 7.3 deg, mostly Grassland 51%, 1s | 49 terrain tiles
+[57/70] oak_fire_2022: elev 962 m (60-3033), slope 11.3 deg, mostly Tree cover 65%, 1s | 36 terrain tiles
+[58/70] alisal_fire_2021: elev 298 m (0-1849), slope 8.1 deg, mostly Water 36%, 1s | 36 terrain tiles; 3.0% of points are sea (sea floor depth replaced by 0 m)
+[59/70] smith_river_complex_2023: elev 622 m (0-1752), slope 16.4 deg, mostly Tree cover 86%, 1s | 49 terrain tiles; 6.6% of points are sea (sea floor depth replaced by 0 m)
+[60/70] srf_lightning_complex_2023: elev 786 m (0-1961), slope 19.7 deg, mostly Tree cover 99%, 1s | 49 terrain tiles; 0.3% of points are sea (sea floor depth replaced by 0 m)
+[61/70] happy_camp_complex_2023: elev 1171 m (282-2234), slope 19.6 deg, mostly Tree cover 94%, 0s | 36 terrain tiles
+[62/70] rabbit_fire_2023: elev 921 m (208-3219), slope 9.8 deg, mostly Shrubland 35%, 1s | 36 terrain tiles
+[63/70] plant_fire_2023: elev 799 m (89-2006), slope 11.6 deg, mostly Grassland 63%, 1s | 36 terrain tiles
+[64/70] almond_fire_2023: elev 306 m (57-1196), slope 3.5 deg, mostly Grassland 73%, 1s | 36 terrain tiles
+[65/70] deep_fire_2023: elev 1206 m (261-2378), slope 20.7 deg, mostly Tree cover 96%, 1s | 49 terrain tiles
+[66/70] south_fork_complex_2023: elev 748 m (0-1961), slope 16.5 deg, mostly Tree cover 97%, 1s | 49 terrain tiles; 0.3% of points are sea (sea floor depth replaced by 0 m)
+[67/70] 3_9_fire_2023: elev 834 m (27-1961), slope 17.3 deg, mostly Tree cover 99%, 1s | 42 terrain tiles
+[68/70] south_fire_2023: elev 492 m (0-2091), slope 10.5 deg, mostly Tree cover 31%, 1s | 36 terrain tiles; 2.0% of points are sea (sea floor depth replaced by 0 m)
+[69/70] highland_fire_2023: elev 838 m (59-2494), slope 10.0 deg, mostly Shrubland 49%, 1s | 36 terrain tiles
+[70/70] bonny_fire_2023: elev 880 m (14-3003), slope 10.5 deg, mostly Shrubland 50%, 1s | 36 terrain tiles
+Done.
