@@ -329,8 +329,12 @@ def replay_meta(fire_id):
     # so our warning time = end of the data hour. Fire arrival = start of the hour GOES first saw fire near the town.
     hour_t = [_utc(fr["time_utc"]) for fr in rp["hours"]]
     orders = store.evac_orders(fire_id)
+    # Only places in our town list can be compared. Others (e.g. Pacific Palisades, a part of the City of
+    # Los Angeles and not a Census place) are listed separately as context.
+    official_other = [o for o in orders if o["town"] not in town_pos]
+    orders_in_list = [o for o in orders if o["town"] in town_pos]
     official = {}
-    for o in orders:
+    for o in orders_in_list:
         try:
             t = _utc(o["order_time_utc"])
         except Exception:
@@ -354,6 +358,8 @@ def replay_meta(fire_id):
             "official_order_utc": off["order"]["t"].isoformat() if "order" in off else None,
             "official_warning_utc": off["warning"]["t"].isoformat() if "warning" in off else None,
             "official_source_url": next((v["url"] for v in off.values() if v.get("url")), None),
+            "official_precision": next((v["precision"] for v in off.values() if v.get("precision")), None),
+            "fire_reached": n in arrival,
             # > 0: we flagged the town that many hours BEFORE the first official order or warning
             "lead_vs_official_h": round((first_off - issued).total_seconds() / 3600, 1)
             if first_off is not None and issued is not None else None})
@@ -361,11 +367,13 @@ def replay_meta(fire_id):
     earlier = [t for t in compared if t["lead_vs_official_h"] > 0]
     official_comparison = {
         "towns_compared": len(compared), "towns_flagged_earlier": len(earlier),
+        "towns_flagged_earlier_and_reached": sum(1 for t in earlier if t["fire_reached"]),
         "towns_flagged_later_or_same": len(compared) - len(earlier),
         "residents_flagged_earlier": int(sum(t["population"] or 0 for t in earlier)),
         "median_lead_h": float(np.median([t["lead_vs_official_h"] for t in compared])) if compared else None,
         "note": "Our warning time = end of the satellite hour it was made from. Official times as published, "
-                "with sources. Not-flagged towns and later flags are counted too."} if compared else None
+                "with sources. Not-flagged towns and later flags are counted too. Flagging a town early only helps if "
+                "the fire really came: see 'fire reached' for each town."} if compared else None
     per_fire = next((r for r in store.metrics().get("test_per_fire", []) if r["fire"] == fire_id), None)
     return {
         "fire_id": fire_id, "name": rp["name"], "split": rp["split"], "model": rp["model"],
@@ -376,6 +384,7 @@ def replay_meta(fire_id):
                    "fire_area_km2": round(float(masks[i].sum() * CELL_KM2), 1)} for i, fr in enumerate(rp["hours"])],
         "default_hour": next((fr["hour_idx"] for fr in rp["hours"] if fr["forecast"] is not None), 0),
         "timeline": timeline, "official_orders": orders, "official_comparison": official_comparison,
+        "official_other": official_other,
         "verification_by_hour": by_hour,
         "official_orders_note": None if orders else
             "Official evacuation times not added yet (data/evac_orders.csv). We only show real public times.",

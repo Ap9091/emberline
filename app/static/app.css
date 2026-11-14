@@ -544,3 +544,27 @@ ul, ol { margin: 0; padding-left: 16px; }
 .sw-false { background: rgba(154, 163, 171, .35); border: 1px solid var(--falseAlarm, #9aa3ab); }
 .sw-verify { background: linear-gradient(90deg, var(--hit, #3f9e78) 0 50%, var(--missed, #b0306a) 50%); }
 .tl-lane-official .tl-tick.tl-tick-soft { background: transparent; border: 1.5px solid #fff; }
+
+/* official table: fixed columns, no awkward wrapping */
+.official-table { table-layout: fixed; }
+.official-table td.mono { white-space: nowrap; }
+.official-table .off-line { display: flex; justify-content: flex-end; gap: 5px; }
+.official-table .town .sub { font-weight: 400; margin-top: 1px; }
+.official-table td .srclink { display: inline-block; margin-top: 2px; }
+.off-others { margin-top: 8px; display: grid; gap: 3px; }
+.off-other { font-size: 11px; color: var(--text-2); }
+/* plan: a town with no clear highway exit */
+.plan-route-human .mono { color: var(--warning); }
+.plan-route-human .route-arrow { color: var(--warning); font-weight: 700; }
+
+/* official orders: stacked rows */
+.off-rows { display: grid; }
+.off-row { padding: 6px 0; border-bottom: 1px solid var(--line); display: grid; gap: 2px; }
+.off-top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.off-top .town { font-weight: 600; }
+.off-top .lead-early, .off-top .lead-late { font: 600 12px var(--mono); white-space: nowrap; }
+.off-top .lead-late { font-weight: 500; }
+.off-times { display: flex; flex-wrap: wrap; gap: 3px 12px; font-size: 11.5px; color: var(--text); }
+.off-times .kind { color: var(--text-3); font: 600 9.5px var(--sans); text-transform: uppercase; letter-spacing: .06em; margin-right: 5px; }
+.off-times .future { opacity: .45; }
+.off-sub { display: flex; justify-content: space-between; gap: 8px; font-size: 11px; color: var(--text-3); }

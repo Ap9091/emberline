@@ -16,6 +16,7 @@ from .situation import ai_context
 
 MAX_RETRIES = 2
 ALERT_MAX = 360
+NO_CLEAR_EXIT = "No clear highway exit - human decision"
 
 
 def briefing(sit):
@@ -104,6 +105,12 @@ def plan(sit):
                          "reasons": reasons, "human_decisions": human,
                          "provider": r["provider"], "model": r["model"], "cached": r["cached"]})
         if not reasons:
+            # Towns where EVERY highway exit runs into the fire: the AI's road is kept for the record but not shown
+            # as the route, and the alert must not send people down it. A human chooses (escort, shelter, local roads).
+            stuck = {t for t, opts in sit["exits"].items() if opts and all(o["blocked_1h_at_km"] is not None for o in opts)}
+            for e in p.get("evacuate") or []:
+                if isinstance(e, dict) and e.get("town") in stuck:
+                    e["exit_ai"], e["exit"], e["needs_human"] = e.get("exit"), NO_CLEAR_EXIT, True
             return {"status": "ACCEPTED", "attempts": attempts, "plan": p, "human_decisions": human}
         feedback = reasons
     return {"status": "MANUAL", "attempts": attempts,
@@ -116,7 +123,9 @@ def alert(sit, approved_plan):
     prompt = ("Draft the Wireless Emergency Alert text an official would send through the county's existing alert "
               f"system for this APPROVED plan. Under {ALERT_MAX} characters, plain text, no emojis, no hashtags. Start "
               "with 'EVACUATION ORDER' or 'EVACUATION WARNING', name the fire, the town(s), the exit route(s) and a "
-              "short action ('Leave now via ...'). Do not invent phone numbers or links. Facts:\n" + json.dumps(ctx, default=str))
+              "short action ('Leave now via ...'). If a town's exit is '" + NO_CLEAR_EXIT + "', do NOT name any road "
+              "for that town: tell its residents to leave now and follow directions from emergency personnel. "
+              "Do not invent phone numbers or links. Facts:\n" + json.dumps(ctx, default=str))
     r = ai.ask("alert", prompt)
     text = r["text"].strip().strip('"')
     if len(text) > ALERT_MAX:                          # hard limit: cut at the last full sentence that fits

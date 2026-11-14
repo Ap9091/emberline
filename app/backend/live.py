@@ -74,8 +74,9 @@ def _recent_files(hours_back, at=None):
     for h in range(hours_back + 1, -1, -1):
         t = now - pd.Timedelta(hours=h)
         try:
-            names += [n for n in _s3().ls(f"{BUCKET}/ABI-L2-FDCC/{t.year}/{t.day_of_year:03d}/{t.hour:02d}/")
-                      if n.endswith(".nc")]
+            # refresh=True: s3fs caches folder listings, and new scans keep arriving in the current hour
+            names += [n for n in _s3().ls(f"{BUCKET}/ABI-L2-FDCC/{t.year}/{t.day_of_year:03d}/{t.hour:02d}/",
+                                          refresh=h <= 1) if n.endswith(".nc")]
         except FileNotFoundError:
             pass
     out = sorted((p2_goes.scan_time(n), n) for n in set(names))
@@ -98,8 +99,14 @@ def _local(name):
 
 
 def _cleanup():
+    """Delete live scans older than 8 hours. Archive scans (used by the demo examples) are kept."""
+    now = pd.Timestamp.now(tz="UTC")
     for p in glob.glob(os.path.join(GOES_DIR, "*.nc")):
-        if time.time() - os.path.getmtime(p) > 8 * 3600:
+        try:
+            scanned = p2_goes.scan_time(p)
+        except Exception:
+            continue
+        if pd.Timedelta(hours=8) < now - scanned < pd.Timedelta(days=2):
             os.remove(p)
 
 
@@ -262,9 +269,14 @@ def _compute_state(at=None):
         area = len(g) * PIXEL_KM2
         growth = (len(g) - n_ago) * PIXEL_KM2
         wind_part = max(toward, 0) * min(1, (wx["speed_kmh"] if wx else 0) / 30)
-        parts = {"people": round(min(1, math.log10(1 + people) / 5), 3), "wind_toward_towns": round(wind_part, 3),
+        parts = {"people": round(min(1, math.log10(1 + people) / 5), 3),
+                 "size": round(min(1, math.log10(1 + area) / math.log10(1 + 300)), 3),
+                 "wind_toward_towns": round(wind_part, 3),
                  "growth": round(min(1, max(growth, 0) / 20), 3)}
-        score = round(100 * (0.5 * parts["people"] + 0.3 * parts["wind_toward_towns"] + 0.2 * parts["growth"]), 1)
+        # detection confidence: one or two GOES pixels are often a farm burn, a hot roof or noise
+        parts["confidence"] = round(min(1.0, 0.5 + len(g) / 6), 3)          # 1 px = 0.67, 2 px = 0.83, 3+ px = 1
+        score = round(100 * parts["confidence"] * (0.35 * parts["people"] + 0.25 * parts["size"]
+                                                   + 0.2 * parts["wind_toward_towns"] + 0.2 * parts["growth"]), 1)
         iid = _incident_id(lat0, lon0, at)
         inc = {"id": iid, "lat": round(lat0, 4), "lon": round(lon0, 4), "n_pixels": len(g),
                "area_km2": round(area, 1), "growth_km2_last_hour": round(growth, 1),
@@ -289,8 +301,10 @@ def _compute_state(at=None):
             "computed_utc": pd.Timestamp.now(tz="UTC").isoformat(), "refresh_s": REFRESH_S,
             "scans_used": len(now_files), "incidents": incidents,
             "pixels": {"type": "FeatureCollection", "features": features},
-            "triage_formula": "score = 100 x (0.5 people within 10 km [log scale] + 0.3 wind blowing toward a town "
-                              "within 25 km x wind strength + 0.2 growth in the last hour)",
+            "triage_formula": "score = 100 x (0.35 people within 10 km [log scale] + 0.25 fire size [log scale, "
+                              "300 km2 = full] + 0.2 wind blowing toward a town within 25 km x wind strength "
+                              "+ 0.2 growth in the last hour), times detection confidence (1 pixel 0.67, "
+                              "2 pixels 0.83, 3+ pixels 1)",
             "notes": ["Area = fire pixels x GOES-18 pixel size (about 6.4 km2): approximate.",
                       "Growth compares the last 15 min with the same 15 min one hour earlier.",
                       "Small agricultural or industrial heat sources can appear as 1-pixel incidents."]}, registry

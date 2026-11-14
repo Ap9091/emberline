@@ -51,7 +51,7 @@ export const TEXT = {
   footer: 'AI drafts, code checks the forecast, a human decides.',
   alertLabel: 'Draft for county alert system, not sent',
   aiOffline: 'AI offline, forecast only',
-  peopleLabel: 'residents in towns warned before fire arrival (GOES-based arrival time)',
+  peopleLabel: 'towns warned before the fire reached them (fire within 1 km of the town point, from GOES-18)',
   whatIfBanner: (speed, dir) => `WHAT-IF · wind ${speed} km/h from ${dir} for the next 3 h · forecast re-run by the model · not real data`,
 };
 

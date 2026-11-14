@@ -207,20 +207,24 @@ function scrollToCopilot() {
 // ── people counter ───────────────────────────────────────────────────────────
 function drawPeople() {
   const tl = s.meta.timeline || [];
+  // towns the fire has reached by the replay hour, and how many of them we had warned beforehand
   const reached = tl.filter(t => t.fire_arrival_hour !== null && t.fire_arrival_hour !== undefined);
   const warnedFirst = reached.filter(t => t.lead_h > 0);
-  const soFar = warnedFirst.filter(t => t.first_warning_hour <= s.hour);
+  const reachedSoFar = reached.filter(t => t.fire_arrival_hour <= s.hour);
+  const warnedSoFar = reachedSoFar.filter(t => t.lead_h > 0);
   const sum = list => list.reduce((a, t) => a + (t.population || 0), 0);
   const orders = s.meta.official_orders || [];
   fill(s.slots.people, h('div', { class: 'people' },
     h('div', { class: 'people-main' },
-      h('div', { class: 'people-n mono' }, fmtInt(sum(soFar))),
-      h('div', { class: 'people-label' }, TEXT.peopleLabel)),
+      h('div', { class: 'people-n mono' }, reachedSoFar.length ? `${warnedSoFar.length}/${reachedSoFar.length}` : '–'),
+      h('div', { class: 'people-label' }, reachedSoFar.length ? TEXT.peopleLabel : 'no town reached by the fire yet at this hour')),
     h('div', { class: 'people-sub mono' },
-      `by ${localHM(s.sit.time_local)}: ${soFar.length} of ${reached.length} towns the fire reached · whole replay ${fmtInt(sum(warnedFirst))} · Census 2024`),
+      `by ${localHM(s.sit.time_local)} · whole replay ${warnedFirst.length} of ${reached.length} · ` +
+      `${fmtInt(sum(warnedFirst))} residents live in those towns (Census 2024; whole-town count, an upper bound: ` +
+      `the fire may only have touched a town's edge)`),
     orders.length && s.meta.official_comparison ? h('div', { class: 'people-sub mono' },
       `flagged before the first official order or warning: ${s.meta.official_comparison.towns_flagged_earlier} of ` +
-      `${s.meta.official_comparison.towns_compared} towns · ${fmtInt(s.meta.official_comparison.residents_flagged_earlier)} residents`) : null));
+      `${s.meta.official_comparison.towns_compared} towns with published times`) : null));
 }
 
 // ── "was it right?" card ─────────────────────────────────────────────────────

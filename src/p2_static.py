@@ -81,6 +81,7 @@ def load_tile(tx, ty):
     """Elevation (metres) of one terrain tile as a 256 x 256 array. Downloads it once, then reuses the file."""
     path = os.path.join(TILE_DIR, f"{ZOOM}_{tx}_{ty}.png")
     if not os.path.exists(path):
+        os.makedirs(TILE_DIR, exist_ok=True)   # a fresh clone has no tile cache yet
         url = f"https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{ZOOM}/{tx}/{ty}.png"
         png = net.get(url, timeout=60).content
         with open(path + ".part", "wb") as f:

@@ -280,7 +280,8 @@ export class Copilot {
         evac.map(e => h('button', { class: 'plan-evac', onclick: () => this.hooks.onTownFocus?.(e.town) },
           h('div', { class: 'plan-evac-top' },
             h('b', {}, e.town), pop(e.town) ? h('span', { class: 'mono muted' }, `${fmtInt(pop(e.town))} residents`) : null),
-          h('div', { class: 'plan-route' }, h('span', { class: 'route-arrow' }, '→'), h('span', { class: 'mono' }, e.exit || 'no exit named')),
+          h('div', { class: 'plan-route' + (e.needs_human ? ' plan-route-human' : '') }, h('span', { class: 'route-arrow' }, e.needs_human ? '!' : '→'),
+            h('span', { class: 'mono' }, e.exit || 'no exit named')),
           this._routeWarning(e),
           e.reason ? h('div', { class: 'plan-reason' }, e.reason) : null))) : null,
       h('div', { class: 'plan-block' },
@@ -295,8 +296,17 @@ export class Copilot {
     return rec.decision === 'approved' ? [card, this._alert(rec.alert)] : card;
   }
 
-  /** Red note when the named exit itself meets the fire (only possible when the town has no clear exit at all). */
+  /**
+   * Under the route: when the town has NO clear highway exit (every exit runs into the fire within 1 h), the backend
+   * replaces the AI's road with "No clear highway exit" and keeps the AI's choice in exit_ai. We say so plainly.
+   */
   _routeWarning(e) {
+    if (e.needs_human) {
+      const ai = (this.sit.exits?.[e.town] || []).find(x => x.id === e.exit_ai);
+      return h('div', { class: 'plan-route-warn mono' },
+        `AI suggested ${e.exit_ai || 'a road'}` + (ai?.blocked_1h_at_km !== null && ai ? `, which meets fire ${ai.blocked_1h_at_km} km out` : '') +
+        '. Not used: choose escort, shelter in place or local roads.');
+    }
     const exit = (this.sit.exits?.[e.town] || []).find(x => x.id === e.exit);
     if (!exit || exit.blocked_1h_at_km === null) return null;
     return h('div', { class: 'plan-route-warn mono' }, `route meets fire or +1 h forecast ${exit.blocked_1h_at_km} km from town`);

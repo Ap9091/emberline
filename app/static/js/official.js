@@ -19,41 +19,47 @@ export function officialCard(meta, hourIso) {
   const nowT = hourIso ? new Date(hourIso).getTime() : Infinity;
   const isPast = iso => iso && new Date(iso).getTime() <= nowT;
 
-  const official = t => {
-    const parts = [];
-    if (t.official_warning_utc) parts.push(['Warning', t.official_warning_utc]);
-    if (t.official_order_utc) parts.push(['Order', t.official_order_utc]);
-    parts.sort((a, b) => new Date(a[1]) - new Date(b[1]));
-    return parts;
-  };
+  // one line per official order / warning, earliest first
+  const official = t => [['Warning', t.official_warning_utc], ['Order', t.official_order_utc]]
+    .filter(([, iso]) => iso).sort((a, b) => new Date(a[1]) - new Date(b[1]));
 
+  // one compact block per town (a 4-column table does not fit the 400 px panel):
+  //   Town                                  +2.4 h earlier
+  //   Emberline 07 Jan 19:00 · Order 07 Jan 21:26
+  //   10,775 residents · fire reached it      source
   const body = rows.map(t => {
     const lead = t.lead_vs_official_h;
     const verdict = lead === null || lead === undefined
       ? h('span', { class: 'dim' }, t.first_warning_issued_utc ? '-' : 'not flagged')
       : h('span', { class: lead > 0 ? 'lead-early' : 'lead-late' }, lead > 0 ? `${fmtHours(lead)} earlier` : `${fmtHours(-lead).replace('+', '')} later`);
-    return h('tr', {},
-      h('td', { class: 'town' }, t.town, h('div', { class: 'sub mono' }, `${fmtInt(t.population)} res.`)),
-      h('td', { class: 'mono' + (isPast(t.first_warning_issued_utc) ? '' : ' future') },
-        t.first_warning_issued_utc ? pacific(t.first_warning_issued_utc) : h('span', { class: 'dim' }, 'not flagged')),
-      h('td', { class: 'mono' },
-        official(t).map(([kind, iso]) => h('div', { class: isPast(iso) ? '' : 'future' }, h('span', { class: 'kind' }, kind), ' ', pacific(iso)))),
-      h('td', { class: 'mono' }, verdict),
-      h('td', {}, t.official_source_url ? h('a', { href: t.official_source_url, target: '_blank', rel: 'noopener', class: 'srclink' }, 'source') : null));
+    const ours = t.first_warning_issued_utc
+      ? h('span', { class: isPast(t.first_warning_issued_utc) ? '' : 'future' }, h('span', { class: 'kind' }, 'Emberline'), pacific(t.first_warning_issued_utc))
+      : h('span', { class: 'dim' }, 'Emberline did not flag it');
+    return h('div', { class: 'off-row' },
+      h('div', { class: 'off-top' }, h('span', { class: 'town' }, t.town), verdict),
+      h('div', { class: 'off-times mono' }, ours,
+        official(t).map(([kind, iso]) => h('span', { class: isPast(iso) ? '' : 'future' },
+          h('span', { class: 'kind' }, kind), pacific(iso) + (t.official_precision === 'approx' ? ' ≈' : '')))),
+      h('div', { class: 'off-sub' },
+        h('span', {}, `${fmtInt(t.population)} residents · ` + (t.fire_reached ? 'fire reached it' : 'fire did not reach it')),
+        t.official_source_url ? h('a', { href: t.official_source_url, target: '_blank', rel: 'noopener', class: 'srclink' }, 'source') : null));
   });
+  const others = (meta.official_other || []).map(o => h('div', { class: 'off-other mono' },
+    `${o.town}: ${o.order_type} ${pacific(o.order_time_utc)} `,
+    o.source_url ? h('a', { href: o.source_url, target: '_blank', rel: 'noopener', class: 'srclink' }, 'source') : null));
 
   const summary = cmp ? h('div', { class: 'official-summary' },
     h('div', { class: 'big mono' }, `${cmp.towns_flagged_earlier}/${cmp.towns_compared}`),
     h('div', {},
       h('div', {}, `towns flagged before the first official order or warning`),
       h('div', { class: 'sub mono' },
-        `median ${fmtHours(cmp.median_lead_h)} · ${fmtInt(cmp.residents_flagged_earlier)} residents in towns flagged earlier`))) : null;
+        `median ${fmtHours(cmp.median_lead_h)} · the fire reached ${cmp.towns_flagged_earlier_and_reached} of them`))) : null;
 
-  return section('Emberline vs official orders', 'public records · Pacific time',
+  return section('Emberline vs official orders', 'public records · PT',
     summary,
-    h('table', { class: 'official-table' },
-      h('thead', {}, h('tr', {}, h('th', {}, 'Town'), h('th', {}, 'Emberline'), h('th', {}, 'Official'), h('th', {}, 'Difference'), h('th', {}))),
-      h('tbody', {}, body)),
+    h('div', { class: 'off-rows' }, body),
+    others.length ? h('div', { class: 'off-others' }, h('div', { class: 'stat-label' }, 'Also published (not in our town list)'), others) : null,
     src('Emberline = first WARNING/EVACUATE, timed at the end of the satellite hour it was made from. Official = first ' +
-        'published order/warning for that place (some cover only part of a town). Greyed = not yet happened at the replay time.'));
+        'published order/warning for that place (some cover only part of a town). Early flags only help if the fire came. ' +
+        'Greyed = not yet happened at the replay time.'));
 }
