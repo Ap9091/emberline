@@ -29,7 +29,7 @@ GEMINI_MODEL = os.getenv("EMBERLINE_GEMINI_MODEL", "gemini-3.8-flash")
 # If the main Gemini model is overloaded (HTTP 503), try these next. The answer records which model replied.
 GEMINI_FALLBACKS = ["gemini-3.7-flash", "gemini-3.5-flash", "gemini-2.5-flash"]
 TIMEOUT_S = 60
-BUSY_SKIP_S = 600     # skip an overloaded model for 10 minutes
+BUSY_SKIP_S = 60      # skip an overloaded or rate-limited model for 1 minute
 _BUSY = {}
 
 

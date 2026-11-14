@@ -20,8 +20,10 @@ def main():
     lo = int(sys.argv[2]) if len(sys.argv) > 2 else 0
     hi = int(sys.argv[3]) if len(sys.argv) > 3 else 73
     rp = store.replay(fire_id)
-    rejected = []
-    for fr in rp["hours"][lo:hi + 1]:
+    rejected, retry = [], {}
+    todo = list(rp["hours"][lo:hi + 1])
+    while todo:
+        fr = todo.pop(0)
         h = fr["hour_idx"]
         if fr["forecast"] is None:
             continue
@@ -38,7 +40,13 @@ def main():
             print(f"hour {h:2d} {sit['time_local']}: plan {p['status']:8s} rejected {n_rej}  ({time.time() - t0:.0f} s)",
                   flush=True)
         except ai.AIOffline as e:
-            print(f"hour {h:2d}: AI offline ({e})", flush=True)
+            # Gemini is busy or rate-limited: wait a minute and try this hour again (up to 3 times)
+            print(f"hour {h:2d}: AI busy ({e}); waiting 60 s", flush=True)
+            retry.setdefault(h, 0)
+            retry[h] += 1
+            if retry[h] <= 3:
+                time.sleep(60)
+                todo.insert(0, fr)
     print("\nHours with a REJECTED attempt:")
     for r in rejected:
         print("  ", r)
