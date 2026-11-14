@@ -1,0 +1,5 @@
+1. On 18 unseen 2024-2025 California fires, the hgb model warned 21 of 24 towns the fire reached (88%), 2.4 h ahead on average; 'grow 1 km/h' warned 21 (88%) and 'looks like now' 0.
+2. False alarms: 25.8 town-hours per fire-day for the model vs 26.2 for grow-1-km.
+3. Newly burning squares at +1 h: F1 0.00 strict / 0.00 within 2 km (grow 1 km: 0.13 / 0.23; persistence cannot predict new fire at all).
+4. Fire-area overlap (IoU) at +1/+2/+3 h: 0.68/0.54/0.46 vs persistence 0.69/0.54/0.46.
+5. Limits: GOES pixels are 2-4 km, smoke and night hide fire, one weather point per fire underestimates local winds like Santa Anas, and ember jumps are mostly missed.
