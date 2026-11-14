@@ -22,3 +22,4 @@ nbconvert
 ipykernel
 joblib
 tabulate
+pyshp
