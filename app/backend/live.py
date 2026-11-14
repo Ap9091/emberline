@@ -46,6 +46,10 @@ GOES_DIR = os.path.join(LIVE_CACHE, "goes")
 os.makedirs(GOES_DIR, exist_ok=True)
 
 _lock = threading.Lock()
+# The netCDF/HDF5 library that reads GOES files is NOT thread-safe: two reads at the same time can crash the whole
+# server (we saw segfaults in libhdf5). Every GOES file read goes through this lock.
+_NC_LOCK = threading.Lock()
+_INC_LOCK = threading.Lock()     # build one incident at a time (they download and read many files)
 _fs = None
 _grid = None                     # (lat, lon, x, y, california index) for the GOES-18 image, computed once
 _state = {"t": 0, "data": None, "registry": {}}
@@ -126,14 +130,15 @@ def _goes_grid(ds):
 
 def _ca_fire_pixels(path):
     """Fire pixels inside California in one GOES file: DataFrame lat, lon, x, y, power_mw, code."""
-    ds = xr.open_dataset(path, decode_times=False)
-    try:
-        lat, lon, x, y, idx, shape = _goes_grid(ds)
-        mask = ds["Mask"].values.ravel()[idx]
-        hit = np.isin(mask, FIRE_CODES)
-        power = ds["Power"].values.ravel()[idx][hit] if "Power" in ds else np.full(hit.sum(), np.nan)
-    finally:
-        ds.close()
+    with _NC_LOCK:
+        ds = xr.open_dataset(path, decode_times=False)
+        try:
+            lat, lon, x, y, idx, shape = _goes_grid(ds)
+            mask = ds["Mask"].values.ravel()[idx]
+            hit = np.isin(mask, FIRE_CODES)
+            power = ds["Power"].values.ravel()[idx][hit] if "Power" in ds else np.full(hit.sum(), np.nan)
+        finally:
+            ds.close()
     return pd.DataFrame({"lat": lat[hit], "lon": lon[hit], "x": x[hit], "y": y[hit],
                          "power_mw": power.astype(float), "code": mask[hit].astype(int)})
 
@@ -400,6 +405,11 @@ def _static_for(box):
 
 
 def incident_situation(incident_id):
+    with _INC_LOCK:
+        return _incident_situation(incident_id)
+
+
+def _incident_situation(incident_id):
     inc = _lookup(incident_id)
     if inc is None:
         return None
@@ -425,7 +435,8 @@ def incident_situation(incident_id):
         h = int((t - t_start) // pd.Timedelta(hours=1))
         if not 0 <= h < HISTORY_H:
             continue
-        px, footprint = p2_goes.read_fire_pixels(p, box)
+        with _NC_LOCK:
+            px, footprint = p2_goes.read_fire_pixels(p, box)
         n_files[h] += 1
         px["scan_time_utc"], px["hour_idx"] = t, h
         tables.append(px)
