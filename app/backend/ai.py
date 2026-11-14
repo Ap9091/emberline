@@ -138,6 +138,8 @@ def parse_json(text):
 
 def status():
     prov, model = provider()
-    return {"provider": prov, "model": model + (" (auto-fallback to other Gemini models if busy)" if prov == "gemini" else ""),
+    return {"provider": prov, "model": model,
+            "fallback": "If this model is busy, other Gemini models answer; each answer shows the model that wrote it."
+            if prov == "gemini" else None,
             "note": None if prov else "No AI key: AI offline, forecast only",
             "switch": "Add ANTHROPIC_API_KEY to .env and restart to use Claude (no code change)."}

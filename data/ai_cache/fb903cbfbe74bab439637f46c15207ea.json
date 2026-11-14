@@ -1,0 +1,1 @@
+{"task": "plan", "provider": "gemini", "model": "gemini-3.5-flash-lite", "seconds": 1.6, "json": {"evacuate": [{"town": "Cohasset", "exit": "State Hwy 32 (NE)", "reason": "Fire at town with 0.946 probability and immediate threat."}], "warn": [], "summary": "Cohasset requires immediate evacuation via State Hwy 32 (NE) due to imminent fire impact."}}
