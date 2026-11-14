@@ -75,7 +75,7 @@ async function load() {
   s.loading = false;
   setLoading(null);
   showData(); draw();
-  if (!s.at) s.refreshTimer = setTimeout(load, ((s.data?.refresh_s || app.config.refresh_s || 300)) * 1000);
+  if (!s.at && !s.data?.static_snapshot) s.refreshTimer = setTimeout(load, ((s.data?.refresh_s || app.config.refresh_s || 300)) * 1000);
   loadTriageLines(token);
 }
 
@@ -88,6 +88,9 @@ function updateClock() {
   const d = s.data;
   if (!d) return setClock(s.at ? `GOES-18 · ARCHIVE ${archiveWhen(s.at)}` : 'GOES-18 · loading…', s.at ? 'archive' : 'idle');
   if (d.archive) return setClock(`GOES-18 scan ${utcHM(d.scan_time_utc)} UTC · ARCHIVE ${utcDate(d.scan_time_utc)}`, 'archive');
+  if (d.static_snapshot) {                // hosted version: a snapshot taken when the site was built, not live
+    return setClock(`GOES-18 scan ${utcHM(d.scan_time_utc)} UTC · ${utcDate(d.scan_time_utc)} · snapshot`, 'idle');
+  }
   const age = Math.max(0, Math.round((Date.now() - new Date(d.scan_time_utc)) / 60000));
   setClock(`GOES-18 scan ${utcHM(d.scan_time_utc)} UTC · ${age} min ago`, 'live');
 }
@@ -188,7 +191,9 @@ function emptyState(d) {
   return h('div', { class: 'empty-state' },
     h('div', { class: 'empty-title' }, d.archive ? 'No fires detected at this archive time' : 'No active fires detected in California'),
     h('div', { class: 'empty-text' }, `No active fires detected in California in the latest GOES-18 scans (${utcHM(d.scan_time_utc)} UTC).`),
-    src(`GOES-18 · ${d.scans_used} scans checked · next check in ${Math.round((d.refresh_s || 300) / 60)} min`),
+    src(d.static_snapshot
+      ? `GOES-18 · ${d.scans_used} scans checked when this hosted demo was built (${utcDate(d.scan_time_utc)}). The live 5-minute feed runs in the full app (app/run.sh).`
+      : `GOES-18 · ${d.scans_used} scans checked · next check in ${Math.round((d.refresh_s || 300) / 60)} min`),
     h('div', { class: 'empty-sub' }, 'To see the copilot at work, open a past moment. The same pipeline runs on archived GOES-18 scans:'),
     examples.map((ex, i) => h('button', { class: 'btn btn-block' + (i === 0 ? ' btn-primary' : ''), 'data-archive': ex.at, onclick: () => { s.at = ex.at; load(); } },
       'Open archive: ' + ex.label.split(' - ')[0])));

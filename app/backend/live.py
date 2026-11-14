@@ -10,6 +10,7 @@ Approximations (shown in the app): fire area = number of fire pixels x pixel siz
 """
 
 import glob
+import json
 import math
 import os
 import threading
@@ -188,9 +189,18 @@ def _weather_now(points, at=None):
 def _weather_hourly(lat, lon, times, at=None):
     """Hourly weather table (hour_idx, ...) for the given UTC times: forecast API (live) or archive API (past)."""
     if _is_archive(at):
-        js = net.get("https://archive-api.open-meteo.com/v1/archive", tries=6, timeout=30, params={
-            "latitude": lat, "longitude": lon, "hourly": WX_VARS, "wind_speed_unit": "kmh", "timezone": "GMT",
-            "start_date": min(times).strftime("%Y-%m-%d"), "end_date": max(times).strftime("%Y-%m-%d")}).json()
+        # past weather never changes, so keep each answer on disk (Open-Meteo limits requests per day)
+        start, end = min(times).strftime("%Y-%m-%d"), max(times).strftime("%Y-%m-%d")
+        cache = os.path.join(LIVE_CACHE, f"weather_{lat:.3f}_{lon:.3f}_{start}_{end}.json")
+        if os.path.exists(cache):
+            with open(cache) as f:
+                js = json.load(f)
+        else:
+            js = net.get("https://archive-api.open-meteo.com/v1/archive", tries=6, timeout=30, params={
+                "latitude": lat, "longitude": lon, "hourly": WX_VARS, "wind_speed_unit": "kmh", "timezone": "GMT",
+                "start_date": start, "end_date": end}).json()
+            with open(cache, "w") as f:
+                json.dump(js, f)
     else:
         js = net.get("https://api.open-meteo.com/v1/forecast", tries=3, timeout=30, params={
             "latitude": lat, "longitude": lon, "hourly": WX_VARS, "wind_speed_unit": "kmh", "timezone": "GMT",

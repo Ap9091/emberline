@@ -4,6 +4,7 @@
 // If the style cannot be downloaded (offline), we fall back to a plain dark background.
 // ─────────────────────────────────────────────────────────────────────────────
 import { BASE_STYLE_URL, TERRAIN_TILES } from './config.js';
+import { STATIC } from './api.js';
 
 const SATURATION = 0.38;                 // 1 = original colours, 0 = grey
 const PAPER = [226, 220, 205];           // warm paper tone that every colour is pulled toward
@@ -24,8 +25,35 @@ export function fallbackStyle() {
   return { version: 8, sources: {}, layers: [{ id: 'background', type: 'background', paint: { 'background-color': '#262b30' } }] };
 }
 
+/**
+ * Hosted mode: map tiles from other sites are blocked, so the build (app/build_site.py) rendered shaded-relief
+ * images of California and of each fire area from the AWS terrain tiles, and clipped the Census highways.
+ */
+async function hostedStyle() {
+  const style = fallbackStyle();
+  style.layers[0].paint['background-color'] = '#d9d3c4';
+  try {
+    const images = await (await fetch('data/basemaps.json')).json();
+    for (const im of images) {                      // California first, then the detailed fire areas on top
+      style.sources['relief-' + im.id] = { type: 'image', url: im.url, coordinates: im.coordinates };
+      style.layers.push({ id: 'relief-' + im.id, type: 'raster', source: 'relief-' + im.id, paint: { 'raster-fade-duration': 0 } });
+    }
+    style.sources.roads = { type: 'geojson', data: 'data/roads.geojson',
+      attribution: 'Relief: AWS Terrain Tiles · Roads: US Census TIGER/Line 2024' };
+    style.layers.push(
+      { id: 'roads-minor', type: 'line', source: 'roads', filter: ['!', ['get', 'major']],
+        paint: { 'line-color': '#8a8475', 'line-width': ['interpolate', ['linear'], ['zoom'], 7, 0.4, 11, 1.2], 'line-opacity': 0.7 } },
+      { id: 'roads-major', type: 'line', source: 'roads', filter: ['get', 'major'],
+        paint: { 'line-color': '#6c665b', 'line-width': ['interpolate', ['linear'], ['zoom'], 6, 0.6, 11, 2], 'line-opacity': 0.85 } });
+  } catch (e) {
+    console.warn('Hosted basemap not available:', e.message);
+  }
+  return style;
+}
+
 /** Download the base style, mute it, and add hillshade. Never throws: returns the fallback style on any error. */
 export async function loadBaseStyle() {
+  if (STATIC) return hostedStyle();
   try {
     const ctl = new AbortController();
     const timer = setTimeout(() => ctl.abort(), 7000);

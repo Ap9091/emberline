@@ -1,0 +1,77 @@
+<title>Emberline</title>
+<!-- Emberline hosted demo. Built by app/build_site.py from app/static/: same app, API answers saved as files in data/. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="vendor/maplibre/maplibre-gl.css">
+<link rel="stylesheet" href="app.css">
+<style>
+  /* Emberline is a dark, single-look app (incident-command software), so it sets its own colours in app.css. */
+  :root { color-scheme: dark; }
+  body { background: #14171a; }
+  /* Phones and narrow windows: map on top, panel and timeline below, the page scrolls. */
+  @media (max-width: 900px) {
+    html, body { height: auto; overflow: auto; }
+    #app, #app[data-mode="replay"] { height: auto; grid-template-rows: auto auto auto; }
+    #topbar { flex-wrap: wrap; height: auto; padding: 8px max(12px, env(safe-area-inset-right, 0px)) 8px max(12px, env(safe-area-inset-left, 0px)); row-gap: 6px; }
+    #topbar .brand-sub, #ai-chip { display: none; }
+    #main { grid-template-columns: 1fr; }
+    #map-area { height: 62vh; }
+    #panel { border-left: 0; border-top: 1px solid #2f353b; }
+    #panel-body { overflow: visible; }
+    #timeline { height: auto; overflow-x: auto; }
+    #map-banner { left: 12px; right: 12px; }
+  }
+</style>
+
+<div id="app" data-mode="replay">
+  <header id="topbar">
+    <div class="brand"><span class="brand-mark"></span>EMBERLINE<span class="brand-sub">wildfire copilot</span></div>
+    <nav id="mode-tabs" aria-label="Mode">
+      <button data-mode="state">STATE</button>
+      <button data-mode="incident">INCIDENT</button>
+      <button data-mode="replay">REPLAY</button>
+    </nav>
+    <div class="topbar-spacer"></div>
+    <div class="chip" id="clock-chip" title="Time of the data on screen"><span class="dot"></span><span id="clock-text">Loading…</span></div>
+    <div class="chip" id="ai-chip" title="AI model used for briefings and plans">AI: …</div>
+    <div class="seg" id="dim-toggle" title="Flat map or 3D terrain">
+      <button data-dim="2d">2D</button><button data-dim="3d">3D</button>
+    </div>
+    <button class="btn" id="results-btn">Results</button>
+  </header>
+
+  <main id="main">
+    <section id="map-area">
+      <div id="map-wrap">
+        <div class="map-pane" id="pane-left" hidden>
+          <div class="pane-title" id="pane-left-title"></div>
+          <div class="map" id="map-left"></div>
+        </div>
+        <div class="map-pane" id="pane-main">
+          <div class="pane-title" id="pane-main-title" hidden></div>
+          <div class="map" id="map-main"></div>
+        </div>
+      </div>
+      <div id="map-banner" hidden></div>
+      <div id="layer-toggles" class="map-card" hidden></div>
+      <div id="legend" class="map-card"></div>
+      <div id="map-loading" hidden><span class="spinner"></span><span id="map-loading-text"></span></div>
+    </section>
+
+    <aside id="panel">
+      <div id="panel-body"></div>
+      <footer id="panel-foot">AI drafts, code checks the forecast, a human decides.</footer>
+    </aside>
+  </main>
+
+  <footer id="timeline"></footer>
+
+  <div id="results-backdrop" hidden></div>
+  <aside id="results-drawer" hidden aria-label="Test results"></aside>
+  <div id="tooltip" hidden></div>
+</div>
+
+<script>window.EMBERLINE_STATIC = true;   // hosted mode: js/api.js reads data/ instead of calling a server</script>
+<script src="vendor/maplibre/maplibre-gl.js"></script>
+<script type="module" src="js/main.js"></script>
