@@ -299,8 +299,10 @@ function showSplit() {
   const at = localHM(s.sit.time_local);
   const later = s.meta.hours[Math.min(s.hour + 3, s.meta.hours.length - 1)].time_local.slice(-5);
   fill($('#pane-left-title'), h('b', {}, `What officials could see at ${at}`), h('span', {}, 'GOES-18 fire detections only'));
-  fill($('#pane-main-title'), h('b', {}, `Emberline forecast at ${at}`),
-    h('span', {}, `rings: forecast +1/+2/+3 h · dark: real fire at ${later}`));
+  const sc = s.whatif?.active ? s.whatif.scenario : null;
+  fill($('#pane-main-title'), h('b', {}, sc ? `Emberline WHAT-IF forecast at ${at}` : `Emberline forecast at ${at}`),
+    h('span', {}, sc ? `wind ${Math.round(sc.whatif.speed_kmh)} km/h from ${compass(sc.whatif.from_deg)} (not real) · dark: real fire at ${later}`
+      : `rings: forecast +1/+2/+3 h · dark: real fire at ${later}`));
   s.left.showSituation(s.sit);
   if (s.playing) { app.view.cancelFade(); app.view.setGroup('actual', true); }
   else app.view.fadeInActual();

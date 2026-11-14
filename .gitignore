@@ -13,3 +13,5 @@ data/live_cache/
 # running logs (change constantly)
 logs/server.log
 logs/prewarm_*.log
+logs/warm_*.log
+logs/watchdog.log

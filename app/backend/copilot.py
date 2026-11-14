@@ -136,5 +136,8 @@ def alert(sit, approved_plan):
 
 def triage_line(inc):
     prompt = ("In one line of at most 22 words, say why this wildfire incident ranks where it does for an emergency "
-              "manager (people nearby, wind toward towns, growth). Facts: " + json.dumps(inc, default=str))
+              "manager (people nearby, fire size, wind toward towns, growth). Field meanings: people_10km = residents "
+              "of towns within 10 km; area_km2 and growth_km2_last_hour are approximate (GOES pixels); "
+              "wind_toward_towns is 0-1 (1 = wind blowing straight from the fire at a town, 0 = not toward any town), "
+              "it is NOT a percentage. Facts: " + json.dumps(inc, default=str))
     return ai.ask("triage", prompt)
