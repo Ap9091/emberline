@@ -1,7 +1,7 @@
 """
 Emberline - Phase 2: which 2 km squares were burning each hour, from GOES satellite fire pixels.
 
-Run from the project folder (takes roughly 30-60 minutes for all 70 fires):
+Run from the project folder (takes roughly 10 minutes for all 70 fires):
     .venv/bin/python src/p2_goes.py                    # every fire in data/fire_windows.csv
     .venv/bin/python src/p2_goes.py park_fire_2024     # just one (or a few) fires
 
@@ -9,13 +9,28 @@ What it does, for each fire:
   1. Lists every GOES fire file (ABI-L2-FDCC, one scan every 5 minutes) for the fire's 74 hours.
   2. Downloads them a few at a time into a temporary folder, reads ONLY the part of the image that
      covers the fire's 80 km box, and deletes the file straight away (the raw files would be ~26 GB).
-  3. Saves every fire pixel in the box:              data/raw/goes_crops/{fire_id}.parquet
+  3. Saves every fire pixel in the box, or within 4 km outside it (row/col = -1 for those):
+                                                     data/raw/goes_crops/{fire_id}.parquet
   4. Turns pixels into "burning squares" per hour:   data/processed/burning/{fire_id}.parquet
      plus a per-hour count table:                    data/processed/burning/{fire_id}_hours.csv
   5. Adds one line per fire to                       results/phase2_goes_summary.csv
 
-The rule: a square is BURNING in hour h if the centre of any GOES fire pixel, from any scan that
-started in that hour, falls inside the square. Squares not listed in the table are not burning.
+The rule (pixel FOOTPRINT): a square is BURNING in hour h if the footprint of any GOES fire pixel,
+from any scan that started in that hour, covers the CENTRE of the square. Squares not listed in the
+table are not burning.
+
+Why a footprint and not just the pixel's centre point? A GOES pixel is 2 km x 2 km only directly
+under the satellite (the "sub-point" on the equator). California is far from there, so the satellite
+looks at it at a slant and each pixel covers a bigger patch of ground: roughly 2.2 km x 3 km for
+GOES-17/18 (GOES-West) and about 3.9 km x 4.3 km for GOES-16 (GOES-East, even further away). If we
+only marked the square holding the pixel's centre, some rows of 2 km squares could NEVER burn (no
+pixel centre ever lands in them) and the maps would show fake empty stripes. So for each fire we
+measure the two "steps" between neighbouring GOES pixel centres near the middle of the box (one
+step to the next pixel across, one step to the next pixel down). A pixel's footprint is the patch
+of ground within half a step of its centre in both directions - a slightly slanted rectangle (a
+parallelogram), because the satellite image is tilted compared with our map. Footprints of
+neighbouring pixels fit together with no gaps and no overlaps, and each fire pixel marks every
+square whose centre is inside its footprint (1-3 squares for GOES-West, 2-4 for GOES-East).
 
 Gap filling: smoke, cloud or a missing file can hide a fire for a short time even though it is
 still burning. We fill ONLY one-hour gaps, and mark every filled row with gapfilled=True:
@@ -27,7 +42,6 @@ Gaps of 2 hours or more are left empty (we do not guess that far).
 The script can be stopped and started again: fires whose outputs already exist are skipped.
 """
 
-import json
 import os
 import shutil
 import sys
@@ -53,7 +67,7 @@ for folder in (CROPS, BURNING):
 FIRES_AT_ONCE = 4        # we work on 4 fires at the same time (one per CPU core)
 DOWNLOADS_PER_FIRE = 6   # each fire downloads 6 files at once (4 x 6 = 24 downloads in parallel)
 DOWNLOAD_TRIES = 5       # the network sometimes drops a download, so try each file up to 5 times
-MARGIN_M = 4000          # read GOES pixels up to 4 km outside the box, then keep only those inside
+MARGIN_M = 4000          # also keep GOES pixels up to 4 km outside the box: their footprint can reach inside
 FIRST = ["park_fire_2024", "eaton_fire_2025", "palisades_fire_2025"]  # done first so others can test early
 
 fs = None    # the S3 connection; each worker process makes its own (see process_fire)
@@ -104,8 +118,8 @@ def box_index(ds, fire):
 
     The GOES image is a fixed 1500 x 2500 grid of pixels, so a given fire's box is always the same
     small rectangle of the image. Turning all 3.75 million pixels into lat/lon is slow, so we do it
-    once and remember: the rectangle (so we only read that part of each file) and the lat/lon and
-    map x/y of the pixels in it.
+    once and remember: the rectangle (so we only read that part of each file), the lat/lon and
+    map x/y of the pixels in it, and the size of one pixel's footprint on the ground.
     """
     # The grid differs between satellites (and could differ between scan modes), so the key includes it.
     key = (fire.fire_id, ds.sizes["x"], ds.sizes["y"], float(ds["x"][0]), float(ds["y"][0]),
@@ -118,18 +132,34 @@ def box_index(ds, fire):
         rows, cols = np.where(near)
         ys = slice(rows.min(), rows.max() + 1)   # the rectangle of the image that holds the box
         xs = slice(cols.min(), cols.max() + 1)
-        _INDEX[key] = (ys, xs, lat[ys, xs], lon[ys, xs], x[ys, xs], y[ys, xs])
+        _INDEX[key] = (ys, xs, lat[ys, xs], lon[ys, xs], x[ys, xs], y[ys, xs], pixel_footprint(x, y, fire))
     return _INDEX[key]
 
 
+def pixel_footprint(x, y, fire):
+    """
+    The two "steps" (in metres on our map) between neighbouring GOES pixels near the middle of the box.
+
+    We find the pixel closest to the box centre and look at its neighbours: half the way from the left
+    neighbour to the right neighbour is one step ACROSS the image, and half the way from the upper to
+    the lower neighbour is one step DOWN the image. Each step is an (x, y) pair because the image is
+    tilted compared with our map. Returns (across, down).
+    """
+    cx, cy = (fire.xmin + fire.xmax) / 2, (fire.ymin + fire.ymax) / 2
+    i, j = np.unravel_index(np.nanargmin((x - cx) ** 2 + (y - cy) ** 2), x.shape)
+    across = (float(x[i, j + 1] - x[i, j - 1]) / 2, float(y[i, j + 1] - y[i, j - 1]) / 2)   # one pixel to the right
+    down = (float(x[i + 1, j] - x[i - 1, j]) / 2, float(y[i + 1, j] - y[i - 1, j]) / 2)     # one pixel down
+    return across, down
+
+
 def read_fire_pixels(path, fire):
-    """Open one GOES file and return a table of the fire pixels whose centre is inside the fire's box."""
+    """Open one GOES file. Returns a table of the fire pixels in (or just outside) the box, and the footprint steps."""
     ds = xr.open_dataset(path, decode_times=False)  # some files have broken time fields; we do not need them
     try:
-        ys, xs, lat, lon, x, y = box_index(ds, fire)
+        ys, xs, lat, lon, x, y, footprint = box_index(ds, fire)
         mask = ds["Mask"].isel(y=ys, x=xs).values          # only this small rectangle is read from disk
-        row, col = grid.cell_of(x, y, fire.xmin, fire.ymax)  # -1 = centre is outside the box
-        hit = np.isin(mask, FIRE_CODES) & (row >= 0)
+        row, col = grid.cell_of(x, y, fire.xmin, fire.ymax)  # square holding the pixel CENTRE (-1 = outside the box)
+        hit = np.isin(mask, FIRE_CODES)
         if "Power" in ds and hit.any():
             power = ds["Power"].isel(y=ys, x=xs).values[hit]  # fire radiative power in megawatts (can be blank)
         else:
@@ -138,15 +168,54 @@ def read_fire_pixels(path, fire):
         ds.close()
     return pd.DataFrame({"lat": lat[hit], "lon": lon[hit], "x": x[hit], "y": y[hit],
                          "row": row[hit], "col": col[hit],
-                         "mask_code": mask[hit].astype("int16"), "power_mw": power.astype("float32")})
+                         "mask_code": mask[hit].astype("int16"), "power_mw": power.astype("float32")}), footprint
 
 
 # ---------------------------------------------------------------------------
 # Step 3: pixels -> burning squares per hour, with gap filling
 # ---------------------------------------------------------------------------
-def burning_squares(pixels):
-    """Group fire pixels into one row per (hour, square), then fill one-hour gaps (see top of file)."""
-    seen = (pixels.groupby(["hour_idx", "row", "col"])
+def covered_squares(pixels, fire, footprint):
+    """
+    Spread each fire pixel over every square whose CENTRE lies inside the pixel's footprint.
+    Returns one row per (pixel, covered square): scan_time_utc, hour_idx, row, col, power_mw.
+    """
+    (ax, ay), (dx, dy) = footprint              # the step across and the step down, in metres
+    px, py = pixels.x.values, pixels.y.values   # pixel centres
+    # First a rough search area: the upright rectangle that just holds the slanted footprint.
+    half_x, half_y = (abs(ax) + abs(dx)) / 2, (abs(ay) + abs(dy)) / 2
+    # Square (row, col) has its centre at x = xmin + (col + 0.5) * 2 km, y = ymax - (row + 0.5) * 2 km,
+    # so the rectangle from px - half_x to px + half_x holds the centres of columns col_lo..col_hi (same for rows).
+    col_lo = np.ceil((px - half_x - fire.xmin) / grid.CELL_M - 0.5).astype(int)
+    col_hi = np.floor((px + half_x - fire.xmin) / grid.CELL_M - 0.5).astype(int)
+    row_lo = np.ceil((fire.ymax - py - half_y) / grid.CELL_M - 0.5).astype(int)
+    row_hi = np.floor((fire.ymax - py + half_y) / grid.CELL_M - 0.5).astype(int)
+    parts = []
+    if len(pixels):
+        for dr in range((row_hi - row_lo).max() + 1):        # the search area is only 1-4 rows and columns,
+            for dc in range((col_hi - col_lo).max() + 1):    # so these two loops are tiny
+                row, col = row_lo + dr, col_lo + dc
+                # How far is this square's centre from the pixel centre, measured in pixel steps?
+                # (ex, ey) = u * across + v * down; solving these two equations gives u and v.
+                ex = fire.xmin + (col + 0.5) * grid.CELL_M - px
+                ey = fire.ymax - (row + 0.5) * grid.CELL_M - py
+                det = ax * dy - ay * dx
+                u = (ex * dy - ey * dx) / det
+                v = (ax * ey - ay * ex) / det
+                ok = ((np.abs(u) <= 0.5) & (np.abs(v) <= 0.5) &                              # inside the footprint
+                      (row >= 0) & (row < grid.N_CELLS) & (col >= 0) & (col < grid.N_CELLS))  # inside the box
+                parts.append(pd.DataFrame({"scan_time_utc": pixels.scan_time_utc.values[ok],
+                                           "hour_idx": pixels.hour_idx.values[ok], "row": row[ok],
+                                           "col": col[ok], "power_mw": pixels.power_mw.values[ok]}))
+    if not parts:
+        return pd.DataFrame(columns=["scan_time_utc", "hour_idx", "row", "col", "power_mw"])
+    return pd.concat(parts, ignore_index=True)
+
+
+def burning_squares(pixels, fire, footprint):
+    """Turn fire pixels into one row per (hour, burning square), then fill one-hour gaps (see top of file)."""
+    covered = covered_squares(pixels, fire, footprint)
+    # n_scans = how many of the hour's scans had a fire pixel covering this square.
+    seen = (covered.groupby(["hour_idx", "row", "col"])
             .agg(n_scans=("scan_time_utc", "nunique"), max_power_mw=("power_mw", "max"))
             .reset_index())
     seen["gapfilled"] = False
@@ -187,7 +256,7 @@ def process_fire(fire):
     t0 = time.time()
     hours = [fire.t_start_utc + pd.Timedelta(hours=h) for h in range(grid.N_HOURS)]
     tmp = tempfile.mkdtemp(prefix=f"goes_{fire.fire_id}_")
-    tables, files_ok, failed = [], np.zeros(grid.N_HOURS, dtype=int), 0
+    tables, files_ok, failed, footprint = [], np.zeros(grid.N_HOURS, dtype=int), 0, None
     try:
         with ThreadPoolExecutor(DOWNLOADS_PER_FIRE) as pool:
             names = [n for hour_list in pool.map(lambda t: list_hour(fire.satellite, t), hours) for n in hour_list]
@@ -203,7 +272,7 @@ def process_fire(fire):
                     failed += 1
                     continue
                 try:
-                    t = read_fire_pixels(local, fire)
+                    t, footprint = read_fire_pixels(local, fire)
                     t.insert(0, "hour_idx", np.int16(h))
                     t.insert(0, "scan_time_utc", when)
                     tables.append(t)
@@ -219,7 +288,7 @@ def process_fire(fire):
     if not tables:
         raise RuntimeError(f"{fire.fire_id}: no files could be read")
     pixels = pd.concat(tables, ignore_index=True).sort_values(["scan_time_utc", "row", "col"]).reset_index(drop=True)
-    burning, whole_hours = burning_squares(pixels)
+    burning, whole_hours = burning_squares(pixels, fire, footprint)
 
     # Per-hour table: how many files, fire pixels and burning squares (burning squares include gap-filled ones).
     per_hour = pd.DataFrame({"hour_idx": range(grid.N_HOURS), "time_utc": hours, "n_files": files_ok})
@@ -244,6 +313,8 @@ def process_fire(fire):
             "burning_square_hours": len(burning),
             "gapfilled_square_hours": int(burning.gapfilled.sum()),
             "whole_hours_gapfilled": len(whole_hours),
+            # footprint size = length of the step across the image (roughly east-west) and down it (roughly north-south)
+            "footprint_x_m": round(float(np.hypot(*footprint[0]))), "footprint_y_m": round(float(np.hypot(*footprint[1]))),
             "seconds": round(time.time() - t0, 1)}
 
 
@@ -270,7 +341,7 @@ def main():
             print(f"{fire.fire_id}: already done, skipping")
         else:
             todo.append(fire)
-    print(f"{len(todo)} fires to do. Gap filling: one-hour gaps only (whole hour copied from the hour "
+    print(f"{len(todo)} fires to do. Rule: a square burns if a fire pixel's footprint covers its centre. Gap filling: one-hour gaps only (whole hour copied from the hour "
           f"before; single squares filled when burning before and after).", flush=True)
 
     with ProcessPoolExecutor(FIRES_AT_ONCE) as pool:
@@ -286,6 +357,7 @@ def main():
                   f"{r['n_fire_pixels']} fire pixels, fire in {r['hours_with_fire']}/74 hours, "
                   f"max {r['max_burning_squares']} squares in one hour, {r['distinct_squares_ever']} squares ever, "
                   f"gap-filled {r['gapfilled_square_hours']} square-hours ({r['whole_hours_gapfilled']} whole hours), "
+                  f"GOES pixel footprint about {r['footprint_x_m']} m (E-W) x {r['footprint_y_m']} m (N-S), "
                   f"{r['seconds']:.0f} s", flush=True)
     print(f"All done in {(time.time() - t0) / 60:.1f} minutes. Summary: {SUMMARY}", flush=True)
 

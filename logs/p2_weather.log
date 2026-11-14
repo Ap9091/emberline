@@ -31,9 +31,42 @@
   [31/70] beckwourth_complex_2021: wind mean 8.8 max 21.4 km/h, gust 49.7, min humidity 5%, max temp 33.5 C
   [32/70] woolsey_fire_2018: wind mean 19.1 max 34.8 km/h, gust 78.1, min humidity 5%, max temp 23.9 C
   [33/70] county_fire_2018: wind mean 10.2 max 21.3 km/h, gust 57.2, min humidity 10%, max temp 41.6 C
-    (try 1 failed: ConnectionError, retrying in 5s)
   [34/70] july_complex_2020: wind mean 10.3 max 25.0 km/h, gust 43.9, min humidity 12%, max temp 32.4 C
-    (try 1 failed: ConnectionError, retrying in 5s)
   [35/70] kincade_fire_2019: wind mean 11.7 max 31.3 km/h, gust 90.7, min humidity 10%, max temp 30.2 C
-    (rate limited: {"error":true,"reason":"Daily API request limit exceeded. Please try again tomor - waiting 5s)
-    (rate limited: {"error":true,"reason":"Daily API request limit exceeded. Please try again tomor - waiting 10s)
+  [36/70] mosquito_fire_2022: wind mean 8.3 max 14.9 km/h, gust 42.8, min humidity 8%, max temp 43.0 C
+  [37/70] tamarack_fire_2021: wind mean 8.2 max 18.6 km/h, gust 51.5, min humidity 23%, max temp 26.8 C
+  [38/70] glass_fire_2020: wind mean 9.8 max 18.5 km/h, gust 61.2, min humidity 8%, max temp 38.2 C
+  [39/70] delta_fire_2018: wind mean 7.4 max 13.9 km/h, gust 46.4, min humidity 13%, max temp 36.3 C
+  [40/70] mckinney_fire_2022: wind mean 4.6 max 12.3 km/h, gust 42.8, min humidity 5%, max temp 43.4 C
+  [41/70] zogg_fire_2020: wind mean 11.6 max 26.1 km/h, gust 66.6, min humidity 7%, max temp 36.9 C
+  [42/70] walker_fire_2019: wind mean 7.2 max 15.1 km/h, gust 60.5, min humidity 14%, max temp 29.4 C
+  [43/70] river_fire_mendocino_complex_2018: wind mean 8.2 max 14.0 km/h, gust 52.2, min humidity 10%, max temp 39.0 C
+  [44/70] river_fire_2020: wind mean 6.4 max 16.2 km/h, gust 44.3, min humidity 27%, max temp 34.4 C
+  [45/70] loyalton_fire_2020: wind mean 7.6 max 19.4 km/h, gust 51.5, min humidity 14%, max temp 28.1 C
+  [46/70] klamathon_fire_2018: wind mean 8.5 max 28.2 km/h, gust 67.0, min humidity 11%, max temp 33.1 C
+  [47/70] apple_fire_2020: wind mean 9.2 max 18.1 km/h, gust 43.9, min humidity 6%, max temp 37.6 C
+  [48/70] lake_fire_2020: wind mean 10.3 max 20.0 km/h, gust 47.9, min humidity 13%, max temp 37.3 C
+  [49/70] mineral_fire_2020: wind mean 11.5 max 19.1 km/h, gust 47.5, min humidity 13%, max temp 36.1 C
+  [50/70] sheep_fire_2020: wind mean 7.2 max 16.6 km/h, gust 54.4, min humidity 12%, max temp 31.9 C
+  [51/70] fairview_fire_2022: wind mean 7.7 max 26.0 km/h, gust 50.4, min humidity 12%, max temp 42.0 C
+  [52/70] lava_fire_2021: wind mean 6.7 max 15.8 km/h, gust 52.2, min humidity 12%, max temp 35.7 C
+  [53/70] holy_fire_2018: wind mean 5.3 max 14.2 km/h, gust 55.4, min humidity 12%, max temp 37.0 C
+  [54/70] el_dorado_fire_2020: wind mean 7.8 max 15.2 km/h, gust 60.5, min humidity 10%, max temp 34.4 C
+  [55/70] gold_fire_2020: wind mean 8.3 max 26.1 km/h, gust 60.8, min humidity 9%, max temp 35.8 C
+  [56/70] butte_tehama_glenn_lightning_complex_tehama_glenn_zone_2020: wind mean 8.0 max 16.9 km/h, gust 32.8, min humidity 6%, max temp 42.2 C
+    (try 1 failed: ConnectionError, retrying in 3s)
+  [57/70] oak_fire_2022: wind mean 9.4 max 19.7 km/h, gust 47.9, min humidity 7%, max temp 35.8 C
+  [58/70] alisal_fire_2021: wind mean 18.3 max 34.1 km/h, gust 88.6, min humidity 11%, max temp 23.0 C
+    (rate limited: {"reason":"Daily API request limit exceeded. Please try again tomorrow.","error" - waiting 3s)
+  [59/70] smith_river_complex_2023: wind mean 7.6 max 15.6 km/h, gust 45.7, min humidity 9%, max temp 36.7 C
+    (rate limited: {"error":true,"reason":"Daily API request limit exceeded. Please try again tomor - waiting 3s)
+    (try 2 failed: ConnectionError, retrying in 3s)
+    (rate limited: {"error":true,"reason":"Daily API request limit exceeded. Please try again tomor - waiting 3s)
+    (try 4 failed: ConnectionError, retrying in 3s)
+    (try 5 failed: ConnectionError, retrying in 3s)
+    (rate limited: {"reason":"Daily API request limit exceeded. Please try again tomorrow.","error" - waiting 3s)
+    (try 7 failed: ConnectionError, retrying in 3s)
+    (rate limited: {"error":true,"reason":"Daily API request limit exceeded. Please try again tomor - waiting 3s)
+  [60/70] srf_lightning_complex_2023: wind mean 5.0 max 15.0 km/h, gust 47.5, min humidity 22%, max temp 33.0 C
+    (rate limited: {"reason":"Daily API request limit exceeded. Please try again tomorrow.","error" - waiting 3s)
+  [61/70] happy_camp_complex_2023: wind mean 4.3 max 14.4 km/h, gust 41.4, min humidity 14%, max temp 38.4 C

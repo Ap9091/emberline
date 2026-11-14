@@ -40,12 +40,12 @@ RENAME = {
 }
 
 
-def fetch(params, tries=30):
+def fetch(params, tries=80):
     """Ask Open-Meteo, retrying. HTTP 429 means "too many requests": wait and try again.
     (Our network goes out through shared addresses; some of them have used up Open-Meteo's
     free daily allowance, so a retry a few seconds later often works.)"""
     for attempt in range(1, tries + 1):
-        wait = min(5 * attempt, 60)   # wait a little longer after each failed try
+        wait = 3   # short wait: the next try usually leaves through a different address
         try:
             r = requests.get(URL, params=params, timeout=45)
             if r.status_code == 429:
