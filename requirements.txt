@@ -17,3 +17,8 @@ python-dotenv
 google-genai
 anthropic
 rasterio
+jupyter
+nbconvert
+ipykernel
+joblib
+tabulate
