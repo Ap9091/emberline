@@ -2,8 +2,8 @@
 
 Made by `src/p2_build_dataset.py`. Table: `data/processed/dataset.parquet`
 
-- 406,659 rows x 56 columns, 70 fires (fires with no rows: none)
-- file size 13.1 MB, in memory 90 MB, build time 78 s
+- 355,483 rows x 56 columns, 67 fires (fires with no rows: ['tamarack_fire_2021', 'butte_tehama_glenn_lightning_complex_tehama_glenn_zone_2020', 'srf_lightning_complex_2023'])
+- file size 11.4 MB, in memory 78 MB, build time 68 s
 - 29 feature columns: burning_now, ever_burned, distance_to_fire_km, burning_neighbours, burning_within_4km, fire_area_now_km2, growth_last_hour_km2, burned_area_so_far_km2, hours_since_start, hour_of_day_local, is_night, wind_speed_kmh, wind_gust_kmh, humidity_pct, temp_c, downwind, downwind_x_speed, elevation_diff_m, upslope, slope_deg, elevation_m, veg_class, frac_tree, frac_shrub, frac_grass, frac_crop, frac_built, frac_water, frp_now_mw
 - Each row = one candidate square (within 6 km of a square burning at hour h) at one hour of one fire.
 
@@ -12,9 +12,9 @@ Made by `src/p2_build_dataset.py`. Table: `data/processed/dataset.parquet`
 ```
        fires    rows  label_1h_pct  new_1h_pct  label_3h_pct  new_3h_pct  burning_now_pct
 split                                                                                    
-train     40  289891     21.250000        1.39         20.85        3.01            20.81
-val       12   19828     10.520000        1.09          8.60        1.93            10.95
-test      18   96940     18.059999        1.28         17.23        2.80            17.96
+train     38  248056     21.930000        1.37     21.440001        2.99            21.42
+val       11   17392     11.190000        1.13      9.280000        2.03            11.55
+test      18   90035     18.889999        1.34     18.129999        2.96            18.55
 ```
 (percentages are of rows whose label is known; NaN labels are left out)
 
@@ -22,83 +22,83 @@ Rows with a NaN (unknown) label, and why:
 
 ```
    label  NaN rows  past hour 73  no satellite data that hour  unexplained
-label_1h     11200          7389                         3811            0
-label_2h     22155         14449                         7706            0
-label_3h     33016         21385                        11631            0
+label_1h      9352          6506                         2846            0
+label_2h     18585         12780                         5805            0
+label_3h     27400         18666                         8734            0
 ```
 
-Labels that come from gap-filled rows (Phase 3 can drop them): label_1h_gapfilled = 2,647 rows; hour_gapfilled_1h (whole hour h+1 copied) = 3,330 rows.
+Labels that come from gap-filled rows (Phase 3 can drop them): label_1h_gapfilled = 2,409 rows; hour_gapfilled_1h (whole hour h+1 copied) = 2,890 rows.
 
 Coverage: of all squares burning at h+1 (when hour h had fire and data), the share that is a candidate row at h:
 
 ```
 split  burning at h+1  inside candidates  coverage_pct
-train           60941              59570          97.8
-  val            2156               2075          96.2
- test           17635              17238          97.7
+train           53673              52680          98.1
+  val            1991               1938          97.3
+ test           16919              16740          98.9
 ```
 (the rest is fire that appears more than 6 km from any square burning at h - the model can never predict those)
 
 ## 2. Five example rows (test split)
 
 ```
-                                            42351                      19882                      21521                      63767                      2208 
-fire_id                          bridge_fire_2024          gifford_fire_2025          gifford_fire_2025          airport_fire_2024             park_fire_2024
-fire_name                             Bridge Fire               Gifford Fire               Gifford Fire               Airport Fire                  Park Fire
+                                            20143                      27975                      2553                       84062                      49605
+fire_id                         gifford_fire_2025            madre_fire_2025             park_fire_2024            boone_fire_2024             lake_fire_2024
+fire_name                            Gifford Fire                 Madre Fire                  Park Fire                 Boone Fire                  Lake Fire
 split                                        test                       test                       test                       test                       test
-hour_idx                                       46                         49                         57                          8                         15
-time_utc                2024-09-10 18:00:00+00:00  2025-08-03 22:00:00+00:00  2025-08-04 06:00:00+00:00  2024-09-10 03:00:00+00:00  2024-07-25 11:00:00+00:00
-square_id                  bridge_fire_2024_17_24    gifford_fire_2025_24_20    gifford_fire_2025_15_18    airport_fire_2024_22_18       park_fire_2024_12_13
-row                                            17                         24                         15                         22                         12
-col                                            24                         20                         18                         18                         13
-x                                        215000.0                    -7000.0                   -11000.0                   223000.0                  -163000.0
-y                                       -413000.0                  -331000.0                  -313000.0                  -485000.0                   213000.0
-lat                                     34.275094                  35.037694                  35.199758                  33.624352                  39.918099
-lon                                   -117.664404                 -120.07678                -120.120905                -117.597352                -121.907689
+hour_idx                                       50                         29                         17                          8                          4
+time_utc                2025-08-03 23:00:00+00:00  2025-07-04 00:00:00+00:00  2024-07-25 13:00:00+00:00  2024-09-04 02:00:00+00:00  2024-07-06 01:00:00+00:00
+square_id                 gifford_fire_2025_25_28      madre_fire_2025_21_30       park_fire_2024_16_20      boone_fire_2024_17_22       lake_fire_2024_16_17
+row                                            25                         21                         16                         17                         16
+col                                            28                         30                         20                         22                         17
+x                                          9000.0                    23000.0                  -149000.0                   -47000.0                    -9000.0
+y                                       -333000.0                  -327000.0                   205000.0                  -205000.0                  -353000.0
+lat                                     35.019664                  35.073468                  39.848527                  36.170875                  34.839523
+lon                                   -119.901306                -119.747608                -121.742157                -120.523141                -120.098466
 burning_now                                     0                          1                          1                          0                          0
-ever_burned                                     0                          1                          1                          0                          1
-distance_to_fire_km                           2.0                        0.0                        0.0                   4.472136                   5.656854
-burning_neighbours                              3                          6                          2                          0                          0
-burning_within_4km                              4                          9                          3                          0                          0
-fire_area_now_km2                            88.0                      312.0                       40.0                       88.0                      204.0
-growth_last_hour_km2                         60.0                       72.0                      -36.0                       12.0                      -72.0
-burned_area_so_far_km2                      128.0                      452.0                      512.0                      136.0                      460.0
-hours_since_start                              45                         48                         56                          7                         14
-hour_of_day_local                              11                         15                         23                         20                          4
-is_night                                        0                          0                          1                          1                          1
-wind_speed_kmh                                6.8                       15.7                        6.5                       15.3                       14.5
-wind_gust_kmh                                28.4                       38.5                       14.4                       30.6                       28.1
-humidity_pct                                   16                         28                         28                         21                         23
-temp_c                                       33.5                       31.5                       24.1                       32.5                  27.299999
-downwind                                 0.741184                  -0.067234                  -0.911138                   0.309488                   0.066082
-downwind_x_speed                         5.040052                  -1.055574                    -5.9224                   4.735171                   0.958187
-elevation_diff_m                      1145.550049                  41.506409                  23.110001                -577.318176                -371.056854
-upslope                                572.775024                  41.506409                  23.110001                 -129.09227                 -65.594208
-slope_deg                               30.549999                  16.129999                      15.79                       5.48                       1.37
-elevation_m                                2458.5                 735.599976                 846.299988                 291.399994                      124.5
-veg_class                                      20                         10                         10                         20                         30
-frac_tree                                   0.195                      0.595                     0.4375                        0.3                      0.075
-frac_shrub                                 0.4225                      0.145                      0.125                     0.3625                        0.0
-frac_grass                                 0.0625                       0.26                     0.4375                     0.0625                     0.9175
-frac_crop                                     0.0                        0.0                        0.0                        0.0                     0.0075
-frac_built                                    0.0                        0.0                        0.0                      0.275                        0.0
+ever_burned                                     0                          1                          1                          0                          0
+distance_to_fire_km                           2.0                        0.0                        0.0                        2.0                   4.472136
+burning_neighbours                              4                          5                          4                          2                          0
+burning_within_4km                              5                          8                          6                          3                          0
+fire_area_now_km2                           340.0                      188.0                      168.0                       36.0                       60.0
+growth_last_hour_km2                         28.0                       20.0                       16.0                      -32.0                       16.0
+burned_area_so_far_km2                      484.0                      432.0                      460.0                       92.0                       60.0
+hours_since_start                              49                         28                         16                          7                          3
+hour_of_day_local                              16                         17                          6                         19                         18
+is_night                                        0                          0                          0                          0                          0
+wind_speed_kmh                               14.9                  19.200001                        9.7                        7.1                       13.7
+wind_gust_kmh                           36.400002                  43.900002                       19.1                  31.299999                  38.200001
+humidity_pct                                   28                         45                         28                         15                          9
+temp_c                                       30.9                       25.9                       24.9                       31.6                  39.599998
+downwind                                 0.740494                   0.647307                  -0.929868                   0.770962                  -0.351387
+downwind_x_speed                        11.033365                  12.428291                  -9.019722                   5.473828                  -4.814007
+elevation_diff_m                      -102.223526                   8.904255                  -90.39286                 182.011108                -388.953339
+upslope                                -51.111763                   8.904255                  -90.39286                  91.005554                  -86.97261
+slope_deg                                    5.92                       7.94                      13.41                      20.16                  16.860001
+elevation_m                                 589.0                 805.700012                 447.700012                 985.200012                      365.0
+veg_class                                      30                         30                         10                         30                         20
+frac_tree                                     0.0                        0.0                     0.9875                     0.2375                       0.37
+frac_shrub                                    0.0                        0.0                        0.0                     0.0075                     0.5825
+frac_grass                                    1.0                        1.0                     0.0125                      0.755                     0.0425
+frac_crop                                     0.0                        0.0                        0.0                        0.0                        0.0
+frac_built                                    0.0                        0.0                        0.0                        0.0                        0.0
 frac_water                                    0.0                        0.0                        0.0                        0.0                        0.0
-frp_now_mw                           17470.169922                 60641.9375                1975.666626                7201.419434               48284.070312
+frp_now_mw                            55049.28125               19474.101562               22915.072266                 2089.12085               14280.022461
 label_1h                                      1.0                        1.0                        0.0                        0.0                        0.0
 new_1h                                        1.0                        0.0                        0.0                        0.0                        0.0
-label_2h                                      1.0                        0.0                        0.0                        0.0                        0.0
-new_2h                                        1.0                        0.0                        0.0                        0.0                        0.0
-label_3h                                      1.0                        0.0                        0.0                        0.0                        0.0
-new_3h                                        1.0                        0.0                        0.0                        0.0                        0.0
+label_2h                                      0.0                        1.0                        0.0                        0.0                        0.0
+new_2h                                        0.0                        0.0                        0.0                        0.0                        0.0
+label_3h                                      0.0                        1.0                        1.0                        0.0                        0.0
+new_3h                                        0.0                        0.0                        0.0                        0.0                        0.0
 label_1h_gapfilled                          False                      False                      False                      False                      False
 hour_gapfilled_1h                           False                      False                      False                      False                      False
 label_2h_gapfilled                          False                      False                      False                      False                      False
 hour_gapfilled_2h                           False                      False                      False                      False                      False
 label_3h_gapfilled                          False                      False                      False                      False                      False
 hour_gapfilled_3h                           False                      False                      False                      False                      False
-nearest_town                           Wrightwood                      Garey                      Garey     Rancho Santa Margarita                       Vina
-nearest_town_pop                           4720.0                       72.0                       72.0                    46353.0                      198.0
-nearest_town_dist_km                      8.56502                  27.422018                  39.039711                   0.898408                  12.433989
+nearest_town                           New Cuyama                 New Cuyama                   Cohasset                   Coalinga                    Sisquoc
+nearest_town_pop                            542.0                      542.0                      830.0                    16722.0                      191.0
+nearest_town_dist_km                    21.740425                  15.667231                   5.964283                  17.073673                  18.076391
 ```
 
 ## 3. No-future-data test
@@ -106,31 +106,31 @@ nearest_town_dist_km                      8.56502                  27.422018    
 For each hour h we delete everything after hour h (burning detections, hour table, weather), redo the
 gap filling on what is left, rerun `features_for_hour` and require identical features (assert).
 
-- PASS  park_fire_2024: 73 hours, 12,939 feature rows identical with and without future data
+- PASS  park_fire_2024: 73 hours, 12,917 feature rows identical with and without future data
 - PASS  caldor_fire_2021: 55 hours, 5,528 feature rows identical with and without future data
-- PASS  palisades_fire_2025: 73 hours, 8,481 feature rows identical with and without future data
+- PASS  palisades_fire_2025: 72 hours, 6,416 feature rows identical with and without future data
 
-Why this matters: the burning tables hold 2,647 gap-filled square-hours (burning at h-1 and h+1, so
+Why this matters: the burning tables hold 2,412 gap-filled square-hours (burning at h-1 and h+1, so
 marked burning at h). Using them as 'burning_now' would leak hour h+1. They are NOT used for the features of
-their own hour; 2,057 candidate rows would have been affected. In those rows burning_now = 0.
+their own hour; 1,871 candidate rows would have been affected. In those rows burning_now = 0.
 - PASS  no gap-filled square is marked burning_now in its own hour
 
 ## 4. Split check
 
-- PASS  no fire_id appears in two splits (70 fires checked)
+- PASS  no fire_id appears in two splits (67 fires checked)
 - PASS  split matches the year (train 2018-2022, val 2023, test 2024-2025)
 - PASS  no duplicate (fire, hour, square) rows
 - PASS  every row is within 6 km of the fire; distance is 0 exactly for burning squares
-- Missing feature values: {'growth_last_hour_km2': 5236, 'frp_now_mw': 5839}
+- Missing feature values: {'growth_last_hour_km2': 4070, 'frp_now_mw': 6482}
 - nearest_town_pop missing in 0 rows (towns with no population in towns_ca.csv)
 
 ## 5. Baseline for Phase 3: 'persistence' (predict label_1h = burning_now)
 
 ```
 split   rows  precision  recall    F1
-train 280278      0.859   0.841 0.850
-  val  19733      0.771   0.805 0.788
- test  95448      0.848   0.843 0.845
+train 240180      0.864   0.843 0.853
+  val  17320      0.776   0.802 0.789
+ test  88631      0.858   0.842 0.850
 ```
 Persistence can never find a newly burning square (new_1h), so Phase 3 should also score on new_1h.
 
@@ -153,4 +153,4 @@ Persistence can never find a newly burning square (new_1h), so Phase 3 should al
 - Weather is one point per fire (its start point), the same for every square in an hour.
 - nearest_town_* columns are for warnings only - NOT model features. Do not train on them or on the ID columns.
 
-Total run time 87 s.
+Total run time 77 s.

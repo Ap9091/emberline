@@ -5,10 +5,16 @@ The notebook tells the story step by step; the longer code lives here so the not
 
 What is in this file
   1. Preparing the table for the models (one-hot vegetation, feature list).
-  2. The two models (logistic regression, gradient-boosted trees) and their average.
+  2. The models: logistic regression, gradient-boosted trees, their average, and a "direct" version
+     (one tree model per forecast hour).
   3. Rolling a forecast forward to +2 h and +3 h (use the +1 h guess as the new fire, predict again).
   4. The baselines ("looks like now", "grow 1 km every hour").
   5. Scoring: squares (strict and within 2 km), newly burning squares, fire-area IoU, and TOWN warnings.
+
+Two probability cut-offs per model (both chosen on validation fires only):
+  * "burn": for squares that have already burned  -> does the fire keep burning there?
+  * "new":  for squares that never burned yet     -> does the fire spread there?
+  New spread is rarer, so its best cut-off is much lower. One cut-off for both would hide all new spread.
 """
 
 import os
@@ -51,9 +57,9 @@ def make_X(df, drop=()):
     return X
 
 
-def training_rows(d):
-    """Rows we learn from / score on: label known, and not a gap-filled (guessed) label."""
-    ok = d.label_1h.notna() & ~d.label_1h_gapfilled.astype(bool) & ~d.hour_gapfilled_1h.astype(bool)
+def training_rows(d, k=1):
+    """Rows we learn from / score on for the k-hour label: label known, and not a gap-filled (guessed) label."""
+    ok = d[f"label_{k}h"].notna() & ~d[f"label_{k}h_gapfilled"].astype(bool) & ~d[f"hour_gapfilled_{k}h"].astype(bool)
     return d[ok]
 
 
@@ -74,6 +80,7 @@ def make_hgb(learning_rate, max_depth, max_iter):
 
 class Model:
     """A fitted model plus the feature list it needs, with one simple method: probability of burning in 1 h."""
+    direct = False
 
     def __init__(self, name, fitted, drop=()):
         self.name, self.fitted, self.drop = name, fitted, tuple(drop)
@@ -84,6 +91,7 @@ class Model:
 
 class Average:
     """The average of two models' probabilities."""
+    direct = False
 
     def __init__(self, name, a, b):
         self.name, self.a, self.b = name, a, b
@@ -92,8 +100,31 @@ class Average:
         return (self.a.prob(df) + self.b.prob(df)) / 2
 
 
+class Direct:
+    """
+    'Direct' forecast: three separate tree models, trained to answer "burning in 1 h?", "in 2 h?", "in 3 h?"
+    straight from what we know now (no rolling forward). prob() = the 1-hour model, so it can be scored like the others.
+    """
+    direct = True
+
+    def __init__(self, name, fitted_by_k):
+        self.name, self.models = name, fitted_by_k            # {1: model, 2: model, 3: model}
+
+    def prob(self, df, k=1):
+        return self.models[k].predict_proba(make_X(df))[:, 1]
+
+
+def fit_direct(train, lrate, depth, n_trees, name="hgb_direct"):
+    """Train one tree model per forecast hour (k = 1, 2, 3) with the same settings."""
+    fitted = {}
+    for k in (1, 2, 3):
+        d = training_rows(train, k)
+        fitted[k] = make_hgb(lrate, depth, n_trees).fit(make_X(d), d[f"label_{k}h"].astype(int))
+    return Direct(name, fitted)
+
+
 # ---------------------------------------------------------------------------
-# 3. One fire, its truth, and the rollout forecast
+# 3. One fire, its truth, and the forecasts
 # ---------------------------------------------------------------------------
 class Fire:
     """Everything about one fire that the forecast and the scoring need."""
@@ -122,33 +153,46 @@ class Fire:
         return now, ever
 
 
-def rollout(model, fire, h, t_prop):
-    """
-    Forecast for hours h+1, h+2, h+3 made at hour h. Returns an array (3, 40, 40) of probabilities,
-    or None if hour h has no usable data.
+def as_fire(probs, ever, th):
+    """Turn probabilities into 'the fire': burned squares need the 'burn' cut-off, never-burned squares the 'new' one."""
+    return np.where(ever, probs >= th["burn"], probs >= th["new"])
 
-    Step 1: features at hour h -> probability each candidate square burns at h+1.
-    Step 2: squares with probability >= t_prop become "the fire at h+1"; recompute the features
-            from that imagined fire and predict h+2. Step 3 is the same again for h+3.
-    Honest note: for h+2 and h+3 we use the weather that really happened (a stand-in for a weather
-    forecast). Everything about the FIRE after hour h is the model's own guess.
+
+def forecast(model, fire, h, th):
+    """
+    Forecast for hours h+1, h+2, h+3 made at hour h: array (3, 40, 40) of probabilities, or None if hour h has no
+    usable data.
+
+    Direct model: features at hour h -> each of the three hour-models.
+    Rolling forward (all other models):
+      Step 1: features at hour h -> probability each candidate square burns at h+1.
+      Step 2: turn that into "the fire at h+1" (two cut-offs, see as_fire), recompute the features from that
+              imagined fire and predict h+2. Step 3 is the same again for h+3.
+    Honest note: for h+2 and h+3 we use the weather that really happened (a stand-in for a weather forecast).
+    Everything about the FIRE after hour h is the model's own guess.
     """
     feats = p2.features_for_hour(fire.burning, fire.hours, fire.static, fire.weather, h)
     if feats is None:
         return None
     out = np.zeros((HORIZON, N, N), np.float32)
+    r_idx, c_idx = feats.row.to_numpy(), feats.col.to_numpy()
+    if model.direct:
+        for k in range(1, HORIZON + 1):
+            out[k - 1, r_idx, c_idx] = model.prob(feats, k)
+        return out
     burning = fire.known(h)
+    _, ever = fire.now_and_ever(h)
     hours = fire.hours.copy()
     pw = burning[burning.hour_idx == h].max_power_mw.dropna()
     power = float(pw.mean()) if len(pw) else np.nan       # imagined squares get today's average fire power
     for k in range(1, HORIZON + 1):
-        p = model.prob(feats)
-        out[k - 1, feats.row.to_numpy(), feats.col.to_numpy()] = p
+        out[k - 1, feats.row.to_numpy(), feats.col.to_numpy()] = model.prob(feats)
         if k == HORIZON or h + k >= grid.N_HOURS:
             break
-        pred = out[k - 1] >= t_prop
+        pred = as_fire(out[k - 1], ever, th)
         if not pred.any():
             break                                         # the model thinks the fire goes out: nothing more to roll
+        ever = ever | pred
         r, c = np.nonzero(pred)
         guess = pd.DataFrame({"hour_idx": h + k, "row": r, "col": c, "n_scans": 1,
                               "max_power_mw": power, "gapfilled": False})
@@ -175,13 +219,16 @@ def grow_baseline(now, km_per_hour=1.0):
     return out
 
 
+BASELINE_TH = {"burn": 0.5, "new": 0.5}     # the baselines give 0 or 1, so any cut-off in between works
+
+
 # ---------------------------------------------------------------------------
 # 4. Run every forecast for a set of fires and keep everything needed for scoring
 # ---------------------------------------------------------------------------
-def collect(fire_ids, models, t_prop):
+def collect(fire_ids, models, th):
     """
     For every fire and every hour with data and fire: the forecasts of each model and baseline,
-    the truth 1-3 h later, and which truths we can trust. Returns a dict of stacked arrays.
+    the truth 1-3 h later, and which truths we can trust. th = {model name: {"burn": x, "new": y}}.
     """
     keys = {"fire_id": [], "hour": [], "is_night": [], "now": [], "ever": [], "truth": [], "truth_ok": []}
     preds = {m.name: [] for m in models}
@@ -194,7 +241,7 @@ def collect(fire_ids, models, t_prop):
             now, ever = fire.now_and_ever(h)
             if not fire.has_data[h] or not now.any():
                 continue
-            outs = {m.name: rollout(m, fire, h, t_prop[m.name] if isinstance(t_prop, dict) else t_prop) for m in models}
+            outs = {m.name: forecast(m, fire, h, th[m.name]) for m in models}
             if any(o is None for o in outs.values()):
                 continue
             for name, o in outs.items():
@@ -211,9 +258,17 @@ def collect(fire_ids, models, t_prop):
             keys["truth"].append(fire.truth[hk])
             keys["truth_ok"].append(np.array([h + k < grid.N_HOURS and fire.truth_ok[h + k] for k in range(1, HORIZON + 1)]))
     res = {k: np.array(v) for k, v in keys.items()}
-    res["pred"] = {k: np.stack(v) for k, v in preds.items()}
+    res["pred"] = {k: (np.stack(v) if v else np.zeros((0, HORIZON, N, N), np.float32)) for k, v in preds.items()}
     res["fires"] = fires
     return res
+
+
+def merge(results):
+    """Join several collect() results into one (e.g. held-out training fires + validation fires)."""
+    out = {k: np.concatenate([r[k] for r in results]) for k in results[0] if k not in ("pred", "fires")}
+    out["pred"] = {m: np.concatenate([r["pred"][m] for r in results]) for m in results[0]["pred"]}
+    out["fires"] = {f: fire for r in results for f, fire in r["fires"].items()}
+    return out
 
 
 # ---------------------------------------------------------------------------
@@ -232,23 +287,24 @@ def _dilate_2km(a):
 def _prf(tp_p, n_p, tp_r, n_r):
     p = tp_p / n_p if n_p else np.nan
     r = tp_r / n_r if n_r else np.nan
-    f = 2 * p * r / (p + r) if (p + r) > 0 else 0.0
+    f = 2 * p * r / (p + r) if (n_p and n_r and (p + r) > 0) else 0.0
     return p, r, f
 
 
-def square_scores(res, name, threshold, k=1, mask=None):
+def square_scores(res, name, th, k=1, mask=None):
     """
     Precision / recall / F1 on squares k hours ahead, four ways:
       all_strict, all_2km  : every burning square (the 2 km version forgives being one square off)
       new_strict, new_2km  : only NEWLY burning squares (never burned before) - the hard, useful part
     plus mean IoU (overlap) of the forecast fire area with the real fire area.
+    th = {"burn": x, "new": y} (see as_fire).
     """
     ok = res["truth_ok"][:, k - 1]
     if mask is not None:
         ok = ok & mask
-    P = res["pred"][name][ok, k - 1] >= threshold
-    A = res["truth"][ok, k - 1]
     ever = res["ever"][ok]
+    P = as_fire(res["pred"][name][ok, k - 1], ever, th)
+    A = res["truth"][ok, k - 1]
     out = {}
     for label, p, a in [("all", P, A), ("new", P & ~ever, A & ~ever)]:
         out[f"{label}_strict"] = _prf((p & a).sum(), p.sum(), (p & a).sum(), a.sum())
@@ -260,14 +316,15 @@ def square_scores(res, name, threshold, k=1, mask=None):
     return out
 
 
-def best_f1_threshold(res, name, k=1):
-    """The probability cut that gives the best square F1 (all squares, strict) - used to decide 'burning' in the rollout."""
-    best = (0.5, -1)
-    for t in np.arange(0.05, 0.96, 0.025):
-        f = square_scores(res, name, t, k)["all_strict"][2]
-        if f > best[1]:
-            best = (float(t), f)
-    return best
+def choose_thresholds(res, name, k=1):
+    """
+    On VALIDATION forecasts: the 'new' cut-off with the best F1 on newly burning squares, then the 'burn' cut-off
+    with the best F1 on all squares (given that 'new' cut-off).
+    """
+    grid_t = np.round(np.arange(0.025, 0.976, 0.025), 3)
+    best_new = max(grid_t, key=lambda t: square_scores(res, name, {"burn": 0.5, "new": t}, k)["new_strict"][2])
+    best_burn = max(grid_t, key=lambda t: square_scores(res, name, {"burn": t, "new": best_new}, k)["all_strict"][2])
+    return {"burn": float(best_burn), "new": float(best_new)}
 
 
 # ---- towns ---------------------------------------------------------------
@@ -309,11 +366,12 @@ def town_events(res, name, threshold, towns, fire_ids=None):
             continue
         sel = np.nonzero(res["fire_id"] == fid)[0]
         hours = res["hour"][sel]
+        nf = near.astype(np.float32)
         flags = (res["pred"][name][sel] >= threshold)                       # cases x 3 x 40 x 40
         # flagged[c, town] = any square near the town forecast to burn in the next 3 h
-        flagged = np.einsum("ckrs,trs->ct", flags.astype(np.float32), near.astype(np.float32)) > 0
-        touched = np.einsum("hrs,trs->ht", fire.truth.astype(np.float32), near.astype(np.float32)) > 0  # hours x towns
-        touched_now = np.einsum("crs,trs->ct", res["now"][sel].astype(np.float32), near.astype(np.float32)) > 0
+        flagged = np.einsum("ckrs,trs->ct", flags.astype(np.float32), nf) > 0
+        touched = np.einsum("hrs,trs->ht", fire.truth.astype(np.float32), nf) > 0  # hours x towns
+        touched_now = np.einsum("crs,trs->ct", res["now"][sel].astype(np.float32), nf) > 0
 
         # --- arrivals and warnings
         for j in range(len(t)):

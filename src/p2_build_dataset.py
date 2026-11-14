@@ -41,6 +41,7 @@ from scipy.spatial import cKDTree
 import grid
 
 P = os.path.join(grid.ROOT, "data", "processed")
+BURNING_DIR = "burning_tracked"   # one fire per box (src/p2_track.py removes other fires in the box)
 OUT = os.path.join(P, "dataset.parquet")
 REPORT = os.path.join(grid.ROOT, "results", "phase2_dataset_report.md")
 MAP_PNG = os.path.join(grid.ROOT, "results", "phase2_grid_check_park.png")
@@ -66,8 +67,8 @@ FEATURES = ["burning_now", "ever_burned", "distance_to_fire_km", "burning_neighb
 # ---------------------------------------------------------------------------
 def load_fire(fire_id):
     """The four input tables of one fire."""
-    burning = pd.read_parquet(os.path.join(P, "burning", f"{fire_id}.parquet"))
-    hours = pd.read_csv(os.path.join(P, "burning", f"{fire_id}_hours.csv"))
+    burning = pd.read_parquet(os.path.join(P, BURNING_DIR, f"{fire_id}.parquet"))
+    hours = pd.read_csv(os.path.join(P, BURNING_DIR, f"{fire_id}_hours.csv"))
     hours["time_utc"] = pd.to_datetime(hours.time_utc, utc=True)
     static = pd.read_parquet(os.path.join(P, "static", f"{fire_id}.parquet")).sort_values(["row", "col"])
     weather = pd.read_parquet(os.path.join(P, "weather", f"{fire_id}.parquet"))
@@ -416,7 +417,7 @@ def main():
 
     say("\nRows with a NaN (unknown) label, and why:\n")
     n_files = {(f, h): n for f in d.fire_id.cat.categories
-               for h, n in zip(range(grid.N_HOURS), pd.read_csv(os.path.join(P, "burning", f"{f}_hours.csv")).n_files)}
+               for h, n in zip(range(grid.N_HOURS), pd.read_csv(os.path.join(P, BURNING_DIR, f"{f}_hours.csv")).n_files)}
     why = []
     for k in (1, 2, 3):
         nan = d[d[f"label_{k}h"].isna()]
