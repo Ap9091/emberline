@@ -1,0 +1,1 @@
+{"task": "plan", "provider": "gemini", "model": "gemini-3.5-flash", "seconds": 1.8, "json": {"evacuate": [], "warn": ["Altadena", "East Pasadena", "Pasadena", "San Marino", "San Pasqual", "Sierra Madre"], "summary": "All 6 threatened towns remain under evacuation warning as the Eaton Fire approaches within 1 hour."}}
