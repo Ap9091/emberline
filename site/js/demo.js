@@ -17,6 +17,7 @@ import { app } from './app.js';
 import { h, fill, $, sleep } from './util.js';
 import { replayApi as R } from './mode_replay.js';
 import { ask, setOpen } from './assistant.js';
+import * as api from './api.js';
 
 const EATON = 'eaton_fire_2025', PARK = 'park_fire_2024';
 const CA = [-124.4, 32.5, -114.1, 42.0];
@@ -129,7 +130,8 @@ const STEPS = [
         h('div', { class: 'dm-time' }, h('span', { class: 'mono' }, '8–9 pm'), h('span', {}, 'Satellite sees fire at the edge of town')),
         h('div', { class: 'dm-time official' }, h('span', { class: 'mono' }, '9:26 pm'), h('span', {}, 'Official evacuation order')))),
       why('Emberline flagged Sierra Madre ', b('almost 2½ hours before the official order'), '. On this fire it was first for ',
-        b('all 5 towns'), ' with public order times, usually by about half an hour.'),
+        b('all 5 towns'), ' with public order times, usually by about half an hour. Across all 3 replay fires: first for ',
+        b('8 of 9 towns'), ', including ', b('every town the fire actually reached'), '.'),
       h('div', { class: 'dm-src' }, 'The panel lists each town, our time, the official time, and a link to the public record (LA County report).')],
     async run(d) {
       await d.replay(EATON, 2, { fire: true, forecast: true });
@@ -264,12 +266,29 @@ function fireBounds(sit) {
   return [cx - half, cy - half * 0.8, cx + half, cy + half * 0.8];
 }
 
+// Auto-play (URL #demo-auto, for recording the video): seconds per step, matched to the pitch script
+// (docs: about 175 words a minute). The welcome screen stays up for AUTO_WELCOME_S first. Space pauses.
+const AUTO_SECONDS = [5, 5.5, 9, 6, 14.5, 6, 8, 6.5, 8.2, 4.8, 7.8, 5.8, 9.5, 6];      // about 1:58 in total
+const AUTO_WELCOME_S = 15.5;
+let autoScale = 1;           // #demo-auto-1.1 = 10% slower, #demo-auto-0.9 = 10% faster
+
+/** Load everything the demo shows before it is needed, so no step waits on a download. */
+function preload() {
+  const hours = { eaton_fire_2025: [1, 2, 3, 4], park_fire_2024: [2] };
+  for (const [fid, hs] of Object.entries(hours)) {
+    api.getReplayMeta(fid).catch(() => {});
+    hs.forEach(hr => api.getReplayHour(fid, hr).catch(() => {}));
+  }
+}
+
 class Demo {
-  constructor() { this.i = -1; this.token = 0; this.markers = []; this.card = null; }
+  constructor() { this.i = -1; this.token = 0; this.markers = []; this.card = null; this.auto = false; this.paused = false; this.timer = null; }
 
   get on() { return this.i >= 0; }
 
-  async start(step = 0) {
+  async start(step = 0, { auto = false } = {}) {
+    this.auto = auto; this.paused = false;
+    preload();
     $('#results-backdrop')?.click();
     closeOverlays();
     document.body.classList.add('demo-on');
@@ -280,6 +299,7 @@ class Demo {
         if (!this.on) return;
         if (e.key === 'Escape') this.stop();
         if (e.key === 'Enter' && !/INPUT|TEXTAREA/.test(e.target.tagName)) { e.preventDefault(); this.next(); }
+        if (e.key === ' ' && this.auto && !/INPUT|TEXTAREA/.test(e.target.tagName)) { e.preventDefault(); this.togglePause(); }
       });
     }
     this.card.hidden = false;
@@ -288,6 +308,21 @@ class Demo {
   }
 
   next() { this.i + 1 < STEPS.length ? this.show(this.i + 1) : this.stop(); }
+
+  togglePause() {
+    this.paused = !this.paused;
+    clearTimeout(this.timer);
+    if (!this.paused) this._arm();
+    const st = this.card?.querySelector('.dm-status');
+    if (st) st.textContent = this.paused ? 'Paused · Space to play' : 'Auto · Space to pause';
+  }
+
+  _arm() {
+    clearTimeout(this.timer);
+    if (!this.auto || this.paused || !this.on) return;
+    const i = this.i;
+    this.timer = setTimeout(() => { if (this.i === i && i < STEPS.length - 1) this.next(); }, (AUTO_SECONDS[i] ?? 7) * autoScale * 1000);
+  }
 
   async show(i) {
     const token = ++this.token;
@@ -308,10 +343,11 @@ class Demo {
       h('h2', {}, step.title),
       h('div', { class: 'dm-body' }, step.body()),
       h('div', { class: 'dm-foot' },
-        h('span', { class: 'dm-status' }),
+        h('span', { class: 'dm-status' }, this.auto ? 'Auto · Space to pause' : ''),
         h('button', { class: 'btn btn-primary dm-next', onclick: () => this.next() }, last ? 'Finish' : 'Next  →')));
     this.card.scrollTop = 0;
     this.card.querySelector('.dm-next').focus({ preventScroll: true });
+    this._arm();
     const d = this._ctx(token);
     try { await step.run(d); }
     catch (e) { console.warn('demo step', i + 1, e); }
@@ -320,6 +356,7 @@ class Demo {
 
   stop() {
     this.token++; this.i = -1;
+    clearTimeout(this.timer); this.auto = false;
     this.clearMarks(); this.focus(null);
     app.view.showLA(false);
     R.realWind?.();
@@ -395,7 +432,8 @@ function closeOverlays() {
   $('#howto')?.remove();
 }
 
-export function showWelcome() {
+export function showWelcome({ auto = false, scale = 1 } = {}) {
+  autoScale = scale;
   closeOverlays();
   const box = h('div', { id: 'welcome', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'welcome-title' },
     h('div', { class: 'wl-card' },
@@ -409,11 +447,13 @@ export function showWelcome() {
         h('div', {}, h('b', {}, '2'), 'Emberline forecasts the spread'),
         h('div', {}, h('b', {}, '3'), 'Towns and roads get checked')),
       h('div', { class: 'wl-actions' },
-        h('button', { class: 'btn btn-primary wl-start', onclick: () => { box.remove(); demo.start(); } }, '▶  Start the demo  ·  2 min'),
+        h('button', { class: 'btn btn-primary wl-start', onclick: () => { clearTimeout(box._t); box.remove(); demo.start(0, { auto }); } }, '▶  Start the demo  ·  2 min'),
         h('button', { class: 'btn wl-skip', onclick: () => box.remove() }, 'Explore on my own')),
       h('div', { class: 'wl-note' }, 'The demo plays by itself. You only press Next.')));
   document.body.append(box);
   box.querySelector('.wl-start').focus();
+  preload();
+  if (auto) box._t = setTimeout(() => box.querySelector('.wl-start')?.click(), AUTO_WELCOME_S * autoScale * 1000);
 }
 
 function showHowTo() {

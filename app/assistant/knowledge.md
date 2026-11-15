@@ -41,6 +41,9 @@ Why it is different: fire apps show where a fire is now; research models predict
 - West Altadena's evacuation alert went out at 3:25 am on January 8, hours after fire was seen there (LA County investigation report). Do NOT claim Emberline would have warned west Altadena: the map treats Altadena as one town.
 - What-if: the same wind direction at 60 km/h instead of 29 km/h turns 6 towns in danger into 20.
 
+# Against real evacuation orders, all 3 replay fires together
+- 9 towns have published order or warning times. Emberline flagged 8 of 9 first. The fire actually reached 5 of them, and Emberline flagged all 5 first (Chico +1.8 h, Cohasset +0.9 h, Sierra Madre +2.4 h, Pasadena +0.4 h, Altadena +0.4 h). The one it flagged later was Butte Meadows (1 hour later), which the fire never reached. Santa Monica (Palisades) was flagged 8.6 h early but the fire never reached it, so that early flag did not matter.
+
 # The Park Fire (Butte County, July 2024)
 - At 3 pm on July 24 the AI first sent Butte Creek Canyon out on State Hwy 32 west, but that road ran into the forecast fire 4.4 km from town, so the code REJECTED the plan. The second plan used Hwy 32 north and passed. 2 of 3 towns with official times were flagged earlier.
 

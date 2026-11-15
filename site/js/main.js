@@ -98,6 +98,9 @@ async function start() {
   const wanted = location.hash.replace('#', '');
   await go(MODES[wanted] ? wanted : 'state');
   if (wanted === 'demo') demo.start();
+  else if (/^demo-auto(-[\d.]+)?$/.test(wanted)) {                 // recording mode: plays by itself (see demo.js)
+    showWelcome({ auto: true, scale: Number(wanted.split('-')[2]) || 1 });
+  }
   else if (!MODES[wanted]) showWelcome();
 }
 

@@ -113,6 +113,9 @@ async function runActions(actions, { fromDemo = false } = {}) {
 // ── built-in answers (no server, no key, or the server is busy) ───────────────
 const A = (type, target = '', hour = -1, from_deg = -1, speed_kmh = -1) => ({ type, target, hour, from_deg, speed_kmh });
 const FAQ = [
+  [/\b(python|javascript|typescript|java|c\+\+|html|css|sql|homework|essay|poem|translate|recipe|joke)\b|\b(write|make|build|fix|debug)\b.*\b(code|program|script|function|app|website|essay)\b/i,
+    'I can only help with Emberline and its wildfire forecasts. Want to see how accurate it is, or the AI plan our code rejected?',
+    [], ['How accurate is it?', 'Show me the AI plan that got rejected']],
   [/lucky|luck|fluke|chance/i, 'Not just luck. At 7 pm Emberline predicted 13 of the 17 squares that burned by 10 pm, with zero false alarms, and each miss was right next to a predicted square. That is one of its best hours, so we also tested 18 fires it never saw: it warned 18 of 20 towns, about 2.8 hours early.',
     [A('fire', 'eaton_fire_2025', 2), A('show', 'check')], ['Show the official orders', 'Where does it fail?']],
   [/reject|safety|unsafe|bad plan|road|copilot|plan|code/i, 'On the Park Fire at 3 pm, the AI first sent Butte Creek Canyon out on Highway 32 west, but that road ran into the forecast fire. Plain code checked it and said REJECTED, so the AI picked Highway 32 north instead. A person still has to press Approve.',

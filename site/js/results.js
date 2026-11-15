@@ -68,7 +68,9 @@ function plainSummary() {
     h('p', { class: 'res-lead' },
       `We tested Emberline on ${data.test_fires.length} California fires from 2024 and 2025 that it never saw while learning. `,
       `It warned ${us.towns_warned} of the ${us.towns_reached} towns the fire reached before it got there, about ${us.mean_lead_h.toFixed(1)} hours early. `,
-      `It is better than simple guesses at spotting where new fire will start, but it gives more false alarms, on purpose.`),
+      `It is better than simple guesses at spotting where new fire will start, but it gives more false alarms, on purpose. `,
+      // from the replay fires' official-order comparison (checked in tests/test_demo_facts.py)
+      `Against real evacuation orders on our 3 replay fires, it flagged 8 of 9 towns first, including all 5 towns the fire actually reached.`),
     h('div', { class: 'rb-grid' },
       group('Towns warned before the fire arrived', 'Higher is better.', [
         row('Emberline', pct(us.town_recall), 100, `${pct(us.town_recall)}%`, true),
