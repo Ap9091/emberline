@@ -13,6 +13,7 @@ import { Timeline } from './timeline.js';
 import { WhatIf } from './whatif.js';
 import { verifyCard } from './verify.js';
 import { officialCard } from './official.js';
+import { showWhy, closeWhy } from './why.js';
 
 const s = {
   fires: null,                 // /api/replay
@@ -41,8 +42,10 @@ export const replayMode = {
       hour: hr => { pause(); setHour(hr); }, playToggle: () => (s.playing ? pause() : play()),
       step: d => { pause(); setHour(s.hour + d); }, speed: i => { s.speedIdx = i; },
       split: () => setSplit(!s.split), copilot: runCopilot, fire: id => { pause(); loadFire(id); },
+      tour: () => app.tour?.(),
     });
     document.addEventListener('keydown', onKey);
+    app.view.map.on('click', onMapClick);
     app.on3DChange = on => { if (on && s.split) setSplit(false); };
     try {
       if (!s.fires) s.fires = await api.getReplayList();
@@ -53,6 +56,7 @@ export const replayMode = {
   },
   leave() {
     pause(); s.token++;
+    app.view.map.off('click', onMapClick); closeWhy(); app.stopTour?.();
     setBanner(null);
     if (s.split) setSplit(false);
     document.removeEventListener('keydown', onKey);
@@ -77,9 +81,22 @@ export const replayApi = {
     for (let i = 0; i < 100 && (s.whatif.busy || !s.whatif.scenario); i++) await new Promise(r => setTimeout(r, 100));
   },
   realWind() { if (s.whatif?.active || s.whatif?.busy) s.whatif.reset(); },
+  /** "Why this square?" at {lon, lat}, or at the forecast square nearest that point (near: true). */
+  async why(where, { near = false } = {}) {
+    if (near) { const cell = await api.likelySquare(s.fireId, s.hour, where.lon, where.lat); if (cell === null) return null; where = { cell }; }
+    return showWhy(s.fireId, s.hour, where);
+  },
+  closeWhy,
   async copilot(quiet = false) { pause(); if (!s.copilot._record().started) await s.copilot.run({ quiet }); },
   pause,
 };
+
+/** A click on the map (not on a town): explain that square. */
+function onMapClick(e) {
+  if (!s.sit || s.split) return;
+  showWhy(s.fireId, s.hour, { lon: e.lngLat.lng, lat: e.lngLat.lat },
+    { note: s.whatif?.active ? 'The what-if wind is on; this explains the forecast with the real wind.' : null });
+}
 
 // panel skeleton: people counter · situation · what-if · was it right · official orders · copilot · log
 function buildPanel() {
@@ -134,6 +151,7 @@ async function loadFire(fireId) {
 
 async function setHour(hour) {
   if (!s.meta) return;
+  closeWhy();
   hour = Math.max(0, Math.min(s.meta.hours.length - 1, hour));
   const token = ++s.token;
   s.hour = hour; s.lastHour.set(s.fireId, hour);
@@ -281,7 +299,8 @@ function drawToggles() {
     toggleRow(`Real fire +${s.horizon} h (hindsight)`, t.actual, set('actual'), 'sw-actual'),
     toggleRow('Was it right? (hit / miss)', t.verify, on => { t.verify = on; applyLayers(); drawVerify(); }, 'sw-verify'),
     h('div', { class: 'toggle-sub' }, h('span', {}, 'Compare at'),
-      segmented([[1, '+1 h'], [2, '+2 h'], [3, '+3 h']], s.horizon, k => { s.horizon = k; applyLayers(); drawToggles(); drawVerify(); })));
+      segmented([[1, '+1 h'], [2, '+2 h'], [3, '+3 h']], s.horizon, k => { s.horizon = k; applyLayers(); drawToggles(); drawVerify(); })),
+    h('div', { class: 'toggle-hint' }, 'Tip: click any square near the fire to see why the model thinks it will burn.'));
 }
 
 // split screen

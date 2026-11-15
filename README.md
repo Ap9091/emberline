@@ -26,6 +26,8 @@ Emberline is for one person: the county emergency manager or incident commander 
 
 The app has three views (STATE: all of California, INCIDENT: one fire up close, REPLAY: three real fires hour by hour), a two-minute guided demo written for someone who knows nothing about wildfires, and an "Ask Emberline" guide that answers questions in plain words and moves the app to the answer. On the website, the copilot runs live with Claude Sonnet 5.5 for any hour of any fire, including what-if winds, and every plan it writes goes through the same code safety check.
 
+**Three ways to look inside it.** **Why this square?** Click any square near a replay fire and the model shows its own reasons: its chance of burning within the hour, against 22% for a typical square, and how much the nearby fire, the wind, the air, the slope, the plants and the time of day pushed it up or down. These are exact rather than estimated, because a logistic regression is a weighted sum, so the reasons add up to its answer (next to Sierra Madre at 7 pm, the wind blowing toward the square was the biggest push). **A self-driving 3D tour.** One button tilts the map into 3D terrain and walks through the hour: the forecast growing +1, +2 and +3 hours, the real fire laid over it, the square-by-square check, and the town most in danger, with a box that explains each step. **Ask out loud.** The guide takes spoken questions (Chrome, Edge or Safari), reads its answers aloud, and can start the tour itself.
+
 ## What we added
 
 **Our own idea.** Emberline is built around the evacuation decision, the part of a wildfire where a few hours of warning matter most.
@@ -160,7 +162,7 @@ app/run.sh
 
 Then open http://localhost:8000. The AI parts are optional: put `GEMINI_API_KEY=...` or `ANTHROPIC_API_KEY=...` in a `.env` file (git ignores it); without one, the app runs and shows "AI offline, forecast only".
 
-The 38 tests cover the safety check (in Python and in the hosted site's JavaScript), every number the demo and this README state, the in-browser what-if against the Python model, the leave-by times, the weather stress test and the guide's rules:
+The 39 tests cover the safety check (in Python and in the hosted site's JavaScript), every number the demo and this README state, the in-browser what-if against the Python model, the exactness of "Why this square?", the leave-by times, the weather stress test and the guide's rules:
 
 ```bash
 .venv/bin/python -m pytest -q tests

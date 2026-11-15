@@ -275,3 +275,82 @@ export function scenario(F, M, base, h, fromDeg, speedKmh) {
     },
   };
 }
+
+// 5. "Why this square?" The model is a logistic regression (a weighted sum), so its reasons for one square are exact:
+//    each input moves the answer up or down by coef × (scaled value), and the moves add up to the model's chance.
+//    The inputs are grouped into plain-word reasons. Explains the chance of burning within the next hour at hour h.
+const REASONS = [
+  ['fire', 'Nearby fire', ['burning_now', 'ever_burned', 'distance_to_fire_km', 'burning_neighbours', 'burning_within_4km']],
+  ['size', 'Fire size and growth', ['fire_area_now_km2', 'growth_last_hour_km2', 'burned_area_so_far_km2', 'frp_now_mw']],
+  ['wind', 'Wind', ['wind_speed_kmh', 'wind_gust_kmh', 'downwind', 'downwind_x_speed']],
+  ['air', 'Humidity and temperature', ['humidity_pct', 'temp_c']],
+  ['slope', 'Slope and height', ['elevation_diff_m', 'upslope', 'slope_deg', 'elevation_m']],
+  ['plants', 'Plants on the ground', ['frac_tree', 'frac_shrub', 'frac_grass', 'frac_crop', 'frac_built', 'frac_water', 'veg_']],
+  ['time', 'Time of day', ['hours_since_start', 'hour_of_day_local', 'is_night']],
+];
+const VEG_NAMES = { 10: 'trees', 20: 'shrubs', 30: 'grass', 40: 'crops', 50: 'buildings', 60: 'bare ground', 70: 'snow',
+                    80: 'water', 90: 'wetland', 95: 'mangroves', 100: 'moss' };
+
+function cellAt(F, lon, lat) {
+  const N = F.n, k = Math.cos(lat * Math.PI / 180);
+  let cell = -1, best = Infinity;
+  for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) {
+    const a = corner(F, r, c), b = corner(F, r + 1, c + 1);
+    const d = (((a[0] + b[0]) / 2 - lon) * k) ** 2 + ((a[1] + b[1]) / 2 - lat) ** 2;
+    if (d < best) { best = d; cell = r * N + c; }
+  }
+  return Math.sqrt(best) * 111 > 2.5 ? -1 : cell;            // more than about one square away: outside the fire's box
+}
+
+/** Explain one square at hour h. where = {lon, lat} or {cell}. Returns {ok:false, why} or the reasons. */
+export function explain(F, M, h, where) {
+  const N = F.n, cell = where.cell ?? cellAt(F, where.lon, where.lat);
+  if (cell < 0) return { ok: false, why: 'outside' };
+  const rows0 = F.burning.filter(([hr, , , gap]) => hr < h || (hr === h && !gap));
+  const feats = features(F, M, rows0, F.hours.n_files, F.weather, h);
+  if (!feats) return { ok: false, why: 'nofire' };
+  const n = feats.cells.indexOf(cell);
+  if (n < 0) return { ok: false, why: 'far' };             // more than 6 km from the fire: the model does not score it
+  const row = feats.X[n];
+  const v = Object.fromEntries(M.features.map((name, j) => [name, row[j]]));
+  const push = M.features.map((name, j) => {
+    const x = Number.isFinite(row[j]) ? Math.fround(row[j]) : M.median[j];
+    return M.coef[j] * ((x - M.mean[j]) / M.scale[j]);
+  });
+  const z = M.intercept + push.reduce((a, b) => a + b, 0);
+  const sum = keys => M.features.reduce((t, name, j) => t + (keys.some(k => name === k || (k.endsWith('_') && name.startsWith(k))) ? push[j] : 0), 0);
+  const fmt = (x, d = 0) => Number.isFinite(x) ? round(x, d).toLocaleString('en-US') : '-';
+  const veg = Object.entries(VEG_NAMES).find(([code]) => v['veg_' + code] === 1);
+  const side = v.downwind > 0.3 ? 'blowing toward it' : v.downwind < -0.3 ? 'blowing away from it' : 'blowing across it';
+  const facts = {
+    fire: v.burning_now ? 'burning right now'
+      : `${v.distance_to_fire_km <= 2.9 ? 'right next to the fire' : `${fmt(v.distance_to_fire_km, 1)} km from the fire`}, ${v.burning_neighbours} burning square${v.burning_neighbours === 1 ? '' : 's'} touching it`,
+    size: `${fmt(v.fire_area_now_km2)} km² burning, ${v.growth_last_hour_km2 >= 0 ? '+' : ''}${fmt(v.growth_last_hour_km2)} km² in the last hour`,
+    wind: `${fmt(v.wind_speed_kmh)} km/h, gusts ${fmt(v.wind_gust_kmh)}, ${side}`,
+    air: `humidity ${fmt(v.humidity_pct)}%, ${fmt(v.temp_c, 1)}°C`,
+    slope: `${fmt(Math.abs(v.elevation_diff_m))} m ${v.elevation_diff_m >= 0 ? 'above' : 'below'} the fire, ${fmt(v.slope_deg)}° slope`,
+    plants: veg ? `mostly ${veg[1]}` : 'mixed ground cover',
+    time: `${String(v.hour_of_day_local).padStart(2, '0')}:00${v.is_night ? ', night' : ''}`,
+  };
+  const reasons = REASONS.map(([key, label, keys]) => ({ key, label, push: round(sum(keys), 3), fact: facts[key] }))
+    .sort((a, b) => Math.abs(b.push) - Math.abs(a.push));
+  const r = Math.floor(cell / N), c = cell % N;
+  return { ok: true, cell, square: squareFeature(F, cell, {}), p: 1 / (1 + Math.exp(-z)), typical: 1 / (1 + Math.exp(-M.intercept)),
+           burning: !!v.burning_now, reasons, centre: [(corner(F, r, c)[0] + corner(F, r + 1, c + 1)[0]) / 2, (corner(F, r, c)[1] + corner(F, r + 1, c + 1)[1]) / 2] };
+}
+
+/** The forecast square (not burning yet, likely to burn within the hour) closest to a point: what the demo explains. */
+export function likelySquareNear(F, M, h, lon, lat) {
+  const rows0 = F.burning.filter(([hr, , , gap]) => hr < h || (hr === h && !gap));
+  const feats = features(F, M, rows0, F.hours.n_files, F.weather, h);
+  if (!feats) return null;
+  const p = predict(M, feats.X), k = Math.cos(lat * Math.PI / 180), N = F.n;
+  let best = null, bd = Infinity;
+  feats.cells.forEach((i, n) => {
+    if (feats.X[n][0] || p[n] < M.th.new) return;            // already burning, or not forecast to burn
+    const r = Math.floor(i / N), c = i % N, a = corner(F, r, c), b = corner(F, r + 1, c + 1);
+    const d = (((a[0] + b[0]) / 2 - lon) * k) ** 2 + ((a[1] + b[1]) / 2 - lat) ** 2;
+    if (d < bd) { bd = d; best = i; }
+  });
+  return best;
+}

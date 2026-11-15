@@ -4,7 +4,7 @@
 // there is no Python server, so every answer is read from the JSON files in data/ that the build saved,
 // the AI answers come from the saved cache, and "what if the wind changes?" runs in the browser
 // (js/whatif_engine.js). The rest of the app does not know the difference.
-import { loadModel, loadFire, scenario } from './whatif_engine.js';
+import { loadModel, loadFire, scenario, explain, likelySquareNear } from './whatif_engine.js';
 
 export const STATIC = !!window.EMBERLINE_STATIC;
 // Hosted on an ordinary web host (Vercel, GitHub Pages): online map tiles and 3D terrain are allowed.
@@ -63,6 +63,16 @@ export function getReplayHour(fireId, hour) {
 //   replay:   {mode: 'replay', fire_id, hour}
 //   incident: {mode: 'live', incident_id}
 export const whatIf = ref => STATIC ? staticWhatIf(ref) : post('/api/whatif', ref);
+/** "Why this square?": the model's own reasons for one square of a replay fire, computed in the browser. */
+export async function explainSquare(fireId, hour, where) {
+  const [M, F] = await Promise.all([loadModel(DATA), loadFire(DATA, fireId)]);
+  return explain(F, M, hour, where);
+}
+/** The forecast square nearest a point (not burning yet, likely to burn within the hour): what the demo explains. */
+export async function likelySquare(fireId, hour, lon, lat) {
+  const [M, F] = await Promise.all([loadModel(DATA), loadFire(DATA, fireId)]);
+  return likelySquareNear(F, M, hour, lon, lat);
+}
 // sit = the situation on screen: the hosted site sends it to the live copilot when no saved answer exists.
 export const aiBriefing = (ref, sit) => STATIC ? staticAi(ref, 'briefing', sit) : post('/api/ai/briefing', ref);
 export const aiPlan = (ref, sit) => STATIC ? staticAi(ref, 'plan', sit) : post('/api/ai/plan', ref);

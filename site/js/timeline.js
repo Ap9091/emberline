@@ -39,7 +39,8 @@ export class Timeline {
     this.splitBtn = h('button', { class: 'btn', id: 'tl-split', title: 'Two maps side by side', onclick: () => this.on.split() }, 'Split screen');
     this.runBtn = h('button', { class: 'btn btn-primary', id: 'tl-run', onclick: () => this.on.copilot() });
     const left = h('div', { class: 'tl-left' },
-      h('div', { class: 'tl-row' }, fireSelect, this.timeEl, this.hourEl),
+      h('div', { class: 'tl-row' }, fireSelect, this.timeEl, this.hourEl,
+        h('button', { class: 'btn btn-tour', id: 'tl-tour', title: 'A self-driving 3D tour of this hour', onclick: () => this.on.tour?.() }, '▶ 3D tour')),
       h('div', { class: 'tl-row' },
         h('button', { class: 'btn btn-icon', id: 'tl-prev', title: 'Back 1 hour (←)', onclick: () => this.on.step(-1) }, icon('prev')),
         this.playBtn,

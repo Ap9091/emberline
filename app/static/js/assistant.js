@@ -10,11 +10,13 @@ import { app } from './app.js';
 import { h, fill, $, sleep } from './util.js';
 import { replayApi as R } from './mode_replay.js';
 import { leaveBy } from './leaveby.js';
+import { canListen, canSpeak, listen, say, hush } from './speech.js';
 
 const MAX_PER_SESSION = 30;
-const STARTERS = ['What am I looking at?', 'How accurate is it?', 'Show me the AI plan that got rejected', 'What if the wind doubled?'];
+const STARTERS = ['Give me a 3D tour', 'How accurate is it?', 'Show me the AI plan that got rejected', 'What if the wind doubled?'];
 
-const ui = { open: false, busy: false, history: [], box: null, list: null, input: null, offline: false, demo: null };
+const ui = { open: false, busy: false, history: [], box: null, list: null, input: null, offline: false, demo: null,
+             speak: false, mic: null, micBtn: null, speakBtn: null };      // speak = read answers aloud (speech.js)
 
 // what is on screen (sent with every question)
 function screen() {
@@ -104,6 +106,9 @@ async function runActions(actions, { fromDemo = false } = {}) {
         case 'demo':
           if (ui.demo) { setOpen(false); ui.demo.start(Math.max(0, (hour ?? 1) - 1)); }
           break;
+        case 'tour':                                   // the self-driving 3D tour of the fire on screen (tour.js)
+          setOpen(false); await ensureReplay(); app.tour?.({ speak: ui.speak });
+          break;
       }
     } catch (e) { console.warn('assistant action', a, e); }
   }
@@ -112,6 +117,8 @@ async function runActions(actions, { fromDemo = false } = {}) {
 // built-in answers (no server, no key, or the server is busy)
 const A = (type, target = '', hour = -1, from_deg = -1, speed_kmh = -1) => ({ type, target, hour, from_deg, speed_kmh });
 const FAQ = [
+  [/\btour\b|show me around|walk me through|fly (me )?(over|around)/i, 'Starting the 3D tour of this fire. The box on the map explains each step.',
+    [A('tour')], ['Why is that square orange?', 'How accurate is it?']],
   [/\b(python|javascript|typescript|java|c\+\+|html|css|sql|homework|essay|poem|translate|recipe|joke)\b|\b(write|make|build|fix|debug)\b.*\b(code|program|script|function|app|website|essay)\b/i,
     'I can only help with Emberline and its wildfire forecasts. Want to see how accurate it is, or the AI plan our code rejected?',
     [], ['How accurate is it?', 'Show me the AI plan that got rejected']],
@@ -166,7 +173,7 @@ function count() { try { return +sessionStorage.getItem('emberline-chat-n') || 0
 function bump() { try { sessionStorage.setItem('emberline-chat-n', String(count() + 1)); } catch { /* private mode */ } }
 
 /** Ask a question (typed by the visitor, tapped as a chip, or sent by the demo). */
-export async function ask(text, { fromDemo = false, actions = true } = {}) {
+export async function ask(text, { fromDemo = false, actions = true, voice = false, speak = null } = {}) {
   text = String(text || '').trim().slice(0, 600);
   if (!text || ui.busy) return;
   setOpen(true);
@@ -187,6 +194,9 @@ export async function ask(text, { fromDemo = false, actions = true } = {}) {
   ui.history.push({ role: 'assistant', content: out.reply });
   addMsg('bot', out.reply, out.suggestions, source);
   ui.busy = false; drawInput();
+  // read the answer aloud when asked out loud, or when the speaker is on ('short' = the first two sentences, for the demo)
+  const talk = speak ?? (voice || ui.speak);
+  if (talk) say(talk === 'short' ? (out.reply.match(/[^.!?]+[.!?]+/g) || [out.reply]).slice(0, 2).join(' ') : out.reply);
   if (actions) await runActions(out.actions, { fromDemo });     // the demo moves the map itself, so it can turn these off
 }
 
@@ -211,10 +221,34 @@ function drawInput() {
 
 export function setOpen(open) {
   ui.open = open;
+  if (!open) { hush(); ui.mic?.stop?.(); }
   ui.box.hidden = !open;
   $('#as-launch').classList.toggle('on', open);
   if (open) { ui.list.scrollTop = ui.list.scrollHeight; if (typeHere()) ui.input.focus({ preventScroll: true }); }
 }
+
+function drawSpeak() {
+  if (!ui.speakBtn) return;
+  ui.speakBtn.textContent = ui.speak ? '🔊' : '🔇';
+  ui.speakBtn.classList.toggle('on', ui.speak);
+}
+
+/** Ask out loud: the words appear in the box as you speak, then go to the guide, and the answer is read aloud. */
+function toggleMic() {
+  if (ui.mic) { ui.mic.stop(); return; }
+  ui.micBtn.classList.add('on'); ui.input.placeholder = 'Listening…';
+  ui.mic = listen({
+    onText: (text, final) => {
+      ui.input.value = text;
+      if (final && text.trim()) { ui.input.value = ''; ui.speak = true; drawSpeak(); ask(text, { voice: true }); }
+    },
+    onEnd: () => { ui.mic = null; ui.micBtn.classList.remove('on'); ui.input.placeholder = 'Ask anything, or "take me to…"'; },
+  });
+  if (!ui.mic) ui.micBtn.classList.remove('on');
+}
+
+/** The guided demo lights up the mic, to show it can be asked out loud. */
+export function flashMic(on) { ui.micBtn?.classList.toggle('on', on); }
 
 export function initAssistant(demo) {
   ui.demo = demo;
@@ -222,15 +256,19 @@ export function initAssistant(demo) {
     h('span', { class: 'as-spark' }, '✦'), h('span', {}, 'Ask Emberline'));
   ui.list = h('div', { class: 'as-list' });
   ui.input = h('input', { type: 'text', maxlength: '600', placeholder: 'Ask anything, or "take me to…"', 'aria-label': 'Ask Emberline' });
+  ui.micBtn = canListen ? h('button', { class: 'btn as-mic', type: 'button', title: 'Ask out loud (answers are read aloud)', 'aria-label': 'Ask out loud', onclick: toggleMic }, '🎤') : null;
   const form = h('form', { class: 'as-form', onsubmit: e => { e.preventDefault(); const v = ui.input.value; ui.input.value = ''; ask(v); } },
-    ui.input, h('button', { class: 'btn btn-primary as-send', type: 'submit', 'aria-label': 'Send' }, '↑'));
+    ui.input, ui.micBtn, h('button', { class: 'btn btn-primary as-send', type: 'submit', 'aria-label': 'Send' }, '↑'));
+  ui.speakBtn = canSpeak ? h('button', { class: 'as-speak', title: 'Read answers aloud', 'aria-label': 'Read answers aloud',
+    onclick: () => { ui.speak = !ui.speak; if (!ui.speak) hush(); drawSpeak(); } }) : null;
   ui.box = h('section', { id: 'as-box', hidden: true, role: 'dialog', 'aria-label': 'Ask Emberline' },
     h('header', { class: 'as-head' },
       h('div', {}, h('b', {}, '✦ Ask Emberline'), h('span', {}, 'AI guide · Claude Sonnet 5.5')),
-      h('button', { class: 'as-x', title: 'Close', onclick: () => setOpen(false) }, '✕')),
+      ui.speakBtn, h('button', { class: 'as-x', title: 'Close', onclick: () => setOpen(false) }, '✕')),
     ui.list, form,
     h('div', { class: 'as-foot' }, 'Research demo. In a real fire, follow official orders.'));
   document.body.append(launch, ui.box);
+  drawSpeak();
   addMsg('bot', 'Hi! Ask me anything about Emberline, or ask me to take you somewhere, like "show me the Park Fire" or "what if the wind doubled?"', STARTERS);
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && ui.open && !ui.demo?.on) setOpen(false); });
 }

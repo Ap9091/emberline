@@ -71,7 +71,7 @@ export class MapView {
       layout: { visibility: 'none', 'line-join': 'round' }, paint: { 'line-color': '#ffb454', 'line-width': 2.2 } });
     m.addLayer({ id: 'ca-line', type: 'line', source: 'california', filter: ['==', ['get', 'kind'], 'ca'],
       paint: { 'line-color': '#e6e9ec', 'line-width': ['interpolate', ['linear'], ['zoom'], 4, 0.8, 9, 1.6], 'line-opacity': 0.55 } });
-    for (const id of ['forecast', 'actual', 'fire', 'verify', 'baseline', 'ring-1', 'ring-2', 'ring-3', 'exits', 'pixels']) {
+    for (const id of ['forecast', 'actual', 'fire', 'verify', 'baseline', 'ring-1', 'ring-2', 'ring-3', 'exits', 'pixels', 'why']) {
       m.addSource(id, { type: 'geojson', data: EMPTY });
     }
 
@@ -134,6 +134,10 @@ export class MapView {
     m.addLayer({ id: 'pixel-core', type: 'circle', source: 'pixels', paint: {
       'circle-color': COLORS.fire, 'circle-stroke-color': '#fff3e0', 'circle-stroke-width': 0.6,
       'circle-radius': ['interpolate', ['linear'], ['zoom'], 4, 1.8, 8, 3, 11, 5] } });
+
+    // "Why this square?": the square being explained (see why.js)
+    m.addLayer({ id: 'why-glow', type: 'line', source: 'why', paint: { 'line-color': '#ffb454', 'line-width': 7, 'line-opacity': 0.35, 'line-blur': 3 } });
+    m.addLayer({ id: 'why-line', type: 'line', source: 'why', paint: { 'line-color': '#fff4de', 'line-width': 2.2 } });
 
     this._applyVisibility();
     this._applyExitFilters();
@@ -249,6 +253,9 @@ export class MapView {
       }
     }
   }
+
+  /** Outline the square that "Why this square?" explains (null clears it). */
+  setWhySquare(feature) { this._setData('why', feature ? { type: 'FeatureCollection', features: [feature] } : null); }
 
   /** Guided demo: show the forecast rings only up to +k hours (3 shows all of them again). */
   showRings(k) {

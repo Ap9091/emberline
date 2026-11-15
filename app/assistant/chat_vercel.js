@@ -17,7 +17,7 @@ const ACTION = {
   type: 'object', additionalProperties: false,
   required: ['type', 'target', 'hour', 'from_deg', 'speed_kmh'],
   properties: {
-    type: { type: 'string', enum: ['mode', 'fire', 'hour', 'show', 'wind', 'real_wind', 'town', 'copilot', 'demo'] },
+    type: { type: 'string', enum: ['mode', 'fire', 'hour', 'show', 'wind', 'real_wind', 'town', 'copilot', 'demo', 'tour'] },
     target: { type: 'string' }, hour: { type: 'integer' }, from_deg: { type: 'integer' }, speed_kmh: { type: 'integer' },
   },
 };

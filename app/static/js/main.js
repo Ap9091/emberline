@@ -25,6 +25,7 @@ import { replayMode } from './mode_replay.js';
 import { initResults } from './results.js';
 import { demo, showWelcome, initSettings } from './demo.js';
 import { initAssistant } from './assistant.js';
+import { startTour, stopTour } from './tour.js';
 
 const MODES = { state: stateMode, incident: incidentMode, replay: replayMode };
 
@@ -82,7 +83,7 @@ async function start() {
   app.view.on3D = show3DButtons;
 
   // top bar
-  app.go = go; app.set3D = set3D;
+  app.go = go; app.set3D = set3D; app.tour = startTour; app.stopTour = stopTour;
   for (const btn of document.querySelectorAll('#mode-tabs button')) btn.addEventListener('click', () => go(btn.dataset.mode));
   for (const btn of document.querySelectorAll('#dim-toggle button')) btn.addEventListener('click', () => { if (app.mode !== 'state') set3D(btn.dataset.dim === '3d'); });
   initResults();

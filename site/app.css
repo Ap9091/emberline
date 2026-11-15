@@ -569,6 +569,8 @@ ul, ol { margin: 0; padding-left: 16px; }
 
 /* 13. guided demo, welcome screen, settings menu (js/demo.js) */
 .btn-demo { background: #3a2410; border-color: #7a4a1c; color: #ffd9a8; font-weight: 600; }
+.btn-tour { background: #3a2410; border-color: #7a4a1c; color: #ffd9a8; font-weight: 600; margin-left: auto; }
+.btn-tour:hover { background: #4a2e14; }
 .btn-demo:hover { background: #4a2e14; }
 #settings-btn { font-size: 15px; line-height: 1; padding: 4px 8px; }
 
@@ -596,6 +598,7 @@ ul, ol { margin: 0; padding-left: 16px; }
 .dm-next { font-size: 14px; padding: 9px 20px; border-radius: 6px; }
 .dm-key { display: inline-block; width: 11px; height: 11px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
 .dm-key.fire { background: var(--fire); }
+.dm-key.mon { background: #4f8fd6; }
 .dm-key.forecast { background: var(--forecast); opacity: .8; }
 .dm-key.actual { background: var(--actual); border: 1px solid #8a4a4a; }
 .dm-key.ring { background: none; border-top: 2.5px dotted var(--ring); border-radius: 0; height: 0; width: 14px; vertical-align: 3px; }
@@ -827,3 +830,55 @@ body:has(#app[data-mode="replay"]) #as-box { bottom: calc(var(--timeline-h) + 12
   padding: 6px 8px; margin-bottom: 6px; border-radius: 0 4px 4px 0; }
 .leave-by.lb-human, .leave-by.lb-now { border-left-color: var(--evacuate); background: rgba(214, 69, 65, .12); }
 .exit-row.closing .exit-state { color: var(--warning); }
+
+/* 20. "Why this square?" popup (why.js) */
+.why-pop .maplibregl-popup-content { background: var(--bg-1); color: var(--text); border: 1px solid #7a4a1c; border-radius: 8px;
+  padding: 12px 14px 11px; box-shadow: 0 10px 30px rgba(0, 0, 0, .55); font-family: var(--sans); }
+.why-pop .maplibregl-popup-tip { display: none; }
+.why-pop .maplibregl-popup-close-button { color: var(--text-3); font-size: 17px; padding: 2px 7px; }
+.why-head { font: 600 11px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ring); margin-bottom: 3px; }
+.why-p { font-size: 12.5px; color: var(--text-2); }
+.why-p b { font-size: 22px; color: var(--text); margin-right: 3px; }
+.why-sub { font-size: 11.5px; color: var(--text-3); margin: 1px 0 8px; }
+.why-list { display: grid; gap: 4px; }
+.why-row { display: grid; grid-template-columns: 1fr 84px 40px; align-items: center; gap: 2px 7px; font-size: 12px; color: var(--text);
+  padding: 3px 6px; border-radius: 4px; border-left: 2px solid transparent; transition: background .3s, border-color .3s; }
+.why-row.on { background: rgba(255, 180, 84, .12); border-left-color: var(--ring); }
+.why-bar { height: 7px; background: var(--bg-0); border-radius: 4px; overflow: hidden; }
+.why-bar i { display: block; height: 100%; border-radius: 4px; }
+.why-row.up .why-bar i { background: #ff6a14; }
+.why-row.down .why-bar i { background: #4f8fd6; }
+.why-n { text-align: right; font-size: 11.5px; }
+.why-row.up .why-n { color: #ff9a55; }
+.why-row.down .why-n { color: #8dbcf0; }
+.why-fact { grid-column: 1 / -1; font-size: 11px; color: var(--text-3); }
+.why-note { font-size: 11px; color: #e8cfa6; margin-top: 7px; }
+.why-foot { font-size: 10.5px; color: var(--text-3); margin-top: 8px; line-height: 1.4; }
+.why-msg { font-size: 12.5px; color: var(--text-2); max-width: 240px; padding-right: 14px; }
+.toggle-hint { font-size: 11px; color: var(--text-3); margin-top: 7px; max-width: 230px; line-height: 1.35; }
+
+/* 21. the self-driving 3D tour (tour.js): the explanation box takes the layer card's place */
+body.tour-on #layer-toggles { display: none !important; }
+#tour-box { position: absolute; z-index: 9; top: 14px; left: 14px; width: 330px; background: rgba(17, 20, 24, .96);
+  border: 1px solid #7a4a1c; border-radius: 8px; padding: 11px 14px 12px; box-shadow: 0 10px 30px rgba(0, 0, 0, .5);
+  animation: dm-in .25s ease-out; }
+.tour-top { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
+.tour-tag { font: 600 10.5px var(--mono); letter-spacing: .1em; text-transform: uppercase; color: #14171a; background: var(--ring);
+  padding: 1px 6px; border-radius: 3px; }
+.tour-count { font-size: 11px; color: var(--text-3); flex: 1; }
+.tour-x { background: none; border: 0; color: var(--text-3); font-size: 14px; padding: 0 2px; cursor: pointer; }
+.tour-x:hover { color: var(--text); }
+.tour-title { font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+.tour-text { font-size: 13px; line-height: 1.45; color: #d3d8dd; }
+.tour-dots { display: flex; gap: 4px; margin-top: 9px; }
+.tour-dots i { height: 3px; flex: 1; border-radius: 2px; background: var(--line-2); }
+.tour-dots i.done { background: #8a6a45; }
+.tour-dots i.on { background: var(--ring); }
+@media (max-width: 900px) { #tour-box { left: 8px; right: 8px; width: auto; top: 8px; } }
+
+/* 22. voice in Ask Emberline (speech.js) */
+.as-mic { padding: 0 10px; font-size: 15px; }
+.as-mic.on { background: #5a1f12; border-color: var(--evacuate); animation: dm-glow 1.2s ease-in-out infinite; outline: 2px solid var(--evacuate); outline-offset: 1px; }
+.as-speak { background: none; border: 1px solid var(--line-2); border-radius: 5px; color: var(--text-2); font-size: 14px; padding: 1px 7px;
+  margin-left: auto; margin-right: 6px; cursor: pointer; }
+.as-speak.on { border-color: var(--ring); color: var(--ring); background: rgba(255, 180, 84, .1); }
