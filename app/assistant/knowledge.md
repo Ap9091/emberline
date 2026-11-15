@@ -61,7 +61,7 @@ Why it is different: fire apps show where a fire is now; research models predict
 - Good satellite data only since 2018, so there are only so many fires to learn from.
 - The replay files keep only forecast chances of 5% and up (to stay small), while the WARNING cut-off is 1%. So the replay can show a WARNING up to an hour later than the model really gave it (for example Butte Meadows on the Park Fire). This makes the replay slightly conservative; the test scores use the full model.
 - Replays use historical weather records (ERA5), which are a bit better than the forecast crews had that night; the live app uses the Open-Meteo forecast. So replay results may be slightly better than real-time use would be.
-- Saved AI answers on the website cover the Park Fire's first 30 hours and the Eaton Fire's first hours; elsewhere the copilot says "AI offline" on the website (the full app makes new answers).
+- The copilot on the website is a hybrid: saved Gemini answers where they exist (the Park Fire's first 30 hours and the Eaton Fire's first 11, including the Park plan that was rejected), and live Claude Sonnet 5.5 for every other hour and every what-if wind. Every plan, saved or live, goes through the same code safety check. On the claude.ai copy of the page there is no server, so only saved answers work there.
 
 # The screens
 - STATE: every fire in California right now from the latest satellite scan, ranked.

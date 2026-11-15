@@ -65,9 +65,10 @@ export function getReplayHour(fireId, hour) {
 //   replay:   {mode: 'replay', fire_id, hour}
 //   incident: {mode: 'live', incident_id}
 export const whatIf = ref => STATIC ? staticWhatIf(ref) : post('/api/whatif', ref);
-export const aiBriefing = ref => STATIC ? staticAi(ref, 'briefing') : post('/api/ai/briefing', ref);
-export const aiPlan = ref => STATIC ? staticAi(ref, 'plan') : post('/api/ai/plan', ref);
-export const aiAlert = (ref, plan) => STATIC ? staticAi(ref, 'alert') : post('/api/ai/alert', { ...ref, plan });
+// sit = the situation on screen: the hosted site sends it to the live copilot when no saved answer exists.
+export const aiBriefing = (ref, sit) => STATIC ? staticAi(ref, 'briefing', sit) : post('/api/ai/briefing', ref);
+export const aiPlan = (ref, sit) => STATIC ? staticAi(ref, 'plan', sit) : post('/api/ai/plan', ref);
+export const aiAlert = (ref, plan, sit) => STATIC ? staticAi(ref, 'alert', sit, plan) : post('/api/ai/alert', { ...ref, plan });
 export const aiTriage = incidentId => STATIC
   ? get(`${DATA}/ai/triage.json`).then(all => all[incidentId] || Promise.reject(offline('No saved AI line for this incident.')))
   : post('/api/ai/triage', { incident_id: incidentId });
@@ -80,19 +81,43 @@ function offline(message) {
   return err;
 }
 
-/** Saved copilot answers: replay → data/ai/replay_{fire}.json[hour], incidents → data/ai/incidents.json[id]. */
-async function staticAi(ref, kind) {
-  if (ref.wind_from_deg !== undefined && ref.wind_from_deg !== null) {
-    throw offline('Hosted demo: the copilot answers were saved for the real wind only. Press "Real wind", or run the full app for a what-if plan.');
+/**
+ * Hosted copilot ("hybrid"):
+ *   1. a SAVED answer if there is one (replay → data/ai/replay_{fire}.json[hour], incidents → data/ai/incidents.json[id]).
+ *      These are real runs recorded earlier with Gemini, including the Park Fire plan the safety check rejected.
+ *   2. otherwise the LIVE copilot: POST api/copilot (Vercel function, Claude Sonnet 5.5, the same code safety check).
+ *      Used for every other hour and for what-if winds. On a page with no server (claude.ai) it says "AI offline".
+ */
+async function staticAi(ref, kind, sit, plan) {
+  const whatIfWind = ref.wind_from_deg !== undefined && ref.wind_from_deg !== null;
+  if (!whatIfWind) {
+    const rec = ref.mode === 'replay'
+      ? (await get(`${DATA}/ai/replay_${ref.fire_id}.json`).catch(() => ({})))[ref.hour]
+      : (await get(`${DATA}/ai/incidents.json`).catch(() => ({})))[ref.incident_id];
+    if (rec?.[kind] && (kind !== 'alert' || !plan || samePlan(rec.plan?.plan, plan))) return rec[kind];
   }
-  const rec = ref.mode === 'replay'
-    ? (await get(`${DATA}/ai/replay_${ref.fire_id}.json`))[ref.hour]
-    : (await get(`${DATA}/ai/incidents.json`))[ref.incident_id];
-  if (!rec?.[kind]) {
-    throw offline('Hosted demo: no saved AI answer for this hour. Saved copilot runs: Park Fire, its first 30 hours, ' +
-      'and the Eaton Fire, its first hours (7 Jan from 18:00). Run the full app for new answers.');
-  }
-  return rec[kind];
+  if (!ONLINE_TILES || !sit) throw offline('No saved AI answer for this moment, and the live AI only runs on the hosted site.');
+  if (kind !== 'alert' && !liveAllowed()) throw offline('You have used this visit\'s live copilot runs. Saved answers still work.');
+  const body = { kind, sit: compactSit(sit), plan };
+  return request('api/copilot', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+    .catch(e => { if ([0, 404, 405, 501].includes(e.status)) throw offline('AI offline, forecast only.'); throw e; });
+}
+
+const samePlan = (a, b) => JSON.stringify(a ?? null) === JSON.stringify(b ?? null);
+
+/** Only what the copilot reads (keeps the request small: no map layers). */
+function compactSit(s) {
+  return { name: s.name, time_local: s.time_local, numbers: s.numbers, wind: s.wind, towns: s.towns, exits: s.exits };
+}
+
+const LIVE_RUNS = 20;           // live briefings + plans per browser session (the account credit is the real cap)
+function liveAllowed() {
+  try {
+    const n = +sessionStorage.getItem('emberline-copilot-n') || 0;
+    if (n >= LIVE_RUNS) return false;
+    sessionStorage.setItem('emberline-copilot-n', String(n + 1));
+  } catch { /* private mode: no counter */ }
+  return true;
 }
 
 /** "What if the wind changes?" computed in the browser with the exported model (replay fires only). */

@@ -22,7 +22,7 @@ Emberline is for one person: the county emergency manager or incident commander 
 
 **A real input and its result.** At 7 pm on January 7, 2025, the Eaton Fire covered 44 km² (11 squares of 2 km), the wind was 29 km/h from the north-northeast with gusts near 100 km/h, and the humidity was 24%. Emberline forecast 52 km² burning by 10 pm, told Sierra Madre (10,775 people) to evacuate, put Pasadena, Altadena, San Marino, East Pasadena and San Pasqual on WARNING, and showed both directions of the I-210 out of Sierra Madre as clear. The official order for Sierra Madre came at 9:26 pm.
 
-The app has three views (STATE: all of California, INCIDENT: one fire up close, REPLAY: three real fires hour by hour), a two-minute guided demo written for someone who knows nothing about wildfires, and an "Ask Emberline" guide that answers questions in plain words and moves the app to the answer.
+The app has three views (STATE: all of California, INCIDENT: one fire up close, REPLAY: three real fires hour by hour), a two-minute guided demo written for someone who knows nothing about wildfires, and an "Ask Emberline" guide that answers questions in plain words and moves the app to the answer. On the website, the copilot runs live with Claude Sonnet 5.5 for any hour of any fire, including what-if winds, and every plan it writes goes through the same code safety check.
 
 ## What we added
 
@@ -119,7 +119,7 @@ Emberline is a research prototype. In a real fire, follow official orders.
 
 **Models and libraries.** No pretrained models for the forecast: we trained our own with [scikit-learn](https://scikit-learn.org/). Also pandas, xarray, s3fs, rasterio, pyproj, [FastAPI](https://fastapi.tiangolo.com/), [MapLibre GL JS](https://maplibre.org/) and [OpenFreeMap](https://openfreemap.org/) / OpenStreetMap for the map.
 
-**AI tools.** [Claude Code](https://www.anthropic.com/claude-code) (Anthropic) helped us write and debug the code. [Gemini](https://ai.google.dev/) Flash (Google) generated the copilot's briefings, plans and alerts that are saved on the website. [Claude Sonnet 5.5](https://www.anthropic.com/claude) (Anthropic) runs the "Ask Emberline" guide.
+**AI tools.** [Claude Code](https://www.anthropic.com/claude-code) (Anthropic) helped us write and debug the code. [Claude Sonnet 5.5](https://www.anthropic.com/claude) (Anthropic) runs the live copilot on the website and the "Ask Emberline" guide. [Gemini](https://ai.google.dev/) Flash (Google) made the copilot runs we saved for the demo, including the Park Fire plan the safety check rejected.
 
 **Inspiration.** [ContainOS](https://devpost.com/software/containos). The full list, with licences and how each source is used, is in [data_sources.md](data_sources.md).
 

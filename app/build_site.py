@@ -190,6 +190,9 @@ def write_vercel_api():
     here = os.path.dirname(os.path.abspath(__file__))
     os.makedirs(os.path.join(OUT, "api"), exist_ok=True)
     shutil.copy2(os.path.join(here, "assistant", "chat_vercel.js"), os.path.join(OUT, "api", "chat.js"))
+    # the live copilot (any hour without a saved answer, and what-if winds), with the same code safety check
+    shutil.copy2(os.path.join(here, "assistant", "copilot_vercel.js"), os.path.join(OUT, "api", "copilot.js"))
+    shutil.copy2(os.path.join(here, "assistant", "copilot_core.js"), os.path.join(OUT, "api", "_copilot_core.js"))
     with open(os.path.join(here, "assistant", "knowledge.md"), encoding="utf-8") as f:
         knowledge = f.read()
     with open(os.path.join(OUT, "api", "_knowledge.js"), "w", encoding="utf-8") as f:
@@ -200,7 +203,7 @@ def write_vercel_api():
                    "dependencies": {"@anthropic-ai/sdk": "1.3.0"}}, f, indent=2)
         f.write("\n")
     with open(os.path.join(OUT, "vercel.json"), "w") as f:
-        json.dump({"functions": {"api/chat.js": {"maxDuration": 30}}}, f, indent=2)
+        json.dump({"functions": {"api/chat.js": {"maxDuration": 30}, "api/copilot.js": {"maxDuration": 60}}}, f, indent=2)
         f.write("\n")
 
 
@@ -226,9 +229,10 @@ def build_data():
     # ── config + results ──
     cfg = server.config()
     cfg["static"] = True
-    cfg["ai"] = {"provider": "Gemini", "model": "cached answers",
-                 "note": "Hosted demo: the AI answers were generated earlier with Gemini and are replayed here. "
-                         "Run the full app (app/run.sh) for new answers."}
+    cfg["ai"] = {"provider": "Claude Sonnet 5.5", "model": "live + saved Gemini runs",
+                 "note": "Hosted demo: saved Gemini answers where they exist (including the Park Fire plan the safety "
+                         "check rejected); every other hour and every what-if is answered live by Claude Sonnet 5.5, "
+                         "checked by the same code safety check."}
     write("config.json", cfg)
     write("results.json", server.results())
 

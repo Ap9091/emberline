@@ -87,7 +87,7 @@ export class Copilot {
     rec.briefing = { state: 'loading', data: null, error: null };
     this._drawIfCurrent(key);
     try {
-      rec.briefing = { state: 'done', data: await api.aiBriefing(ref), error: null };
+      rec.briefing = { state: 'done', data: await api.aiBriefing(ref, this.sit), error: null };
       this.log('ai', `Briefing drafted (${rec.briefing.data.model}${rec.briefing.data.cached ? ', cached' : ''})`);
     } catch (e) {
       rec.briefing = { state: e.status === 503 ? 'offline' : 'error', data: null, error: e.message };
@@ -101,7 +101,7 @@ export class Copilot {
     rec.plan = { state: 'loading', data: null, error: null, revealed: 0 };
     this._drawIfCurrent(key);
     let data;
-    try { data = await api.aiPlan(ref); }
+    try { data = await api.aiPlan(ref, this.sit); }
     catch (e) {
       if (e.status === 503 && e.body) data = e.body;        // AI_OFFLINE comes back as HTTP 503 with a body
       else {
@@ -143,7 +143,7 @@ export class Copilot {
     rec.alert = { state: 'loading', data: null, error: null };
     this._drawIfCurrent(key);
     try {
-      rec.alert = { state: 'done', data: await api.aiAlert(ref, plan), error: null };
+      rec.alert = { state: 'done', data: await api.aiAlert(ref, plan, this.sit), error: null };
       this.log('alert', `Alert drafted (${rec.alert.data.chars}/360 characters). ${TEXT.alertLabel}.`);
     } catch (e) {
       rec.alert = { state: e.status === 503 ? 'offline' : 'error', data: null, error: e.message };
