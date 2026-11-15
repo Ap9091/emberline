@@ -158,7 +158,7 @@ app/run.sh
 
 Then open http://localhost:8000. The AI parts are optional: put `GEMINI_API_KEY=...` or `ANTHROPIC_API_KEY=...` in a `.env` file (git ignores it); without one, the app runs and shows "AI offline, forecast only".
 
-The 32 tests cover the safety check, every number the demo and this README state, the in-browser what-if against the Python model, the weather stress test and the guide's rules:
+The 38 tests cover the safety check (in Python and in the hosted site's JavaScript), every number the demo and this README state, the in-browser what-if against the Python model, the leave-by times, the weather stress test and the guide's rules:
 
 ```bash
 .venv/bin/python -m pytest -q tests
@@ -170,11 +170,11 @@ The model was trained in [notebooks/03_train.ipynb](notebooks/03_train.ipynb), s
 
 | Folder | What it holds |
 |---|---|
-| `src/` | The pipeline: `p1`/`p2` build the dataset (satellite, weather, terrain, towns, tracking); `p3_core.py` is the model, forecast and scoring; `p4_*.py` are the stress test, false-alarm breakdown and speed test |
+| `src/` | The pipeline: `p1`/`p2` build the dataset (satellite, weather, terrain, towns, tracking); `p3_core.py` is the model, forecast and scoring; `p4_*.py` are the weather stress test, false-alarm breakdown, speed test and road check |
 | `notebooks/` | Training, tuning and the test, with outputs |
 | `results/` | Every number in this README, the replay files and the failure maps |
 | `models/` | The trained model |
-| `app/` | The web app: `backend/` (FastAPI, forecasts, roads, copilot, safety check), `static/` (the page), `assistant/` (the guide's knowledge) |
-| `site/` | The hosted version, plus one serverless function for the guide |
+| `app/` | The web app: `backend/` (FastAPI, forecasts, roads, copilot, safety check), `static/` (the page), `assistant/` (the guide's knowledge, and the hosted site's chat and copilot functions) |
+| `site/` | The hosted version, plus two serverless functions: the guide and the live copilot |
 | `tests/` | The tests, also run by GitHub Actions on every push |
 | `data/` | The processed dataset, the fire list, and the evacuation orders with sources |
