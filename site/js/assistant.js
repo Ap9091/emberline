@@ -121,7 +121,7 @@ const FAQ = [
   [/reject|safety|unsafe|bad plan|road|copilot|plan|code/i, 'On the Park Fire at 3 pm, the AI first sent Butte Creek Canyon out on Highway 32 west, but that road ran into the forecast fire. Plain code checked it and said REJECTED, so the AI picked Highway 32 north instead. A person still has to press Approve.',
     [A('fire', 'park_fire_2024', 2), A('copilot'), A('show', 'copilot')], ['What does the code check?', 'How accurate is it?']],
   [/real wind|go back/i, 'Back to the real wind.', [A('real_wind')], ['What if the wind doubled?', 'How accurate is it?']],
-  [/what.?if|wind|doubl|stronger/i, 'Here is the Eaton Fire with the wind twice as strong (60 km/h instead of 29). Emberline re-runs its forecast in about a second, and the towns in danger go from 6 to 20. Press "Real wind" to go back.',
+  [/what.?if|wind|doubl|stronger/i, 'Here is the Eaton Fire with the wind twice as strong (60 km/h instead of 29). Emberline re-runs its forecast in about a second, and the towns in danger go from 10 to 20. Press "Real wind" to go back.',
     [A('fire', 'eaton_fire_2025', 2), A('wind', '', -1, 25, 60)], ['How does the forecast work?', 'Go back to the real wind']],
   [/official|order|earl|late|altadena|sierra/i, 'This card compares Emberline with the real evacuation orders. Emberline warned Sierra Madre at 7:00 pm; the official order came at 9:26 pm. For all 5 towns with published times, Emberline was first, usually by about half an hour.',
     [A('fire', 'eaton_fire_2025', 2), A('show', 'official')], ['What does the bar at the bottom mean?', 'How accurate is it?']],

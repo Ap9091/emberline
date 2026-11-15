@@ -47,7 +47,7 @@ export class WhatIf {
 
   reset() {
     this._token++; clearTimeout(this._timer);
-    this.scenario = null; this.busy = false; this.error = null;
+    this.scenario = null; this.ref = null; this.busy = false; this.error = null;
     this.fromDeg = this.base?.wind?.from_deg ?? 0; this.speed = Math.round(this.base?.wind?.speed_kmh ?? 0);
     this.hooks.onScenario(null);
     this.draw();
@@ -72,9 +72,13 @@ export class WhatIf {
     const token = ++this._token;
     this.busy = true; this.error = null; this.draw();
     try {
-      const sit = await this.hooks.run(this.fromDeg, this.speed);
+      // Compare like with like: the scenario AND the same model re-run with the real wind. (The saved replay keeps
+      // only forecast chances of 5% and up, so its WARNING list can be shorter than the model's own.)
+      const real = this.base?.wind || {};
+      const [sit, ref] = await Promise.all([this.hooks.run(this.fromDeg, this.speed),
+        this.hooks.run(real.from_deg ?? 0, real.speed_kmh ?? 0).catch(() => null)]);
       if (token !== this._token) return;
-      this.scenario = sit; this.busy = false;
+      this.scenario = sit; this.ref = ref; this.busy = false;
       this.hooks.onScenario(sit);
     } catch (e) {
       if (token !== this._token) return;
@@ -162,7 +166,7 @@ export class WhatIf {
     if (this.busy) return h('div', { class: 'progress' }, h('span', { class: 'spinner' }), 'Re-running the model with this wind…');
     if (this.error) return h('div', { class: 'note note-red' }, `Could not re-run the forecast: ${this.error}`);
     if (!this.active) return null;
-    const real = this.base, sc = this.scenario;
+    const real = this.ref || this.base, sc = this.scenario;      // ref = the model re-run with the real wind
     const ra = real.numbers.forecast_area_km2, sa = sc.numbers.forecast_area_km2;
     // towns whose countdown status is different with this wind (only changes that touch EVACUATE or WARNING)
     const byName = list => Object.fromEntries((list || []).map(t => [t.name, t]));

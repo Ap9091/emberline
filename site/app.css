@@ -799,3 +799,9 @@ body:has(#app[data-mode="replay"]) #as-box { bottom: calc(var(--timeline-h) + 12
 .wl-proof { display: flex; gap: 12px; align-items: center; background: rgba(240, 140, 46, .1); border: 1px solid #7a4a1c; border-radius: 8px; padding: 10px 12px; margin: 0 0 18px; }
 .wl-proof b { font: 600 24px var(--mono); color: var(--ring); white-space: nowrap; }
 .wl-proof span { font-size: 13.5px; line-height: 1.45; color: #e8dccb; }
+
+/* ── 18. results: real-world checks ───────────────────────────────────────── */
+.rw-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.rw-card { background: var(--bg-0); border: 1px solid var(--line); border-radius: 6px; padding: 12px; display: grid; gap: 6px; align-content: start; }
+.rw-big { font-size: 26px; font-weight: 600; color: var(--ring); line-height: 1; }
+@media (max-width: 800px) { .rw-grid { grid-template-columns: 1fr; } }

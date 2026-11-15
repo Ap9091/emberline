@@ -39,7 +39,7 @@ async function openResults() {
     try { data = await api.getResults(); }
     catch (e) { return fill(drawer, head(), h('div', { class: 'note note-red' }, `Could not load results: ${e.message}`)); }
   }
-  fill(drawer, head(), h('div', { class: 'results-body' }, plainSummary(), summary(), mainTable(), perFireTable(), ablationTable(), notes()));
+  fill(drawer, head(), h('div', { class: 'results-body' }, plainSummary(), realWorld(), summary(), mainTable(), perFireTable(), ablationTable(), notes()));
 }
 
 function closeResults() {
@@ -89,6 +89,21 @@ function plainSummary() {
         row('Grows 1 km/h', grow.false_alarms_per_fire_day, 40, grow.false_alarms_per_fire_day.toFixed(0)),
         row('Stays put', still.false_alarms_per_fire_day, 40, still.false_alarms_per_fire_day.toFixed(0))])),
     h('div', { class: 'src' }, '"Stays put" never warns anyone, so it has no false alarms and warns 0 towns. The full numbers are below.'));
+}
+
+/** Three checks that it would work in a real fire (src/p4_*.py → results/*.json; tests/test_impact_checks.py). */
+function realWorld() {
+  const card = (title, big, text) => h('div', { class: 'rw-card' }, h('div', { class: 'rw-big mono' }, big), h('div', {},
+    h('div', { class: 'rb-title' }, title), h('div', { class: 'rb-explain' }, text)));
+  return h('section', { class: 'res-sec' }, h('h3', {}, 'Would it work in a real fire?'),
+    h('div', { class: 'rw-grid' },
+      card('It holds up with the real forecast', '18/20',
+        'The test used weather records made after each fire. Re-run with the weather forecast available at the time (and even the one from a day before), it still warned 18 of 20 towns, 2.8 hours early.'),
+      card('Its false alarms are gentle', '98%',
+        'Of all the false alarms on the 18 test fires, 98% were WARNING ("get ready"). Only 19 town-hours said EVACUATE when the fire did not come.'),
+      card('It is fast enough', '~4 s',
+        'From a new satellite scan to a forecast, town and road checks and a checked AI plan: about 4 seconds typically, under 20 when the AI is slow. A new scan comes every 5 minutes.')),
+    h('div', { class: 'src' }, 'Same model, no retraining. Files: results/weather_stress.json, false_alarms.json, speed.json.'));
 }
 
 function summary() {

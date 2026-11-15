@@ -37,8 +37,12 @@ def test_browser_what_if_matches_python():
         assert j["exits"] == py["exits"], case
 
 
-def test_twice_the_wind_6_to_20_towns():
+def test_twice_the_wind_10_to_20_towns():
+    """Like with like: the model re-run with the real wind vs with twice the wind (both full model)."""
     real = S.replay_situation("eaton_fire_2025", 2)
     danger = lambda s: sum(t["status"] != "MONITOR" for t in s["towns"])
-    assert round(real["wind"]["speed_kmh"]) == 29 and danger(real) == 6
+    assert round(real["wind"]["speed_kmh"]) == 29
+    assert danger(whatif.scenario(real, 25, 29)) == 10
     assert danger(whatif.scenario(real, 25, 60)) == 20
+    # the saved replay keeps only chances >= 5%, so its own list is shorter (conservative, never more)
+    assert danger(real) == 6

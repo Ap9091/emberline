@@ -9,7 +9,8 @@
 //     Across all 18 test fires the average +3 h overlap (IoU) is 45%: we say so on screen.
 //   * Sierra Madre: Emberline warning 7:00 pm (end of the satellite hour it was made from), fire within
 //     1 km of town in the 8-9 pm satellite hour, first published evacuation order 9:26 pm (LA County report).
-//   * What-if: same wind direction, 60 instead of 29 km/h → towns in danger 6 → 20, +3 h area 52 → 184 km²
+//   * What-if: same wind direction, 60 instead of 29 km/h → towns in danger 10 → 20 (both the full model re-run;
+//     the saved replay keeps chances ≥ 5% only, so it lists 6 at the real wind)
 //     (in-browser engine, identical to the Python backend; see app/check_whatif.mjs).
 // To change the wording, edit STEPS below.
 // ─────────────────────────────────────────────────────────────────────────────
@@ -176,7 +177,7 @@ const STEPS = [
     title: 'What if the wind changes?',
     body: () => [see('Back on the Eaton Fire, the wind now blows ', b('twice as hard'), '. The map and the towns update in about a second:'),
       h('div', { class: 'dm-compare' },
-        h('div', {}, h('span', { class: 'dm-big mono' }, '6'), h('span', {}, 'towns in danger with the real wind (29 km/h)')),
+        h('div', {}, h('span', { class: 'dm-big mono' }, '10'), h('span', {}, 'towns in danger with the real wind (29 km/h)')),
         h('div', { class: 'hot' }, h('span', { class: 'dm-big mono' }, '20'), h('span', {}, 'towns in danger at 60 km/h'))),
       why('Teams can plan for a worse wind before it happens. Drag the compass on the right to try any wind.')],
     async run(d) {
@@ -199,7 +200,8 @@ const STEPS = [
           h('tr', {}, h('td', {}, 'Towns warned before the fire came'), h('td', { class: 'ours mono' }, '18 / 20'), h('td', { class: 'mono' }, '18 / 20'), h('td', { class: 'mono' }, '0 / 20')),
           h('tr', {}, h('td', {}, 'How early, on average'), h('td', { class: 'ours mono' }, '2.8 h'), h('td', { class: 'mono' }, '2.5 h'), h('td', { class: 'mono' }, '–')),
           h('tr', {}, h('td', {}, 'Spotting new fire (0 to 1)'), h('td', { class: 'ours mono' }, '0.41'), h('td', { class: 'mono' }, '0.24'), h('td', { class: 'mono' }, '0')))),
-      why('It works across many fires, not just one: 90% of towns warned, almost 3 hours early, and about 1.7 times better at spotting new fire.')],
+      why('It works across many fires, not just one: 90% of towns warned, almost 3 hours early, and about 1.7 times better at spotting new fire. ',
+        'It held up just as well when we swapped in the ', b('weather forecast people really had'), '.')],
     async run(d) {
       R.realWind();
       d.focus(null);
@@ -212,7 +214,7 @@ const STEPS = [
   {
     title: 'Where it gets things wrong',
     body: () => [h('ul', { class: 'dm-list' },
-        h('li', {}, b('False alarms. '), 'It warns some towns the fire never reaches, more often than the simple rule. We chose this: missing a town is worse than an extra warning.'),
+        h('li', {}, b('False alarms. '), 'It warns some towns the fire never reaches, more often than the simple rule. But 98% of them were “get ready”, not “leave now”. We chose this: missing a town is worse than an extra warning.'),
         h('li', {}, b('Fire shape. '), 'For the overall shape it is about as good as “the fire stays put” (45% vs 47%). Its strength is new spread and town warnings.'),
         h('li', {}, b('Blurry eyes. '), 'The satellite sees 2 km squares, and smoke, clouds and night can hide fire. Local wind gusts are missed.'),
         h('li', {}, b('Few fires. '), 'Good satellite data only goes back to 2018, so there are only so many fires to learn from.')),

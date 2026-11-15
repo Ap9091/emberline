@@ -39,7 +39,7 @@ Why it is different: fire apps show where a fire is now; research models predict
 - Sierra Madre (10,775 people): Emberline WARNING at 7:00 pm, EVACUATE from the next hour, the satellite saw fire at the edge of town between 8 and 9 pm, and the first published evacuation order came at 9:26 pm, almost 2.5 hours after Emberline's warning.
 - 5 of 5 towns with published order times were flagged by Emberline before the official order (median about 0.4 hours, so usually around half an hour early); the fire reached 3 of them.
 - West Altadena's evacuation alert went out at 3:25 am on January 8, hours after fire was seen there (LA County investigation report). Do NOT claim Emberline would have warned west Altadena: the map treats Altadena as one town.
-- What-if: the same wind direction at 60 km/h instead of 29 km/h turns 6 towns in danger into 20.
+- What-if: the same wind direction at 60 km/h instead of 29 km/h turns 10 towns in danger into 20 (both are the model re-run; the replay's own list shows 6 because it stores only chances of 5% and up).
 
 # Against real evacuation orders, all 3 replay fires together
 - 9 towns have published order or warning times. Emberline flagged 8 of 9 first. The fire actually reached 5 of them, and Emberline flagged all 5 first (Chico +1.8 h, Cohasset +0.9 h, Sierra Madre +2.4 h, Pasadena +0.4 h, Altadena +0.4 h). The one it flagged later was Butte Meadows (1 hour later), which the fire never reached. Santa Monica (Palisades) was flagged 8.6 h early but the fire never reached it, so that early flag did not matter.
@@ -49,11 +49,17 @@ Why it is different: fire apps show where a fire is now; research models predict
 
 # Palisades Fire (Los Angeles, January 2025) is also in REPLAY.
 
+# Would it work in a real fire? (three checks, same model, no retraining)
+- Forecast weather: the test used ERA5 weather records made after each fire. Re-run with the archived weather forecast available at the time (Open-Meteo Historical Forecast API), and with the forecast from a day before, it still warned 18 of 20 towns about 2.8 hours early; spotting new fire 0.41-0.42; overlap 45-46%. Sierra Madre was still flagged 2.4 hours before its order, and every town the fire reached was still flagged first.
+- False alarms are gentle: 98.5% of the 1,301 false-alarm town-hours were WARNING ("get ready"). Only 19 town-hours were EVACUATE when the fire did not come within 3 hours.
+- Speed: a new satellite scan becomes a forecast with town and road checks in under a second of model time (about 4 seconds including download and a typical AI answer, under 20 seconds when the AI is slow). GOES publishes a new scan every 5 minutes.
+
 # Where it fails (be honest when asked)
 - More false alarms than the simple rule (on purpose).
 - Overall fire shape is only as good as "stays put".
 - The satellite sees 2 to 4 km pixels; smoke, clouds and night hide fire. Wind comes from one weather point per fire, so local gusts like Santa Ana winds are missed. Ember jumps beyond 6 km are missed.
 - Good satellite data only since 2018, so there are only so many fires to learn from.
+- The replay files keep only forecast chances of 5% and up (to stay small), while the WARNING cut-off is 1%. So the replay can show a WARNING up to an hour later than the model really gave it (for example Butte Meadows on the Park Fire). This makes the replay slightly conservative; the test scores use the full model.
 - Replays use historical weather records (ERA5), which are a bit better than the forecast crews had that night; the live app uses the Open-Meteo forecast. So replay results may be slightly better than real-time use would be.
 - Saved AI answers on the website cover the Park Fire's first 30 hours and the Eaton Fire's first hours; elsewhere the copilot says "AI offline" on the website (the full app makes new answers).
 
