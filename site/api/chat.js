@@ -13,7 +13,7 @@ import { KNOWLEDGE } from './_knowledge.js';
 const MODEL = process.env.EMBERLINE_ASSISTANT_MODEL || 'claude-sonnet-5-5';
 const MAX_TURNS = 12;          // last messages sent to the model
 const MAX_CHARS = 600;         // per visitor message
-const LIMIT_PER_IP = 40;       // messages per IP per warm instance per hour (the $ cap is the account credit)
+const LIMIT_PER_IP = 25;       // messages per IP per warm instance per hour (the $ cap is the account credit)
 
 const ACTION = {
   type: 'object', additionalProperties: false,
@@ -60,7 +60,7 @@ export async function askClaude(messages, screen, apiKey) {
   const withScreen = [...messages.slice(0, -1),
     { role: 'user', content: `${last.content}\n\n<screen>${JSON.stringify(screen || {}).slice(0, 4000)}</screen>` }];
   const base = {
-    model: MODEL, max_tokens: 1500,
+    model: MODEL, max_tokens: 1000,
     system: [{ type: 'text', text: KNOWLEDGE, cache_control: { type: 'ephemeral' } }],
     messages: withScreen,
   };

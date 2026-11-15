@@ -68,7 +68,7 @@ def chat(raw_messages, screen):
     import anthropic
     client = anthropic.Anthropic(max_retries=1, timeout=25)
     msgs[-1] = {"role": "user", "content": msgs[-1]["content"] + "\n\n<screen>" + json.dumps(screen or {})[:4000] + "</screen>"}
-    base = dict(model=MODEL, max_tokens=1500, messages=msgs,
+    base = dict(model=MODEL, max_tokens=1000, messages=msgs,
                 system=[{"type": "text", "text": KNOWLEDGE, "cache_control": {"type": "ephemeral"}}])
     try:
         # structured JSON answer, low effort (chat), server-side fallback model if Sonnet declines
