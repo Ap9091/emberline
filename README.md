@@ -85,10 +85,11 @@ Persistence cannot warn anyone, since it never predicts new fire, and it is hard
 
 **From prediction to decision.** On the three replay fires, nine towns have published evacuation order or warning times. Emberline flagged eight of them first, including all five towns the fire actually reached, by between 0.4 and 2.4 hours (Sierra Madre 2.4 h, Chico 1.8 h, Cohasset 0.9 h, Pasadena and Altadena 0.4 h each). The one it flagged later was Butte Meadows, by an hour, and the fire never reached it.
 
-**Does it hold up?** Three checks with the same model and no retraining:
+**Does it hold up?** Four checks with the same model and no retraining:
 
 - **With the forecast people really had.** The test used weather records made after each fire (ERA5). Re-run with the archived weather forecast from the time, and with the forecast from a day earlier, it still warned 18 of 20 towns 2.8 hours early, and Sierra Madre was still flagged 2.4 hours before its order ([results/weather_stress.md](results/weather_stress.md)).
 - **Its false alarms are mostly "get ready".** Of 1,301 false-alarm town-hours, 98.5% were WARNING; only 19 were EVACUATE ([results/false_alarms.json](results/false_alarms.json)).
+- **Its leave-by times and road calls held up.** Checked against the real fire on the three replay fires, the road Emberline recommended was still free of fire until the town's leave-by time in 354 of 358 cases (98.9%), the leave-by time came before the fire reached the town in 57 of 58 (98.3%), and roads it called open for three hours really stayed clear in 994 of 1,027 (96.8%). These are road-hours, and the same road appears in many hours, so they are not a thousand independent tests ([results/road_check.md](results/road_check.md)).
 - **It is fast enough.** A new scan becomes a forecast with town and road checks in under a second of model time, about four seconds with the download and a typical AI answer ([results/speed.json](results/speed.json)); a new scan arrives every five minutes.
 
 **What affects its accuracy.** Wind matters most: without the wind inputs, the model's skill at ranking new burning squares on the test fires dropped by about 20%, while removing terrain made almost no difference (measured with the boosted-tree version). Accuracy is lower at night (new-square F1 0.29 against 0.42 by day), when the fire is small (0.37 against 0.42 for large fires, with far more false alarms), and in extreme gusts, when nearly every square near the fire passes the low warning threshold.

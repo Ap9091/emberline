@@ -1,0 +1,196 @@
+{
+ "note": "Three replay fires (all test fires), every forecast hour with satellite data for the next 3 hours, every highway out of every town on EVACUATE or WARNING. Real fire = GOES fire squares at +1/+2/+3 h.",
+ "road_hours": 1314,
+ "said_open_3h_really_stayed_clear_3h": {
+  "n": 1027,
+  "yes": 994,
+  "share": 0.968
+ },
+ "said_usable_really_clear_that_long": {
+  "n": 1090,
+  "yes": 1048,
+  "share": 0.961
+ },
+ "said_cut_1h_really_reached_by_fire_1h": {
+  "n": 224,
+  "yes": 194,
+  "share": 0.866
+ },
+ "said_cut_1h_really_reached_by_fire_3h": {
+  "n": 224,
+  "yes": 198,
+  "share": 0.884
+ },
+ "recommended_road_clear_until_leave_by": {
+  "n": 358,
+  "yes": 354,
+  "share": 0.989
+ },
+ "leave_by_before_fire_arrived": {
+  "n": 58,
+  "yes": 57,
+  "share": 0.983
+ },
+ "misses": [
+  {
+   "fire": "park_fire_2024",
+   "hour": 1,
+   "town": "Chico",
+   "road": "State Hwy 32 (NE)",
+   "said_closes_h": null,
+   "real_closes_h": 1
+  },
+  {
+   "fire": "park_fire_2024",
+   "hour": 34,
+   "town": "Cohasset",
+   "road": "State Hwy 32 (S)",
+   "said_closes_h": null,
+   "real_closes_h": 2
+  },
+  {
+   "fire": "park_fire_2024",
+   "hour": 35,
+   "town": "Forest Ranch",
+   "road": "State Hwy 32 (SW)",
+   "said_closes_h": null,
+   "real_closes_h": 1
+  },
+  {
+   "fire": "park_fire_2024",
+   "hour": 35,
+   "town": "Cohasset",
+   "road": "State Hwy 32 (S)",
+   "said_closes_h": null,
+   "real_closes_h": 1
+  },
+  {
+   "fire": "park_fire_2024",
+   "hour": 51,
+   "town": "Butte Meadows",
+   "road": "State Hwy 32 (NE)",
+   "said_closes_h": null,
+   "real_closes_h": 2
+  },
+  {
+   "fire": "eaton_fire_2025",
+   "hour": 1,
+   "town": "Pasadena",
+   "road": "I-210 (E)",
+   "said_closes_h": null,
+   "real_closes_h": 2
+  },
+  {
+   "fire": "eaton_fire_2025",
+   "hour": 1,
+   "town": "Altadena",
+   "road": "I-210 (E)",
+   "said_closes_h": null,
+   "real_closes_h": 2
+  },
+  {
+   "fire": "eaton_fire_2025",
+   "hour": 1,
+   "town": "San Marino",
+   "road": "I-210 (E)",
+   "said_closes_h": null,
+   "real_closes_h": 2
+  },
+  {
+   "fire": "eaton_fire_2025",
+   "hour": 1,
+   "town": "Sierra Madre",
+   "road": "I-210 (W)",
+   "said_closes_h": null,
+   "real_closes_h": 2
+  },
+  {
+   "fire": "eaton_fire_2025",
+   "hour": 1,
+   "town": "East Pasadena",
+   "road": "I-210 (E)",
+   "said_closes_h": null,
+   "real_closes_h": 2
+  },
+  {
+   "fire": "eaton_fire_2025",
+   "hour": 1,
+   "town": "East Pasadena",
+   "road": "I-210 (NW)",
+   "said_closes_h": null,
+   "real_closes_h": 2
+  },
+  {
+   "fire": "eaton_fire_2025",
+   "hour": 1,
+   "town": "San Pasqual",
+   "road": "I-210 (E)",
+   "said_closes_h": null,
+   "real_closes_h": 2
+  },
+  {
+   "fire": "eaton_fire_2025",
+   "hour": 2,
+   "town": "Sierra Madre",
+   "road": "I-210 (E)",
+   "said_closes_h": null,
+   "real_closes_h": 3
+  },
+  {
+   "fire": "eaton_fire_2025",
+   "hour": 2,
+   "town": "Sierra Madre",
+   "road": "I-210 (W)",
+   "said_closes_h": null,
+   "real_closes_h": 1
+  },
+  {
+   "fire": "eaton_fire_2025",
+   "hour": 2,
+   "town": "Pasadena",
+   "road": "I-210 (E)",
+   "said_closes_h": null,
+   "real_closes_h": 1
+  },
+  {
+   "fire": "eaton_fire_2025",
+   "hour": 2,
+   "town": "Altadena",
+   "road": "I-210 (E)",
+   "said_closes_h": null,
+   "real_closes_h": 1
+  },
+  {
+   "fire": "eaton_fire_2025",
+   "hour": 2,
+   "town": "San Marino",
+   "road": "I-210 (E)",
+   "said_closes_h": null,
+   "real_closes_h": 1
+  },
+  {
+   "fire": "eaton_fire_2025",
+   "hour": 2,
+   "town": "East Pasadena",
+   "road": "I-210 (E)",
+   "said_closes_h": null,
+   "real_closes_h": 1
+  },
+  {
+   "fire": "eaton_fire_2025",
+   "hour": 2,
+   "town": "East Pasadena",
+   "road": "I-210 (NW)",
+   "said_closes_h": null,
+   "real_closes_h": 1
+  },
+  {
+   "fire": "eaton_fire_2025",
+   "hour": 2,
+   "town": "San Pasqual",
+   "road": "I-210 (E)",
+   "said_closes_h": null,
+   "real_closes_h": 1
+  }
+ ]
+}

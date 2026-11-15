@@ -67,6 +67,7 @@ Why it is different: fire apps show where a fire is now; research models predict
 - For every town on EVACUATE or WARNING, Emberline gives a "leave by" time: the earlier of when the fire may reach the town (its countdown) and when its best escape road is forecast to be cut (the road is checked against the forecast fire at +1, +2 and +3 hours). It uses only the forecast: no traffic, police closures or evacuation zones.
 - Eaton Fire at 7 pm: Sierra Madre should leave by about 8 pm; both directions of the I-210 stay clear of the forecast fire for at least 3 hours, so the deadline is the fire reaching the town.
 - If every highway out is cut within the hour, it says so and leaves the decision to a person.
+- Checked against the real fire on the three replay fires: the recommended road was still free of fire until the leave-by time in 354 of 358 cases (98.9%), the leave-by time came before the fire reached the town in 57 of 58 (98.3%), roads called open for 3 hours really stayed clear in 994 of 1,027 (96.8%), and roads called cut within the hour really had fire reach them within the hour in 194 of 224 (86.6%). These are road-hours (the same road appears in many hours), not independent tests.
 
 # The screens
 - STATE: every fire in California right now from the latest satellite scan, ranked.

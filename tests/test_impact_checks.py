@@ -42,3 +42,12 @@ def test_app_quotes_these_checks():
     for text in ("'18/20'", "'98%'", "'~4 s'", "Only 19 town-hours"):
         assert text in js, text
     assert "98.5% of the 1,301" in k and "18 of 20 towns about 2.8 hours early" in k
+
+
+def test_road_and_leave_by_check():
+    r = load("road_check.json")
+    assert (r["recommended_road_clear_until_leave_by"]["yes"], r["recommended_road_clear_until_leave_by"]["n"]) == (354, 358)
+    assert (r["leave_by_before_fire_arrived"]["yes"], r["leave_by_before_fire_arrived"]["n"]) == (57, 58)
+    assert (r["said_open_3h_really_stayed_clear_3h"]["yes"], r["said_open_3h_really_stayed_clear_3h"]["n"]) == (994, 1027)
+    readme = open(os.path.join(ROOT, "README.md"), encoding="utf-8").read()
+    assert "354 of 358 cases (98.9%)" in readme and "57 of 58 (98.3%)" in readme

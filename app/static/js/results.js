@@ -101,9 +101,11 @@ function realWorld() {
         'The test used weather records made after each fire. Re-run with the weather forecast available at the time (and even the one from a day before), it still warned 18 of 20 towns, 2.8 hours early.'),
       card('Its false alarms are gentle', '98%',
         'Of all the false alarms on the 18 test fires, 98% were WARNING ("get ready"). Only 19 town-hours said EVACUATE when the fire did not come.'),
+      card('Its leave-by times held up', '98.9%',
+        'On the three replay fires, the road Emberline recommended was still free of real fire until the leave-by time in 354 of 358 cases, and the leave-by time came before the fire in 57 of 58.'),
       card('It is fast enough', '~4 s',
         'From a new satellite scan to a forecast, town and road checks and a checked AI plan: about 4 seconds typically, under 20 when the AI is slow. A new scan comes every 5 minutes.')),
-    h('div', { class: 'src' }, 'Same model, no retraining. Files: results/weather_stress.json, false_alarms.json, speed.json.'));
+    h('div', { class: 'src' }, 'Same model, no retraining. Files: results/weather_stress.json, false_alarms.json, road_check.json, speed.json.'));
 }
 
 function summary() {
