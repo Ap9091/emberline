@@ -217,7 +217,7 @@ const STEPS = [
       d.beat(1);
       if (!await d.wait(1600)) return;
       // the demo changes the wind itself (so the map is always right); the guide only explains it
-      if (!phone) ask('What happens if the wind doubles?', { fromDemo: true, actions: false });
+      if (!phone) ask('What happens if the wind doubles to 60 km/h?', { fromDemo: true, actions: false });
       if (!await d.wait(1600)) return;
       d.focus(R.state.slots.whatif);
       await R.wind(R.state.sit.wind.from_deg, 60);
