@@ -70,7 +70,7 @@ const STEPS = [
         key('fire', b('Red'), ': burning now'),
         key('forecast', b('Orange'), ': may burn soon (darker = more likely)'),
         key('ring', b('Dotted lines'), ': where the edge should be in 1, 2 and 3 hours'))),
-      why('Towns see the danger before it arrives. The model learned from ', b('40 past California fires'),
+      why('Towns see the danger before it arrives. The model learned from ', b('38 past California fires'),
         ', using wind, slopes, plants and how dry the air is.')],
     async run(d) {
       await d.replay(EATON, 2, { fire: true, forecast: true });
@@ -192,7 +192,7 @@ const STEPS = [
   },
   {
     title: 'Not one lucky fire: we tested 18',
-    body: () => [see('The dots are ', b('18 fires from 2024 and 2025 the model never saw'), '. We trained on 40 older fires, then compared it with two simple guesses:'),
+    body: () => [see('The dots are ', b('18 fires from 2024 and 2025 the model never saw'), '. We trained on 38 older fires, then compared it with two simple guesses:'),
       h('table', { class: 'dm-table' },
         h('thead', {}, h('tr', {}, h('th'), h('th', { class: 'ours' }, 'Emberline'), h('th', {}, 'Grows 1 km/h'), h('th', {}, 'Stays put'))),
         h('tbody', {},
@@ -464,7 +464,7 @@ function showHowTo() {
       h('h1', {}, 'How Emberline works'),
       h('ol', { class: 'howto-list' },
         h('li', {}, h('b', {}, 'Watch. '), 'The GOES-18 weather satellite photographs California every 5–10 minutes. Hot spots = fire.'),
-        h('li', {}, h('b', {}, 'Forecast. '), 'A model trained on 40 past fires uses wind, slope, plants and dryness to colour the squares likely to burn in the next 1–3 hours.'),
+        h('li', {}, h('b', {}, 'Forecast. '), 'A model trained on 38 past fires uses wind, slope, plants and dryness to colour the squares likely to burn in the next 1–3 hours.'),
         h('li', {}, h('b', {}, 'Warn. '), 'Towns near those squares get EVACUATE, WARNING or MONITOR, with a countdown.'),
         h('li', {}, h('b', {}, 'Check the roads. '), 'An AI drafts the evacuation plan. Plain code rejects any road the fire is about to cross.'),
         h('li', {}, h('b', {}, 'A person decides. '), 'Nothing is sent until a human approves it.')),

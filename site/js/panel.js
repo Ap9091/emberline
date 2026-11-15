@@ -78,9 +78,13 @@ export function numbersCard(sit, modelName) {
 
 // 4. town countdowns
 const ETA_TEXT = { 0: 'fire at town', 1: 'fire in < 1 h', 2: 'fire in ~2 h', 3: 'fire in ~3 h' };
+// WARNING towns are flagged by a small chance (the 0.01 town cut-off), so their hour is when fire becomes possible
+const MAYBE_TEXT = { 1: 'possible in < 1 h', 2: 'possible in ~2 h', 3: 'possible in ~3 h' };
 
 export function etaText(t) {
-  return t.eta_h === null || t.eta_h === undefined ? `${fmt1(t.dist_km)} km from fire` : ETA_TEXT[t.eta_h] || `fire in ~${t.eta_h} h`;
+  if (t.eta_h === null || t.eta_h === undefined) return `${fmt1(t.dist_km)} km from fire`;
+  if (t.status === 'WARNING') return MAYBE_TEXT[t.eta_h] || `possible in ~${t.eta_h} h`;
+  return ETA_TEXT[t.eta_h] || `fire in ~${t.eta_h} h`;
 }
 
 function exitRows(sit, town) {

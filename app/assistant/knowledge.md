@@ -25,7 +25,7 @@ Why it is different: fire apps show where a fire is now; research models predict
 
 # The model
 - A logistic regression (simple and explainable). We also tried gradient-boosted trees: on the tuning fires they scored a little better square by square, but warned fewer towns (87% vs 93%). The decision is about towns, so we kept the simpler model, which is also easier to explain.
-- Trained on 40 California fires from 2018 to 2022 (237,225 examples: one 2 km square at one hour; 355,483 in the whole dataset with the tuning and test fires). Settings tuned on 12 fires from 2023 (plus cross-validation by fire on the training fires). Tested on 18 fires from 2024 and 2025 that it never saw. Honest detail: the first test run exposed three bugs (other fires inside a fire's box, one cut-off hiding new spread, too few tuning towns); we fixed them, re-ran the test once, and kept the first run's results in the repo (results/phase3_run1_*).
+- Trained on 38 California fires from 2018 to 2022 (40 were picked, 2 had no usable satellite data; 237,225 examples: one 2 km square at one hour; 355,483 in the whole dataset with the tuning and test fires). Settings tuned on 12 fires from 2023 (plus cross-validation by fire on the training fires). Tested on 18 fires from 2024 and 2025 that it never saw. Honest detail: the first test run exposed three bugs (other fires inside a fire's box, one cut-off hiding new spread, too few tuning towns); we fixed them, re-ran the test once, and kept the first run's results in the repo (results/phase3_run1_*).
 - Each hour it gives every square near the fire a chance of burning in the next hour, then rolls forward to +2 and +3 hours.
 
 # Test results on the 18 unseen fires (compared with two simple guesses)
@@ -43,7 +43,7 @@ Why it is different: fire apps show where a fire is now; research models predict
 - What-if: the same wind direction at 60 km/h instead of 29 km/h turns 10 towns in danger into 20 (both are the model re-run; the replay's own list shows 6 because it stores only chances of 5% and up).
 
 # Against real evacuation orders, all 3 replay fires together
-- 9 towns have published order or warning times. Emberline flagged 8 of 9 first. The fire actually reached 5 of them, and Emberline flagged all 5 first (Chico +1.8 h, Cohasset +0.9 h, Sierra Madre +2.4 h, Pasadena +0.4 h, Altadena +0.4 h). The one it flagged later was Butte Meadows (1 hour later), which the fire never reached. Santa Monica (Palisades) was flagged 8.6 h early but the fire never reached it, so that early flag did not matter.
+- 9 towns have published order or warning times. Emberline flagged 8 of 9 first. The fire actually reached 5 of them, and Emberline flagged all 5 first (Chico +1.8 h, Cohasset +0.9 h, Sierra Madre +2.4 h, Pasadena +0.4 h, Altadena +0.4 h). The one flagged later in the saved replay was Butte Meadows (1 hour later), which the fire never reached. The full model, before the replay files were trimmed to chances of 5% and up, flags it an hour early (9 of 9), and with forecast weather it is 8 of 9, so 8 of 9 is the cautious count. Santa Monica (Palisades) was flagged 8.6 h early but the fire never reached it, so that early flag did not matter.
 
 # The Park Fire (Butte County, July 2024)
 - At 3 pm on July 24 the AI first sent Butte Creek Canyon out on State Hwy 32 west, but that road ran into the forecast fire 4.4 km from town, so the code REJECTED the plan. The second plan used Hwy 32 north and passed. 2 of 3 towns with official times were flagged earlier.

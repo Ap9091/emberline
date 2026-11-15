@@ -337,7 +337,7 @@ export class MapView {
     this._fadeTimer = setTimeout(() => {
       const start = performance.now();
       const step = now => {
-        const t = Math.min(1, (now - start) / SPLIT_FADE.durationMs);
+        const t = Math.max(0, Math.min(1, (now - start) / SPLIT_FADE.durationMs));   // the frame clock can start just before `start`
         setOpacity(SPLIT_FADE.opacity * t);
         if (t < 1) this._fadeFrame = requestAnimationFrame(step);
       };

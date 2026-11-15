@@ -134,7 +134,7 @@ const FAQ = [
     [A('show', 'results')], ['Where does it fail?', 'Show the Eaton Fire']],
   [/fail|limit|wrong|weak|bad|problem/i, 'It gives more false alarms than a simple rule, on purpose, because missing a town is worse. For the overall fire shape it is only as good as "the fire stays put". And the satellite sees 2 km squares, so smoke, clouds and night can hide fire.',
     [], ['How accurate is it?', 'What data does it use?']],
-  [/data|satellite|source|weather|train|learn|model|work/i, 'The fire comes from the NOAA GOES weather satellite (every 5 minutes). Weather from Open-Meteo, slopes from terrain maps, plants from ESA WorldCover, towns and roads from the US Census. The model learned from 40 fires (2018 to 2022) and was tested on 18 newer ones.',
+  [/data|satellite|source|weather|train|learn|model|work/i, 'The fire comes from the NOAA GOES weather satellite (every 5 minutes). Weather from Open-Meteo, slopes from terrain maps, plants from ESA WorldCover, towns and roads from the US Census. The model learned from 38 fires (2018 to 2022) and was tested on 18 newer ones.',
     [], ['How accurate is it?', 'Show the forecast']],
   [/bar|timeline|bottom|tick/i, 'The bar at the bottom shows the whole fire from left to right. Orange ticks are when Emberline first warned a town, red ticks are when the fire reached a town, white ticks are official orders, and the brown hill is the fire size.',
     [A('show', 'timeline')], ['Show the official orders', 'How accurate is it?']],
