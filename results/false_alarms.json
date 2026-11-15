@@ -1,0 +1,22 @@
+{
+ "note": "Town-hours on EVACUATE or WARNING on the 18 test fires (fire not already at the town), and whether the fire reached the town within the next 3 hours. Same rules as the app.",
+ "by_status": {
+  "EVACUATE": {
+   "town_hours": 32,
+   "fire_came_within_3h": 13,
+   "share_fire_came": 0.406,
+   "false_alarm_town_hours": 19
+  },
+  "WARNING": {
+   "town_hours": 1361,
+   "fire_came_within_3h": 79,
+   "share_fire_came": 0.058,
+   "false_alarm_town_hours": 1282
+  }
+ },
+ "false_alarms": {
+  "total_town_hours": 1301,
+  "share_warning": 0.985,
+  "share_evacuate": 0.015
+ }
+}

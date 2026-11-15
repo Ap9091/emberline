@@ -1,0 +1,18 @@
+{
+ "scan": {
+  "scan_time_utc": "2026-11-15 01:11:17+00:00",
+  "list_s": 1.34,
+  "download_s": 0.22,
+  "read_s": 1.5,
+  "fire_pixels_in_california": 3
+ },
+ "forecast_towns_roads_s": 0.08,
+ "safety_check_ms": 0.0,
+ "ai_answer_s": {
+  "median": 2.1,
+  "p90": 16.2,
+  "n": 141
+ },
+ "scan_to_checked_plan_s": 3.9,
+ "note": "One run on a cloud machine. The satellite publishes a new California fire scan every 5 minutes; Emberline needs scan_to_checked_plan_s seconds to turn it into a forecast and a checked AI plan."
+}
