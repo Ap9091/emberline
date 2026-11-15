@@ -805,3 +805,13 @@ body:has(#app[data-mode="replay"]) #as-box { bottom: calc(var(--timeline-h) + 12
 .rw-card { background: var(--bg-0); border: 1px solid var(--line); border-radius: 6px; padding: 12px; display: grid; gap: 6px; align-content: start; }
 .rw-big { font-size: 26px; font-weight: 600; color: var(--ring); line-height: 1; }
 @media (max-width: 800px) { .rw-grid { grid-template-columns: 1fr; } }
+
+/* ── 19. leave-by times (js/leaveby.js) ───────────────────────────────────── */
+.town-row .town-eta { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 8px; }
+.town-leave { font: 600 10.5px var(--mono); color: var(--ring); letter-spacing: .02em; }
+.town-leave.lb-human { color: var(--evacuate); }
+.town-leave.lb-open { color: var(--text-3); font-weight: 500; }
+.leave-by { font-size: 12px; line-height: 1.4; color: var(--text); background: rgba(240, 140, 46, .1); border-left: 3px solid var(--ring);
+  padding: 6px 8px; margin-bottom: 6px; border-radius: 0 4px 4px 0; }
+.leave-by.lb-human, .leave-by.lb-now { border-left-color: var(--evacuate); background: rgba(214, 69, 65, .12); }
+.exit-row.closing .exit-state { color: var(--warning); }

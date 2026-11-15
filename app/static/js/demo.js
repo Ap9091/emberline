@@ -116,7 +116,8 @@ const STEPS = [
         num('1', b('People'), ': how many live there'),
         num('2', b('Chance'), ': how likely the fire reaches it in 3 hours'),
         num('3', b('Dist.'), ': how far the fire is now')),
-      why('People get a clear answer, leave now or get ready, not just a map.')],
+      h('div', { class: 'dm-honest' }, b('Leave by about 8 pm. '), 'Both directions of the I-210 stay clear of the forecast fire for at least 3 hours, so the deadline is the fire reaching town.'),
+      why('People get a clear answer, when to leave and which road, not just a map.')],
     async run(d) {
       await d.replay(EATON, 2, { fire: true, forecast: true });
       R.town('Sierra Madre');

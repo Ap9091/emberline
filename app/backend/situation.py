@@ -184,12 +184,18 @@ def build(*, fire_id, name, mode, time_utc, xmin, ymax, now, ever, probs, grow, 
             opts = []
             for ex in roads.exits_for(float(x), float(y)):
                 b1 = roads.blocked(ex, danger_1h, xmin, ymax)
+                # when the forecast fire first reaches the road: within 1, 2 or 3 hours (None = open 3 h+)
+                within_2h = now.copy()
+                for ring in rings[:2]:
+                    within_2h |= ring
+                b2 = roads.blocked(ex, within_2h, xmin, ymax)
                 later = now.copy()
                 for ring in rings:
                     later |= ring
                 b3 = roads.blocked(ex, later, xmin, ymax)
                 opts.append({"id": ex["id"], "road": ex["road"], "direction": ex["direction"],
-                             "length_km": ex["length_km"], "blocked_1h_at_km": b1, "blocked_3h_at_km": b3})
+                             "length_km": ex["length_km"], "blocked_1h_at_km": b1, "blocked_2h_at_km": b2,
+                             "blocked_3h_at_km": b3})
                 exits_geo.append(roads.exit_geojson(ex, {"town": tw["name"], "blocked_1h": b1 is not None,
                                                          "blocked_3h": b3 is not None}))
             exits_out[tw["name"]] = opts

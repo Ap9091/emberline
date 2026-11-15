@@ -63,6 +63,11 @@ Why it is different: fire apps show where a fire is now; research models predict
 - Replays use historical weather records (ERA5), which are a bit better than the forecast crews had that night; the live app uses the Open-Meteo forecast. So replay results may be slightly better than real-time use would be.
 - The copilot on the website is a hybrid: saved Gemini answers where they exist (the Park Fire's first 30 hours and the Eaton Fire's first 11, including the Park plan that was rejected), and live Claude Sonnet 5.5 for every other hour and every what-if wind. Every plan, saved or live, goes through the same code safety check. On the claude.ai copy of the page there is no server, so only saved answers work there.
 
+# Leave-by times
+- For every town on EVACUATE or WARNING, Emberline gives a "leave by" time: the earlier of when the fire may reach the town (its countdown) and when its best escape road is forecast to be cut (the road is checked against the forecast fire at +1, +2 and +3 hours). It uses only the forecast: no traffic, police closures or evacuation zones.
+- Eaton Fire at 7 pm: Sierra Madre should leave by about 8 pm; both directions of the I-210 stay clear of the forecast fire for at least 3 hours, so the deadline is the fire reaching the town.
+- If every highway out is cut within the hour, it says so and leaves the decision to a person.
+
 # The screens
 - STATE: every fire in California right now from the latest satellite scan, ranked.
 - INCIDENT: one fire up close with the copilot (briefing, plan, safety check, alert draft).

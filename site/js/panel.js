@@ -4,6 +4,7 @@
 // The AI part (briefing, plan, alert, event log) is in copilot.js.
 // ─────────────────────────────────────────────────────────────────────────────
 import { h, fill, fmtInt, fmtKm2, fmt1, fmtPct, utcHM, localHMZone, compass, windArrow } from './util.js';
+import { leaveBy, roadClosesH, roadLabel } from './leaveby.js';
 
 /** A panel section: small-caps title, optional source caption on the right, then the content. */
 export function section(title, caption, ...body) {
@@ -86,23 +87,32 @@ export function etaText(t) {
 
 function exitRows(sit, town) {
   const exits = sit.exits?.[town] || [];
-  if (!exits.length) return h('div', { class: 'exit-list' }, h('div', { class: 'exit-row muted' }, 'No highway exit near this town (local roads only).'));
-  return h('div', { class: 'exit-list' },
-    exits.map(e => h('div', { class: 'exit-row' + (e.blocked_1h_at_km !== null ? ' blocked' : '') },
+  const lb = leaveBy(sit, town);
+  const advice = lb ? h('div', { class: 'leave-by lb-' + lb.kind }, lb.text) : null;
+  if (!exits.length) return h('div', { class: 'exit-list' }, advice, h('div', { class: 'exit-row muted' }, 'No highway exit near this town (local roads only).'));
+  return h('div', { class: 'exit-list' }, advice,
+    exits.map(e => h('div', { class: 'exit-row' + (roadClosesH(e) === 1 ? ' blocked' : roadClosesH(e) ? ' closing' : '') },
       h('span', { class: 'exit-swatch' }),
       h('span', { class: 'exit-name' }, e.id),
       h('span', { class: 'mono exit-len' }, `${fmt1(e.length_km)} km`),
-      h('span', { class: 'mono exit-state' },
-        e.blocked_1h_at_km !== null ? `fire +1 h at ${fmt1(e.blocked_1h_at_km)} km`
-          : e.blocked_3h_at_km !== null ? `clear 1 h · fire +3 h at ${fmt1(e.blocked_3h_at_km)} km` : 'clear'))),
-    src('Roads: Census TIGER 2024 · checked against fire now and +1 h forecast'));
+      h('span', { class: 'mono exit-state' }, roadLabel(e)))),
+    src('Roads: Census TIGER 2024 · checked against the fire now and the +1, +2, +3 h forecast · traffic not included'));
+}
+
+/** Small "leave by 20:00" line under a town's countdown. */
+function leaveTag(sit, t) {
+  const lb = leaveBy(sit, t.name);
+  if (!lb) return null;
+  const text = lb.kind === 'now' ? 'leave now' : lb.kind === 'human' ? 'no clear road' : lb.kind === 'open' ? 'roads open 3 h+'
+    : `leave by ${lb.by || `+${lb.hours} h`}`;
+  return h('span', { class: 'town-leave lb-' + lb.kind }, text);
 }
 
 function townRow(sit, t, selected, onSelect) {
   const row = h('button', { class: 'town-row' + (selected ? ' selected' : ''), 'data-status': t.status, onclick: () => onSelect(selected ? null : t.name) },
     h('span', { class: 'chip-status', 'data-status': t.status }, t.status),
     h('span', { class: 'town-name' }, t.name),
-    h('span', { class: 'town-eta' }, etaText(t)),
+    h('span', { class: 'town-eta' }, etaText(t), leaveTag(sit, t)),
     h('span', { class: 'town-meta mono' },
       h('span', { title: 'Residents (Census)' }, fmtInt(t.population)),
       h('span', { title: 'Chance that fire reaches the town within 3 h (model)' }, fmtPct(t.chance_3h)),

@@ -11,6 +11,7 @@
 import { app } from './app.js';
 import { h, fill, $, sleep } from './util.js';
 import { replayApi as R } from './mode_replay.js';
+import { leaveBy } from './leaveby.js';
 
 const MAX_PER_SESSION = 30;
 const STARTERS = ['What am I looking at?', 'How accurate is it?', 'Show me the AI plan that got rejected', 'What if the wind doubled?'];
@@ -28,7 +29,7 @@ function screen() {
       out.wind = sit.wind;
       out.forecast_area_km2 = sit.numbers?.forecast_area_km2;
       out.towns_in_danger = (sit.towns || []).filter(t => t.status !== 'MONITOR').slice(0, 8)
-        .map(t => ({ name: t.name, status: t.status, eta_h: t.eta_h, people: t.population }));
+        .map(t => { const lb = leaveBy(sit, t.name); return { name: t.name, status: t.status, eta_h: t.eta_h, people: t.population, leave_by: lb?.text || null }; });
       const v = sit.verification?.[2];
       if (v?.ok) out.check_3h = { hit: v.model.all.tp, missed: v.model.all.fn, false_alarm: v.model.all.fp };
     }

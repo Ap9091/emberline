@@ -18,9 +18,9 @@ Emberline is for one person: the county emergency manager or incident commander 
 
 **What goes in:** the fire as the GOES-18 weather satellite sees it every five minutes, the wind and humidity, the slope of the land, what is growing on it, where the towns are, and the main highways out of each town.
 
-**What comes out:** a forecast of where the fire will be in 1, 2 and 3 hours, a status for every nearby town (EVACUATE, WARNING or MONITOR, with a countdown), whether each escape road is clear or about to be cut off, and an evacuation plan drafted by an AI and checked by plain code before a person approves it.
+**What comes out:** a forecast of where the fire will be in 1, 2 and 3 hours, a status for every nearby town (EVACUATE, WARNING or MONITOR, with a countdown), a "leave by" time for each town (the earlier of the fire reaching it and its best escape road being cut), whether each escape road is clear or about to be cut off, and an evacuation plan drafted by an AI and checked by plain code before a person approves it.
 
-**A real input and its result.** At 7 pm on January 7, 2025, the Eaton Fire covered 44 km² (11 squares of 2 km), the wind was 29 km/h from the north-northeast with gusts near 100 km/h, and the humidity was 24%. Emberline forecast 52 km² burning by 10 pm, told Sierra Madre (10,775 people) to evacuate, put Pasadena, Altadena, San Marino, East Pasadena and San Pasqual on WARNING, and showed both directions of the I-210 out of Sierra Madre as clear. The official order for Sierra Madre came at 9:26 pm.
+**A real input and its result.** At 7 pm on January 7, 2025, the Eaton Fire covered 44 km² (11 squares of 2 km), the wind was 29 km/h from the north-northeast with gusts near 100 km/h, and the humidity was 24%. Emberline forecast 52 km² burning by 10 pm, told Sierra Madre (10,775 people) to evacuate, put Pasadena, Altadena, San Marino, East Pasadena and San Pasqual on WARNING, and showed both directions of the I-210 out of Sierra Madre clear for at least three hours, so Sierra Madre should leave by about 8 pm. The official order for Sierra Madre came at 9:26 pm.
 
 The app has three views (STATE: all of California, INCIDENT: one fire up close, REPLAY: three real fires hour by hour), a two-minute guided demo written for someone who knows nothing about wildfires, and an "Ask Emberline" guide that answers questions in plain words and moves the app to the answer. On the website, the copilot runs live with Claude Sonnet 5.5 for any hour of any fire, including what-if winds, and every plan it writes goes through the same code safety check.
 
@@ -110,7 +110,7 @@ Emberline is a research prototype. In a real fire, follow official orders.
 
 ## What we'd do next
 
-1. **Use official evacuation zones instead of town centres**, since counties issue orders by zone, and add a "leave by" time for each zone from when the forecast fire reaches each escape road.
+1. **Use official evacuation zones instead of town centres**, since counties issue orders by zone, and add traffic to the leave-by times, which today come from the fire forecast alone.
 2. **Run it beside a county emergency office during a live fire**, without sending anything, to see whether its warnings arrive early enough to change a decision; with that, finer winds (3 km instead of one point per fire) and VIIRS satellite passes to separate nearby fires.
 
 ## Sources

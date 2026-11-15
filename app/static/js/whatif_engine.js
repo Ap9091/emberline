@@ -199,6 +199,7 @@ export function scenario(F, M, base, h, fromDeg, speedKmh) {
     rings.push(ring);
   }
   const danger = now.map((v, i) => v || rings[0][i]);
+  const within2h = now.map((v, i) => v || rings[0][i] || rings[1][i]);
   const later = now.map((v, i) => v || rings[0][i] || rings[1][i] || rings[2][i]);
 
   // town countdowns (port of situation.town_statuses)
@@ -236,10 +237,10 @@ export function scenario(F, M, base, h, fromDeg, speedKmh) {
     if (status === 'EVACUATE' || status === 'WARNING') {
       exits[t.name] = t.exits.map(ex => {
         const firstHit = mask => { for (const [r, c, km] of ex.path) if (mask[r * N + c]) return round(km, 1); return null; };
-        const b1 = firstHit(danger), b3 = firstHit(later);
+        const b1 = firstHit(danger), b2 = firstHit(within2h), b3 = firstHit(later);
         exitFeatures.push({ type: 'Feature', properties: { id: ex.id, town: t.name, blocked_1h: b1 !== null, blocked_3h: b3 !== null },
           geometry: { type: 'LineString', coordinates: ex.coords } });
-        return { id: ex.id, road: ex.road, direction: ex.direction, length_km: ex.length_km, blocked_1h_at_km: b1, blocked_3h_at_km: b3 };
+        return { id: ex.id, road: ex.road, direction: ex.direction, length_km: ex.length_km, blocked_1h_at_km: b1, blocked_2h_at_km: b2, blocked_3h_at_km: b3 };
       });
     }
   }
