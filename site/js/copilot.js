@@ -207,7 +207,9 @@ export class Copilot {
     else if (b.state === 'error') body = h('div', { class: 'note note-red' }, `Briefing failed: ${b.error}`);
     else if (b.state === 'done') {
       const lines = String(b.data.text || '').split('\n').map(s => s.trim()).filter(Boolean).map(s => s.replace(/^[-•]\s*/, ''));
-      body = h('ul', { class: 'briefing' }, lines.map(l => h('li', {}, l)));
+      // models sometimes add **bold** markers: show them as bold text, never as raw asterisks
+      const rich = l => l.split(/\*\*(.+?)\*\*/g).map((part, i) => (i % 2 ? h('b', {}, part) : part.replace(/\*\*/g, '')));
+      body = h('ul', { class: 'briefing' }, lines.map(l => h('li', {}, rich(l))));
     }
     return section('AI situation briefing', b.state === 'done' ? this._aiMeta(b.data) : null, body);
   }
