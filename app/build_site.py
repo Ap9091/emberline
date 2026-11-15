@@ -193,6 +193,8 @@ def write_vercel_api():
     # the live copilot (any hour without a saved answer, and what-if winds), with the same code safety check
     shutil.copy2(os.path.join(here, "assistant", "copilot_vercel.js"), os.path.join(OUT, "api", "copilot.js"))
     shutil.copy2(os.path.join(here, "assistant", "copilot_core.js"), os.path.join(OUT, "api", "_copilot_core.js"))
+    # Emberline's voice (ElevenLabs; the key is ELEVENLABS_API_KEY in Vercel's settings, never in the repo)
+    shutil.copy2(os.path.join(here, "assistant", "speak_vercel.js"), os.path.join(OUT, "api", "speak.js"))
     with open(os.path.join(here, "assistant", "knowledge.md"), encoding="utf-8") as f:
         knowledge = f.read()
     with open(os.path.join(OUT, "api", "_knowledge.js"), "w", encoding="utf-8") as f:
@@ -203,7 +205,8 @@ def write_vercel_api():
                    "dependencies": {"@anthropic-ai/sdk": "1.3.0"}}, f, indent=2)
         f.write("\n")
     with open(os.path.join(OUT, "vercel.json"), "w") as f:
-        json.dump({"functions": {"api/chat.js": {"maxDuration": 30}, "api/copilot.js": {"maxDuration": 60}}}, f, indent=2)
+        json.dump({"functions": {"api/chat.js": {"maxDuration": 30}, "api/copilot.js": {"maxDuration": 60},
+                                "api/speak.js": {"maxDuration": 20}}}, f, indent=2)
         f.write("\n")
 
 

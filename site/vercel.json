@@ -5,6 +5,9 @@
     },
     "api/copilot.js": {
       "maxDuration": 60
+    },
+    "api/speak.js": {
+      "maxDuration": 20
     }
   }
 }

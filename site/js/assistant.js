@@ -16,7 +16,7 @@ const MAX_PER_SESSION = 30;
 const STARTERS = ['Give me a 3D tour', 'How accurate is it?', 'Show me the AI plan that got rejected', 'What if the wind doubled?'];
 
 const ui = { open: false, busy: false, history: [], box: null, list: null, input: null, offline: false, demo: null,
-             speak: false, mic: null, micBtn: null, speakBtn: null };      // speak = read answers aloud (speech.js)
+             speak: false, mic: null, micBtn: null, speakBtn: null, toast: null, toastTimer: null };   // speak = read answers aloud (speech.js)
 
 // what is on screen (sent with every question)
 function screen() {
@@ -195,6 +195,9 @@ export async function ask(text, { fromDemo = false, actions = true, voice = fals
   addMsg('bot', out.reply, out.suggestions, source);
   ui.busy = false; drawInput();
   // read the answer aloud when asked out loud, or when the speaker is on ('short' = the first two sentences, for the demo)
+  // when the answer moves the app, the chat steps aside so it never covers what it just showed: a short note stays
+  // above the Ask button instead (open the chat again for the whole conversation)
+  if (actions && !fromDemo && out.actions?.length) { setOpen(false); showToast(out.reply); }
   const talk = speak ?? (voice || ui.speak);
   if (talk) say(talk === 'short' ? (out.reply.match(/[^.!?]+[.!?]+/g) || [out.reply]).slice(0, 2).join(' ') : out.reply);
   if (actions) await runActions(out.actions, { fromDemo });     // the demo moves the map itself, so it can turn these off
@@ -221,10 +224,27 @@ function drawInput() {
 
 export function setOpen(open) {
   ui.open = open;
+  if (open) hideToast();
   if (!open) { hush(); ui.mic?.stop?.(); }
   ui.box.hidden = !open;
   $('#as-launch').classList.toggle('on', open);
   if (open) { ui.list.scrollTop = ui.list.scrollHeight; if (typeHere()) ui.input.focus({ preventScroll: true }); }
+}
+
+function showToast(text) {
+  hideToast();
+  ui.toast = h('div', { id: 'as-toast', role: 'status' },
+    h('div', { class: 'as-toast-head' }, h('b', {}, '✦ Emberline'),
+      h('button', { class: 'as-toast-open', onclick: () => setOpen(true) }, 'Open chat'),
+      h('button', { class: 'as-x', title: 'Hide', onclick: hideToast }, '✕')),
+    h('div', { class: 'as-toast-text' }, text));
+  document.body.append(ui.toast);
+  ui.toastTimer = setTimeout(hideToast, 15000);
+}
+
+function hideToast() {
+  clearTimeout(ui.toastTimer);
+  ui.toast?.remove(); ui.toast = null;
 }
 
 function drawSpeak() {

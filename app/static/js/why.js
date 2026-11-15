@@ -25,7 +25,7 @@ export async function showWhy(fireId, hour, where, { note = null } = {}) {
   catch { e = { ok: false, why: 'error' }; }
   closeWhy();
   const at = e.ok ? e.centre : [where.lon, where.lat];
-  popup = new maplibregl.Popup({ className: 'why-pop', maxWidth: '340px', offset: 12, focusAfterOpen: false })
+  popup = new maplibregl.Popup({ className: 'why-pop', maxWidth: '300px', offset: 14, focusAfterOpen: false })
     .setLngLat(at).setDOMContent(e.ok ? card(e, note) : h('div', { class: 'why-msg' }, MSG[e.why] || MSG.error)).addTo(app.view.map);
   popup.on('close', () => { if (popup) { popup = null; app.view.setWhySquare(null); } });
   if (e.ok) app.view.setWhySquare(e.square);

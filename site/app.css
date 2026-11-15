@@ -832,17 +832,18 @@ body:has(#app[data-mode="replay"]) #as-box { bottom: calc(var(--timeline-h) + 12
 .exit-row.closing .exit-state { color: var(--warning); }
 
 /* 20. "Why this square?" popup (why.js) */
+.maplibregl-popup.why-pop { z-index: 12; }                       /* above the town labels and pins */
 .why-pop .maplibregl-popup-content { background: var(--bg-1); color: var(--text); border: 1px solid #7a4a1c; border-radius: 8px;
-  padding: 12px 14px 11px; box-shadow: 0 10px 30px rgba(0, 0, 0, .55); font-family: var(--sans); }
+  padding: 10px 12px 9px; box-shadow: 0 10px 30px rgba(0, 0, 0, .55); font-family: var(--sans); }
 .why-pop .maplibregl-popup-tip { display: none; }
 .why-pop .maplibregl-popup-close-button { color: var(--text-3); font-size: 17px; padding: 2px 7px; }
 .why-head { font: 600 11px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ring); margin-bottom: 3px; }
 .why-p { font-size: 12.5px; color: var(--text-2); }
-.why-p b { font-size: 22px; color: var(--text); margin-right: 3px; }
-.why-sub { font-size: 11.5px; color: var(--text-3); margin: 1px 0 8px; }
-.why-list { display: grid; gap: 4px; }
-.why-row { display: grid; grid-template-columns: 1fr 84px 40px; align-items: center; gap: 2px 7px; font-size: 12px; color: var(--text);
-  padding: 3px 6px; border-radius: 4px; border-left: 2px solid transparent; transition: background .3s, border-color .3s; }
+.why-p b { font-size: 20px; color: var(--text); margin-right: 3px; }
+.why-sub { font-size: 11px; color: var(--text-3); margin: 0 0 6px; }
+.why-list { display: grid; gap: 1px; }
+.why-row { display: grid; grid-template-columns: 1fr 70px 38px; align-items: center; gap: 0 7px; font-size: 11.5px; color: var(--text);
+  padding: 2px 6px; border-radius: 4px; border-left: 2px solid transparent; transition: background .3s, border-color .3s; }
 .why-row.on { background: rgba(255, 180, 84, .12); border-left-color: var(--ring); }
 .why-bar { height: 7px; background: var(--bg-0); border-radius: 4px; overflow: hidden; }
 .why-bar i { display: block; height: 100%; border-radius: 4px; }
@@ -851,9 +852,9 @@ body:has(#app[data-mode="replay"]) #as-box { bottom: calc(var(--timeline-h) + 12
 .why-n { text-align: right; font-size: 11.5px; }
 .why-row.up .why-n { color: #ff9a55; }
 .why-row.down .why-n { color: #8dbcf0; }
-.why-fact { grid-column: 1 / -1; font-size: 11px; color: var(--text-3); }
+.why-fact { grid-column: 1 / -1; font-size: 10.5px; line-height: 1.3; color: var(--text-3); }
 .why-note { font-size: 11px; color: #e8cfa6; margin-top: 7px; }
-.why-foot { font-size: 10.5px; color: var(--text-3); margin-top: 8px; line-height: 1.4; }
+.why-foot { font-size: 10px; color: var(--text-3); margin-top: 6px; line-height: 1.35; }
 .why-msg { font-size: 12.5px; color: var(--text-2); max-width: 240px; padding-right: 14px; }
 .toggle-hint { font-size: 11px; color: var(--text-3); margin-top: 7px; max-width: 230px; line-height: 1.35; }
 
@@ -882,3 +883,14 @@ body.tour-on #layer-toggles { display: none !important; }
 .as-speak { background: none; border: 1px solid var(--line-2); border-radius: 5px; color: var(--text-2); font-size: 14px; padding: 1px 7px;
   margin-left: auto; margin-right: 6px; cursor: pointer; }
 .as-speak.on { border-color: var(--ring); color: var(--ring); background: rgba(255, 180, 84, .1); }
+
+/* 23. after an answer that moves the app, the chat steps aside and leaves this note above the Ask button */
+#as-toast { position: fixed; z-index: 26; right: 16px; bottom: 100px; width: min(330px, calc(100vw - 32px)); background: rgba(20, 23, 26, .97);
+  border: 1px solid #7a4a1c; border-radius: 8px; padding: 9px 12px 10px; box-shadow: 0 10px 30px rgba(0, 0, 0, .5); animation: dm-in .25s ease-out; }
+.as-toast-head { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; font-size: 12.5px; }
+.as-toast-head b { color: var(--ring); flex: 1; }
+.as-toast-open { background: none; border: 1px solid var(--line-2); border-radius: 4px; color: var(--text-2); font-size: 11.5px; padding: 1px 8px; cursor: pointer; }
+.as-toast-open:hover { color: var(--text); border-color: var(--ring); }
+.as-toast-text { font-size: 12.5px; line-height: 1.45; color: #d3d8dd; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+body:has(#app[data-mode="replay"]) #as-toast { bottom: calc(var(--timeline-h) + 62px); }
+@media (max-width: 900px) { #as-toast, body:has(#app[data-mode="replay"]) #as-toast { bottom: 64px; right: 12px; } }
