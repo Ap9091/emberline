@@ -26,7 +26,7 @@ The app has three views (STATE: all of California, INCIDENT: one fire up close, 
 
 ## What we added
 
-**Our own idea.** It was inspired by [ContainOS](https://devpost.com/software/containos) (TreeHacks 2026), a decision-support tool for fire crews built on fire physics and a multi-agent AI, and we took the same goal somewhere different.
+**Our own idea.** Emberline is built around the evacuation decision, the part of a wildfire where a few hours of warning matter most.
 
 - **Our own user:** the person deciding evacuations, not the crews fighting the fire.
 - **Our own data:** we built a dataset ourselves from the raw GOES satellite files for 70 California fires, and trained and tested our own forecast model on it.
@@ -122,7 +122,7 @@ Emberline is a research prototype. In a real fire, follow official orders.
 
 **AI tools.** [Claude Code](https://www.anthropic.com/claude-code) (Anthropic) helped us write and debug the code. [Claude Sonnet 5.5](https://www.anthropic.com/claude) (Anthropic) runs the live copilot on the website and the "Ask Emberline" guide. [Gemini](https://ai.google.dev/) Flash (Google) made the copilot runs we saved for the demo, including the Park Fire plan the safety check rejected.
 
-**Inspiration.** [ContainOS](https://devpost.com/software/containos). The full list, with licences and how each source is used, is in [data_sources.md](data_sources.md).
+The full list of sources, with licences and how each one is used, is in [data_sources.md](data_sources.md).
 
 ---
 
@@ -145,7 +145,7 @@ Emberline is a research prototype. In a real fire, follow official orders.
 - **How accurate is it?** On 18 unseen fires it warned 90% of the towns the fire reached, about three hours early, and it held up with forecast weather. For the overall shape of the fire it only ties persistence.
 - **What if the AI is wrong?** The AI never acts on its own. Code rejects any plan that leaves out a town on EVACUATE, names a road that does not exist, or uses a road the forecast fire crosses within the hour, and nothing is sent until a person approves it.
 - **Why such a simple model?** It warned more towns than the boosted trees on the tuning fires, each input can be explained in a sentence, and it runs in under a second.
-- **How is it different from ContainOS?** ContainOS supports fire crews with physics and AI agents. Emberline supports the evacuation decision with a model trained and tested on real satellite data, checks its AI with code, and grades itself against the real evacuation orders.
+- **How is it different from what already exists?** Fire apps such as Watch Duty show the fire and the official orders, and research models predict spread. Emberline joins the two for the evacuation decision: it tells each town when to leave and by which road, checks its AI with code, and grades itself against the real evacuation orders.
 
 ## Run it yourself
 

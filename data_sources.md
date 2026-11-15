@@ -43,4 +43,4 @@ Status is what `src/check_sources.py` found in Phase 1 (14 Nov 2026).
 | MapLibre GL JS 4.7.1 (bundled in `app/static/vendor/`), OpenFreeMap tiles | https://maplibre.org/ , https://openfreemap.org/ | BSD-3 / map data © OpenStreetMap contributors, OpenMapTiles | App maps, 3D terrain (Phase 4). |
 | IBM Plex Sans and IBM Plex Mono (bundled in `app/static/vendor/fonts/`) | https://github.com/IBM/plex | SIL Open Font License 1.1 | The app's typefaces. |
 
-Idea credit: inspired by ContainOS (TreeHacks 2026). All code in this repo was written new this weekend.
+All code in this repo was written new this weekend.
