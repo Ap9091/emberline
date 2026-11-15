@@ -61,7 +61,7 @@ Why it is different: fire apps show where a fire is now; research models predict
 - The satellite sees 2 to 4 km pixels; smoke, clouds and night hide fire. Wind comes from one weather point per fire, so local gusts like Santa Ana winds are missed. Ember jumps beyond 6 km are missed.
 - Good satellite data only since 2018, so there are only so many fires to learn from.
 - The replay files keep only forecast chances of 5% and up (to stay small), while the WARNING cut-off is 1%. So the replay can show a WARNING up to an hour later than the model really gave it (for example Butte Meadows on the Park Fire). This makes the replay slightly conservative; the test scores use the full model.
-- Replays use historical weather records (ERA5), which are a bit better than the forecast crews had that night; the live app uses the Open-Meteo forecast. So replay results may be slightly better than real-time use would be.
+- Replays use historical weather records (ERA5), which are a bit better than the forecast crews had that night; the live app uses the Open-Meteo forecast. So replay results may be slightly better than real-time use would be. We tested this: re-run with the archived forecast from the time (and the one from a day earlier), it still warned 18 of 20 towns about 2.8 hours early.
 - The copilot on the website is a hybrid: saved Gemini answers where they exist (the Park Fire's first 30 hours and the Eaton Fire's first 11, including the Park plan that was rejected), and live Claude Sonnet 5.5 for every other hour and every what-if wind. Every plan, saved or live, goes through the same code safety check. On the claude.ai copy of the page there is no server, so only saved answers work there.
 
 # Leave-by times
@@ -71,7 +71,8 @@ Why it is different: fire apps show where a fire is now; research models predict
 - Checked against the real fire on the three replay fires: the recommended road was still free of fire until the leave-by time in 354 of 358 cases (98.9%), the leave-by time came before the fire reached the town in 57 of 58 (98.3%), roads called open for 3 hours really stayed clear in 994 of 1,027 (96.8%), and roads called cut within the hour really had fire reach them within the hour in 194 of 224 (86.6%). These are road-hours (the same road appears in many hours), not independent tests.
 
 # The screens
-- STATE: every fire in California right now from the latest satellite scan, ranked.
+- STATE: every fire in California from the latest satellite scan, ranked. The full app reads a new scan every 5 minutes; on the website the latest scan is a snapshot from when the site was built, so it is labelled LATEST SCAN, not live. With no fires in it, STATE shows the last big fire day.
+- Town countdowns: EVACUATE towns say "fire at town" or "fire in < 1 h" (the forecast fire area reaches them). WARNING towns say "possible in < 1 h" (or ~2 h, ~3 h): the first hour with a small chance of fire near them, not an expected arrival.
 - INCIDENT: one fire up close with the copilot (briefing, plan, safety check, alert draft).
 - REPLAY: past fires (Park, Eaton, Palisades) hour by hour. Includes: the map (red = burning now, orange = may burn soon, dotted rings = predicted edge at +1/+2/+3 h), Split screen (left: what people saw, right: our forecast with the real fire 3 h later), "Was it right?" (green hit, pink missed, grey false alarm), town list (EVACUATE red, WARNING orange, MONITOR blue; People, Chance, Dist.), "Emberline vs official orders", the what-if compass, the AI copilot, and the timeline bar at the bottom (orange ticks = our first warning, red = fire reaches town, white = official order, brown hill = fire size).
 - Results button: the full test table. Demo button / gear menu: replay the guided demo.
