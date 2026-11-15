@@ -81,7 +81,7 @@ async function load() {
   draw();
   if (fresh) setLoading(s.at ? 'Downloading GOES-18 scans from the archive… (about 10 s the first time)' : 'Reading the latest GOES-18 scans…');
   setBanner(s.at ? (s.quietLive && s.at === latestExample()?.at
-    ? `No fires in California right now · showing the last big fire day: ${archiveWhen(s.at)}`
+    ? `${STATIC ? 'No fires in California in the latest scan' : 'No fires in California right now'} · showing the last big fire day: ${archiveWhen(s.at)}`
     : `ARCHIVE · ${archiveWhen(s.at)} · same pipeline on past GOES-18 data`) : null);
   try {
     const data = await api.getState(s.at);
@@ -169,7 +169,9 @@ function sourcePicker() {
     h('span', { class: 'radio' }), h('span', { class: 'source-title' }, title), h('span', { class: 'source-sub mono' }, sub));
   return section('Data', 'GOES-18 ABI fire product · every 5 min',
     h('div', { class: 'source-list' },
-      option(null, 'LIVE NOW', s.quietLive ? 'no fires right now' : 'latest scans'),
+      // hosted version: the 'live' entry is a snapshot taken when the site was built, so it is not called live
+      STATIC ? option(null, 'LATEST SCAN', 'snapshot from when this site was built')
+             : option(null, 'LIVE NOW', s.quietLive ? 'no fires right now' : 'latest scans'),
       (app.config.archive_examples || []).map(ex => {
         const [name, ...when] = ex.label.split(' - ');
         return option(ex.at, name, 'ARCHIVE · ' + when.join(' - '));
