@@ -1,4 +1,3 @@
-// ─────────────────────────────────────────────────────────────────────────────
 // mapview.js - one MapLibre map with all Emberline data layers.
 // The app creates one MapView for the main map and a second one for the left half of the split screen.
 //
@@ -7,7 +6,6 @@
 //   view.showSituation(sit);        // INCIDENT / REPLAY data (fire, forecast, rings, towns, exits)
 //   view.showState(state, onClick); // STATE data (fire pixels + incident markers)
 //   view.setGroup('forecast', false) // layer toggles
-// ─────────────────────────────────────────────────────────────────────────────
 import { COLORS, TERRAIN_EXAGGERATION, PITCH_3D, SPLIT_FADE } from './config.js';
 import { h } from './util.js';
 
@@ -59,7 +57,7 @@ export class MapView {
     this.ready = new Promise(resolve => this.map.on('load', () => { this._addLayers(); resolve(); }));
   }
 
-  // ── set-up: all sources and layers, bottom to top ──────────────────────────
+  // set-up: all sources and layers, bottom to top
   _addLayers() {
     const m = this.map;
     // California only: everything outside the state is covered, the border drawn, Los Angeles County ready to glow
@@ -141,7 +139,7 @@ export class MapView {
     this._applyExitFilters();
   }
 
-  // ── data ───────────────────────────────────────────────────────────────────
+  // data
   _setData(source, data) { this.map.getSource(source)?.setData(data || EMPTY); }
 
   /** Draw an INCIDENT / REPLAY situation. Pass null to clear. */
@@ -176,7 +174,7 @@ export class MapView {
     this.incidentMarkers = [];
   }
 
-  // ── towns: HTML markers (crisp IBM Plex labels, work without map fonts) ────
+  // towns: HTML markers (crisp IBM Plex labels, work without map fonts)
   _updateTownMarkers(towns) {
     const seen = new Set();
     for (const t of towns) {
@@ -237,7 +235,7 @@ export class MapView {
     }
   }
 
-  // ── layer toggles ──────────────────────────────────────────────────────────
+  // layer toggles
   setGroup(group, on) {
     this.visible[group] = on;
     if (group === 'towns') this._updateTownMarkers(this.sit?.towns || []);
@@ -268,7 +266,7 @@ export class MapView {
     this._setData('verify', L.verify?.[this.horizon - 1]);
   }
 
-  // ── exits ──────────────────────────────────────────────────────────────────
+  // exits
   setSelectedTown(name) {
     this.selectedTown = name;
     for (const [n, entry] of this.townMarkers) entry.el.classList.toggle('selected', n === name);
@@ -296,7 +294,7 @@ export class MapView {
     this.map.setFilter('exit-approved', isApproved);
   }
 
-  // ── camera ─────────────────────────────────────────────────────────────────
+  // camera
   /** Zoom to [west, south, east, north]. */
   fit(bounds, { animate = true, padding = 48 } = {}) {
     if (!bounds) return;
@@ -326,7 +324,7 @@ export class MapView {
 
   resize() { this.map.resize(); }
 
-  // ── split screen: fade the real fire 3 h later in over the forecast ────────
+  // split screen: fade the real fire 3 h later in over the forecast
   fadeInActual() {
     this.cancelFade();
     this.horizon = 3; this._applyHorizon();

@@ -1,8 +1,6 @@
-// ─────────────────────────────────────────────────────────────────────────────
 // mode_incident.js - INCIDENT mode: the command view of one fire.
 //   map:   3D terrain, fire, forecast squares + rings, towns, exits
 //   panel: header · wind · numbers · town countdowns · AI briefing · AI plan · alert · event log
-// ─────────────────────────────────────────────────────────────────────────────
 import * as api from './api.js';
 import { app, setClock, setLoading, setBanner, setToggles, setLegend, toggleRow, segmented } from './app.js';
 import { h, fill, $, utcHM, utcDate, compass } from './util.js';

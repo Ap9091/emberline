@@ -1,4 +1,3 @@
-// ─────────────────────────────────────────────────────────────────────────────
 // assistant.js - "Ask Emberline": the chat guide in the corner.
 //
 // The visitor asks a question; the server (Vercel: site/api/chat.js, full app: POST /api/chat in server.py) asks
@@ -7,7 +6,6 @@
 // The actions move the app (open a fire, go to an hour, split screen, what-if wind, highlight a card...).
 // If the server has no API key, is busy, or this page has no server (claude.ai), the built-in answers
 // below (FAQ) take over, so the chat always does something useful.
-// ─────────────────────────────────────────────────────────────────────────────
 import { app } from './app.js';
 import { h, fill, $, sleep } from './util.js';
 import { replayApi as R } from './mode_replay.js';
@@ -18,7 +16,7 @@ const STARTERS = ['What am I looking at?', 'How accurate is it?', 'Show me the A
 
 const ui = { open: false, busy: false, history: [], box: null, list: null, input: null, offline: false, demo: null };
 
-// ── what is on screen (sent with every question) ─────────────────────────────
+// what is on screen (sent with every question)
 function screen() {
   const out = { mode: app.mode, demo_step: ui.demo?.on ? ui.demo.i + 1 : null };
   if (app.mode === 'replay' && R.state?.meta) {
@@ -40,7 +38,7 @@ function screen() {
   return out;
 }
 
-// ── running the actions the assistant asks for ───────────────────────────────
+// running the actions the assistant asks for
 const FIRES = ['eaton_fire_2025', 'park_fire_2024', 'palisades_fire_2025'];
 const PANELS = { towns: 'sit', official: 'official', whatif: 'whatif', copilot: 'ai', verify: 'verify' };
 
@@ -111,13 +109,13 @@ async function runActions(actions, { fromDemo = false } = {}) {
   }
 }
 
-// ── built-in answers (no server, no key, or the server is busy) ───────────────
+// built-in answers (no server, no key, or the server is busy)
 const A = (type, target = '', hour = -1, from_deg = -1, speed_kmh = -1) => ({ type, target, hour, from_deg, speed_kmh });
 const FAQ = [
   [/\b(python|javascript|typescript|java|c\+\+|html|css|sql|homework|essay|poem|translate|recipe|joke)\b|\b(write|make|build|fix|debug)\b.*\b(code|program|script|function|app|website|essay)\b/i,
     'I can only help with Emberline and its wildfire forecasts. Want to see how accurate it is, or the AI plan our code rejected?',
     [], ['How accurate is it?', 'Show me the AI plan that got rejected']],
-  [/lucky|luck|fluke|chance/i, 'Not just luck. At 7 pm Emberline predicted 13 of the 17 squares that burned by 10 pm, with zero false alarms, and each miss was right next to a predicted square. That is one of its best hours, so we also tested 18 fires it never saw: it warned 18 of 20 towns, about 2.8 hours early.',
+  [/lucky|luck|fluke|chance/i, 'At 7 pm Emberline predicted 13 of the 17 squares that burned by 10 pm, with zero false alarms, and each miss was right next to a predicted square. That is one of its best hours, so we also tested it on 18 fires it never saw, where it warned 18 of 20 towns about 2.8 hours early.',
     [A('fire', 'eaton_fire_2025', 2), A('show', 'check')], ['Show the official orders', 'Where does it fail?']],
   [/reject|safety|unsafe|bad plan|road|copilot|plan|code/i, 'On the Park Fire at 3 pm, the AI first sent Butte Creek Canyon out on Highway 32 west, but that road ran into the forecast fire. Plain code checked it and said REJECTED, so the AI picked Highway 32 north instead. A person still has to press Approve.',
     [A('fire', 'park_fire_2024', 2), A('copilot'), A('show', 'copilot')], ['What does the code check?', 'How accurate is it?']],
@@ -154,7 +152,7 @@ function faq(text) {
   return { reply: hit[1], actions: hit[2], suggestions: hit[3] };
 }
 
-// ── talking to the server ────────────────────────────────────────────────────
+// talking to the server
 async function askServer(history) {
   if (window.EMBERLINE_STATIC && !window.EMBERLINE_TILES) throw Object.assign(new Error('no server'), { offline: true });   // claude.ai page
   const res = await fetch('api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -192,7 +190,7 @@ export async function ask(text, { fromDemo = false } = {}) {
   await runActions(out.actions, { fromDemo });
 }
 
-// ── the window ───────────────────────────────────────────────────────────────
+// the window
 function addMsg(who, content, suggestions = [], source = null) {
   const row = h('div', { class: `as-msg as-${who}` }, h('div', { class: 'as-bubble' }, content),
     source === 'faq' ? h('div', { class: 'as-note' }, 'Built-in answer (the AI assistant is offline right now)') : null,

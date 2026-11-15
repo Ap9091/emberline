@@ -1,4 +1,3 @@
-// ─────────────────────────────────────────────────────────────────────────────
 // verify.js - "WAS IT RIGHT?" (REPLAY only): hindsight check of the forecast.
 //
 // The forecast made at hour h is compared, square by square, with what GOES-18 really saw burning
@@ -11,7 +10,6 @@
 // F1 (0-1): 1 = every square we forecast burned AND every square that burned was forecast.
 // "within 2 km": a square counts as right if real fire was within one square (GOES pixels are 2-4 km).
 // "new squares": only squares that had never burned before - the hard, useful part of a forecast.
-// ─────────────────────────────────────────────────────────────────────────────
 import { h, fmtInt } from './util.js';
 import { section, src, plain, tech } from './panel.js';
 

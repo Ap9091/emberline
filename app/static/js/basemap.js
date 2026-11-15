@@ -1,8 +1,6 @@
-// ─────────────────────────────────────────────────────────────────────────────
 // basemap.js - loads the OpenFreeMap "liberty" style and makes it earthy and muted,
 // so the fire data is the only strong colour on the map.
 // If the style cannot be downloaded (offline), we fall back to a plain dark background.
-// ─────────────────────────────────────────────────────────────────────────────
 import { BASE_STYLE_URL, TERRAIN_TILES } from './config.js';
 import { STATIC, ONLINE_TILES } from './api.js';
 

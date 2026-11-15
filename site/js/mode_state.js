@@ -1,8 +1,6 @@
-// ─────────────────────────────────────────────────────────────────────────────
 // mode_state.js - STATE mode: all of California.
 //   map:   every GOES-18 fire pixel + one ringed marker per incident
 //   panel: LIVE / archive selector, incident list ranked by triage score, AI "why" line for the top 5
-// ─────────────────────────────────────────────────────────────────────────────
 import * as api from './api.js';
 import { STATIC } from './api.js';
 import { app, setClock, setLoading, setBanner, setToggles, setLegend, segmented } from './app.js';
@@ -73,7 +71,7 @@ export function archiveWhen(at) {
   return ex ? ex.label.split(' - ').slice(1).join(' - ') : utcDate(at) + ' ' + utcHM(at) + ' UTC';
 }
 
-// ── loading ──────────────────────────────────────────────────────────────────
+// loading
 async function load() {
   const token = ++s.loadToken;
   clearTimeout(s.refreshTimer);
@@ -128,7 +126,7 @@ function openIncident(inc) {
   app.go('incident', { id: inc.id, at: s.at, label: `near ${inc.nearest_town}` });
 }
 
-// ── AI "why it ranks high" lines: top 5, one after the other ─────────────────
+// AI "why it ranks high" lines: top 5, one after the other
 async function loadTriageLines(token) {
   const top = (s.data?.incidents || []).slice().sort((a, b) => a.rank - b.rank).slice(0, TRIAGE_AI_TOP_N);
   for (const inc of top) {
@@ -160,7 +158,7 @@ function updateTriageLine(id) {
   if (slot) fill(slot, triageLine(id));
 }
 
-// ── drawing the panel ────────────────────────────────────────────────────────
+// drawing the panel
 function draw() {
   if (app.mode !== 'state') return;
   fill($('#panel-body'), sourcePicker(), body(), s.data ? howRankingWorks() : null);

@@ -1,6 +1,4 @@
-// ─────────────────────────────────────────────────────────────────────────────
 // util.js - small helpers used everywhere (DOM building, number/time formatting).
-// ─────────────────────────────────────────────────────────────────────────────
 
 /** Build a DOM element: h('div', {class: 'card', onclick: fn}, 'text', childEl, ...) */
 export function h(tag, attrs = {}, ...children) {
@@ -36,14 +34,14 @@ export function fill(el, ...children) {
   return el;
 }
 
-// ── numbers ──────────────────────────────────────────────────────────────────
+// numbers
 export const fmtInt = n => (n === null || n === undefined) ? '-' : Math.round(n).toLocaleString('en-US');
 export const fmt1 = n => (n === null || n === undefined) ? '-' : Number(n).toFixed(1);
 export const fmtKm2 = n => (n === null || n === undefined) ? '-' : (n >= 100 ? fmtInt(n) : fmt1(n));
 export const fmtPct = p => (p === null || p === undefined) ? '-' : (p > 0 && p < 0.01 ? '<1%' : Math.round(p * 100) + '%');
 export const fmtSigned = n => (n > 0 ? '+' : n < 0 ? '−' : '') + fmtKm2(Math.abs(n));
 
-// ── times ────────────────────────────────────────────────────────────────────
+// times
 /** "15:16" (UTC) from an ISO string */
 export function utcHM(iso) {
   if (!iso) return '--:--';
@@ -75,7 +73,7 @@ export function localHMZone(timeLocal) {
   return m ? (m[1] + (m[2] ? ' ' + m[2] : '')) : '';
 }
 
-// ── wind ─────────────────────────────────────────────────────────────────────
+// wind
 const COMPASS = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
 export const compass = deg => COMPASS[Math.round((((deg % 360) + 360) % 360) / 22.5) % 16];
 
@@ -99,7 +97,7 @@ export async function copyText(text) {
   }
 }
 
-// ── hover tooltip (one shared element, used by the timeline ticks) ───────────
+// hover tooltip (one shared element, used by the timeline ticks)
 export function showTooltip(text, x, y) {
   const tip = $('#tooltip');
   tip.textContent = text; tip.hidden = false;

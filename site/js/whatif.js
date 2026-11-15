@@ -1,4 +1,3 @@
-// ─────────────────────────────────────────────────────────────────────────────
 // whatif.js - "WHAT IF THE WIND CHANGES?" (INCIDENT and REPLAY).
 //
 // The commander drags the compass (where the wind blows TO) and the speed slider. After a short pause the
@@ -8,7 +7,6 @@
 //
 //   const w = new WhatIf(slot, { run: (fromDeg, speed) => api.whatIf({...ref, ...}), onScenario: sit => ... });
 //   w.setBase(sit);      // the real situation (call on every new hour / incident)
-// ─────────────────────────────────────────────────────────────────────────────
 import { h, svg, fill, fmtInt, fmtKm2, compass } from './util.js';
 import { section, src } from './panel.js';
 import { WHATIF } from './config.js';
@@ -87,7 +85,7 @@ export class WhatIf {
     this.draw();
   }
 
-  // ── drawing ────────────────────────────────────────────────────────────────
+  // drawing
   draw() {
     const base = this.base;
     if (!base) return fill(this.slot);

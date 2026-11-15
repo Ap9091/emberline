@@ -1,9 +1,7 @@
-// ─────────────────────────────────────────────────────────────────────────────
 // mode_replay.js - REPLAY mode (the demo): step through a past fire hour by hour.
 //   map:      real fire, our forecast, baseline, real fire later (toggles), optional split screen
 //   panel:    people counter + the same situation panel and copilot as INCIDENT
 //   timeline: js/timeline.js
-// ─────────────────────────────────────────────────────────────────────────────
 import * as api from './api.js';
 import { app, setClock, setLoading, setBanner, setToggles, setLegend, toggleRow, segmented } from './app.js';
 import { REPLAY_SPEEDS, TEXT } from './config.js';
@@ -64,7 +62,7 @@ export const replayMode = {
   },
 };
 
-// ── hooks for the guided demo (js/demo.js) ───────────────────────────────────
+// hooks for the guided demo (js/demo.js)
 export const replayApi = {
   get state() { return s; },
   async open(fireId) { pause(); if (s.fireId !== fireId || !s.meta) await loadFire(fireId); },
@@ -83,7 +81,7 @@ export const replayApi = {
   pause,
 };
 
-// ── panel skeleton: people counter · situation · what-if · was it right · official orders · copilot · log ──
+// panel skeleton: people counter · situation · what-if · was it right · official orders · copilot · log
 function buildPanel() {
   s.slots = { people: h('div'), sit: h('div'), whatif: h('div'), verify: h('div'), official: h('div'),
               ai: h('div', { id: 'copilot-slot' }), log: h('div') };
@@ -103,7 +101,7 @@ function buildPanel() {
   app.view.onTownClick = name => s.panel.select(name);
 }
 
-// ── loading a fire and an hour ───────────────────────────────────────────────
+// loading a fire and an hour
 async function loadFire(fireId) {
   const token = ++s.token;
   setLoading('Loading replay…');
@@ -176,7 +174,7 @@ function timelineUi() {
   return { hour: s.hour, playing: s.playing, speedIdx: s.speedIdx, split: s.split, copilotRan: !!rec?.started };
 }
 
-// ── play / pause ─────────────────────────────────────────────────────────────
+// play / pause
 function play() {
   if (!s.meta) return;
   if (s.hour >= s.meta.hours.length - 1) s.hour = s.meta.default_hour - 1;    // at the end: start again
@@ -210,7 +208,7 @@ function onKey(e) {
   if (e.key === 'ArrowLeft') { pause(); setHour(s.hour - 1); }
 }
 
-// ── copilot button ───────────────────────────────────────────────────────────
+// copilot button
 function runCopilot() {
   if (!s.sit) return;
   pause();
@@ -223,7 +221,7 @@ function scrollToCopilot() {
   requestAnimationFrame(() => s.slots.ai.scrollIntoView({ block: 'start', behavior: 'smooth' }));
 }
 
-// ── people counter ───────────────────────────────────────────────────────────
+// people counter
 function drawPeople() {
   const tl = s.meta.timeline || [];
   // towns the fire has reached by the replay hour, and how many of them we had warned beforehand
@@ -248,13 +246,13 @@ function drawPeople() {
         `${fmtInt(sum(warnedFirst))} people live in the towns warned in time (Census 2024, whole towns, so an upper bound).`))));
 }
 
-// ── "was it right?" card ─────────────────────────────────────────────────────
+// "was it right?" card
 function drawVerify() {
   fill(s.slots.verify, verifyCard({ sit: s.sit, meta: s.meta, hour: s.hour, k: s.horizon, showOnMap: s.toggles.verify,
     onToggleMap: on => { s.toggles.verify = on; applyLayers(); drawToggles(); drawVerify(); } }));
 }
 
-// ── layer toggles ────────────────────────────────────────────────────────────
+// layer toggles
 function applyLayers() {
   const v = app.view, t = s.toggles;
   const check = t.verify && !s.split;                 // "was it right?" view: hit / missed / false-alarm squares
@@ -286,7 +284,7 @@ function drawToggles() {
       segmented([[1, '+1 h'], [2, '+2 h'], [3, '+3 h']], s.horizon, k => { s.horizon = k; applyLayers(); drawToggles(); drawVerify(); })));
 }
 
-// ── split screen ─────────────────────────────────────────────────────────────
+// split screen
 async function setSplit(on) {
   s.split = on;
   const paneLeft = $('#pane-left'), titleMain = $('#pane-main-title');

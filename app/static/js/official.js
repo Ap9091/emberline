@@ -1,11 +1,9 @@
-// ─────────────────────────────────────────────────────────────────────────────
 // official.js - "EMBERLINE VS OFFICIAL ORDERS" (REPLAY only).
 //
 // For every town with a real, published evacuation order or warning (data/evac_orders.csv, one source link
 // per row), compare it with the first time Emberline put that town on WARNING or EVACUATE.
 // Our time is the END of the satellite hour the forecast was made from (that is when it could have been sent).
 // Towns we flagged later, or never, are listed too. If there are no official times yet, nothing is invented.
-// ─────────────────────────────────────────────────────────────────────────────
 import { h, fmtInt, pacific, fmtHours } from './util.js';
 import { section, src, plain, tech } from './panel.js';
 

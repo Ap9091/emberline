@@ -1,6 +1,4 @@
-// ─────────────────────────────────────────────────────────────────────────────
 // results.js - the Results drawer: test scores from /api/results, shown plainly (weak ones too).
-// ─────────────────────────────────────────────────────────────────────────────
 import * as api from './api.js';
 import { h, fill, $, fmtInt } from './util.js';
 

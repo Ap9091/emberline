@@ -1,4 +1,3 @@
-// ─────────────────────────────────────────────────────────────────────────────
 // whatif_engine.js - "what if the wind changes?" computed IN THE BROWSER (hosted version only).
 //
 // The hosted page has no Python server, so this file runs the same steps as the backend
@@ -9,7 +8,6 @@
 //   4. town countdowns (EVACUATE / WARNING / MONITOR) and exit-road checks
 // with the wind for hours h..h+3 replaced by the scenario wind. The inputs come from data/whatif/*.json,
 // written by app/whatif_export.py; app/check_whatif.mjs checks that the answers match the Python backend.
-// ─────────────────────────────────────────────────────────────────────────────
 
 const cache = new Map();
 async function json(url) {
@@ -24,7 +22,7 @@ const COMPASS8 = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
 const STATUS_RANK = { EVACUATE: 0, WARNING: 1, MONITOR: 2 };
 const round = (x, d) => { const f = 10 ** d; return Math.round(x * f) / f; };
 
-// ── 1. features (port of p2_build_dataset.features_for_hour) ─────────────────
+// 1. features (port of p2_build_dataset.features_for_hour)
 /**
  * rows: burning rows [hour, row, col, gapfilled(0/1), max_power_mw|null], nFiles: per-hour file counts,
  * weather: per-hour arrays. Returns {cells: [i...], X: [[...features in model order]]} or null.
@@ -103,7 +101,7 @@ function features(F, M, rows, nFiles, weather, h) {
   return { cells, X };
 }
 
-// ── 2. the trained logistic regression: fill missing → scale → weighted sum → probability ─
+// 2. the trained logistic regression: fill missing → scale → weighted sum → probability
 function predict(M, X) {
   return X.map(row => {
     let z = M.intercept;
@@ -117,7 +115,7 @@ function predict(M, X) {
 
 const asFire = (p, ever, th) => ever ? p >= th.burn : p >= th.new;
 
-// ── 3. forecast with rolling forward (port of p3_core.forecast) ──────────────
+// 3. forecast with rolling forward (port of p3_core.forecast)
 function forecast(F, M, weather, h) {
   const N = F.n, th = M.th;
   const rows0 = F.burning.filter(([hr, , , gap]) => hr < h || (hr === h && !gap));      // what was known at hour h
@@ -146,7 +144,7 @@ function forecast(F, M, weather, h) {
   return out;
 }
 
-// ── drawing helpers (port of backend/geo.py) ─────────────────────────────────
+// drawing helpers (port of backend/geo.py)
 function corner(F, r, c) { return F.corners[r * (F.n + 1) + c]; }
 function squareFeature(F, i, props) {
   const r = Math.floor(i / F.n), c = i % F.n;
@@ -167,7 +165,7 @@ function outline(F, mask, props) {
   return { type: 'FeatureCollection', features: lines.length ? [{ type: 'Feature', properties: props, geometry: { type: 'MultiLineString', coordinates: lines } }] : [] };
 }
 
-// ── 4. the scenario situation (port of whatif.scenario + situation.build) ────
+// 4. the scenario situation (port of whatif.scenario + situation.build)
 /**
  * base = the real situation for this hour (from data/replay/...), h = hour.
  * Returns a situation object shaped exactly like the backend's, or null if there is no forecast at this hour.

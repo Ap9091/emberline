@@ -1,10 +1,8 @@
-// ─────────────────────────────────────────────────────────────────────────────
 // copilot.js - the AI part of the side panel:
 //   briefing → plan (every attempt, REJECTED / PASSED banners) → Approve / Dismiss → alert draft → event log
 //
 // One Copilot object serves one mode (INCIDENT or REPLAY). It remembers its results per situation
 // (per replay hour), so scrubbing back to an hour shows the plan you already ran there.
-// ─────────────────────────────────────────────────────────────────────────────
 import * as api from './api.js';
 import { TEXT } from './config.js';
 import { h, fill, nowHMS, localHM, copyText, sleep, fmtInt } from './util.js';
@@ -29,7 +27,7 @@ export class Copilot {
     this._stepTimer = null;
   }
 
-  // ── which situation are we looking at ──────────────────────────────────────
+  // which situation are we looking at
   /** ref = {mode:'replay', fire_id, hour} or {mode:'live', incident_id} */
   setSituation(sit, ref) {
     this.sit = sit; this.ref = ref; this.key = JSON.stringify(ref);
@@ -52,7 +50,7 @@ export class Copilot {
 
   get hasForecast() { return !!(this.sit?.layers?.forecast?.features?.length || this.sit?.towns?.length); }
 
-  // ── event log ──────────────────────────────────────────────────────────────
+  // event log
   /** kind: info | ai | reject | ok | human | alert */
   log(kind, text) {
     const at = this.sit ? localHM(this.sit.time_local) : '';
@@ -68,7 +66,7 @@ export class Copilot {
         : h('div', { class: 'empty-line' }, 'Nothing logged yet.')));
   }
 
-  // ── run briefing + plan for the current situation ──────────────────────────
+  // run briefing + plan for the current situation
   /** quiet = do not scroll the panel (used when INCIDENT starts the copilot by itself). */
   async run({ quiet = false } = {}) {
     this.quiet = quiet;
@@ -132,7 +130,7 @@ export class Copilot {
     if (key === this.key) { this._syncMap(); this._reveal('.plan, .big-card'); }
   }
 
-  // ── operator decisions ─────────────────────────────────────────────────────
+  // operator decisions
   async approve() {
     const key = this.key, ref = this.ref, rec = this._record();
     const plan = rec.plan.data.plan;
@@ -174,7 +172,7 @@ export class Copilot {
 
   _drawIfCurrent(key) { if (key === this.key) this.draw(); }
 
-  // ── drawing ────────────────────────────────────────────────────────────────
+  // drawing
   draw() {
     clearInterval(this._stepTimer);
     if (!this.sit) return fill(this.slot);
@@ -346,7 +344,7 @@ export class Copilot {
   }
 }
 
-// ── small shared pieces ──────────────────────────────────────────────────────
+// small shared pieces
 export function skeleton(text, lines = 3) {
   return h('div', {},
     h('div', { class: 'progress' }, h('span', { class: 'spinner' }), text),

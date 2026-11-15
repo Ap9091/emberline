@@ -1,4 +1,3 @@
-// ─────────────────────────────────────────────────────────────────────────────
 // copilot_core.js - the copilot for the hosted site, ported line by line from app/backend/copilot.py and
 // app/backend/situation.py (ai_context). Used by the Vercel function site/api/copilot.js (copied there as
 // site/api/_copilot_core.js by app/build_site.py). tests/test_copilot_parity.py checks that the safety check and the
@@ -9,7 +8,6 @@
 //   2. an evacuation route runs into the fire now or the +1 h forecast fire, or
 //   3. it names a town or exit that does not exist.
 // If every highway exit of a town runs into the fire, that town goes to a human decision instead.
-// ─────────────────────────────────────────────────────────────────────────────
 
 export const MAX_RETRIES = 2;
 export const ALERT_MAX = 360;

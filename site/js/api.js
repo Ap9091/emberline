@@ -1,11 +1,9 @@
-// ─────────────────────────────────────────────────────────────────────────────
 // api.js - every call to the backend lives here. All URLs are relative (/api/...).
 //
 // HOSTED MODE (window.EMBERLINE_STATIC = true, set by the hosted index page made by app/build_site.py):
 // there is no Python server, so every answer is read from the JSON files in data/ that the build saved,
 // the AI answers come from the saved cache, and "what if the wind changes?" runs in the browser
 // (js/whatif_engine.js). The rest of the app does not know the difference.
-// ─────────────────────────────────────────────────────────────────────────────
 import { loadModel, loadFire, scenario } from './whatif_engine.js';
 
 export const STATIC = !!window.EMBERLINE_STATIC;
@@ -40,7 +38,7 @@ const post = (url, data) => request(url, {
   method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data),
 });
 
-// ── data ─────────────────────────────────────────────────────────────────────
+// data
 export const getConfig = () => get(STATIC ? `${DATA}/config.json` : '/api/config');
 export const getResults = () => get(STATIC ? `${DATA}/results.json` : '/api/results');
 export const getState = at => get(STATIC ? `${DATA}/state/${at ? slug(at) : 'live'}.json`
@@ -60,7 +58,7 @@ export function getReplayHour(fireId, hour) {
   return hourCache.get(key);
 }
 
-// ── AI ───────────────────────────────────────────────────────────────────────
+// AI
 // `ref` says which situation the AI should look at:
 //   replay:   {mode: 'replay', fire_id, hour}
 //   incident: {mode: 'live', incident_id}
@@ -73,7 +71,7 @@ export const aiTriage = incidentId => STATIC
   ? get(`${DATA}/ai/triage.json`).then(all => all[incidentId] || Promise.reject(offline('No saved AI line for this incident.')))
   : post('/api/ai/triage', { incident_id: incidentId });
 
-// ── hosted mode helpers ──────────────────────────────────────────────────────
+// hosted mode helpers
 /** The same error the server sends when the AI is unavailable (the copilot shows "AI offline, forecast only"). */
 function offline(message) {
   const err = new ApiError(503, message);

@@ -1,4 +1,3 @@
-// ─────────────────────────────────────────────────────────────────────────────
 // demo.js - the guided demo. It plays the app by itself; the viewer only presses Next.
 //
 // One story, told on the real Eaton Fire (Los Angeles, January 2025), plus one step on the Park Fire
@@ -13,7 +12,6 @@
 //     the saved replay keeps chances ≥ 5% only, so it lists 6 at the real wind)
 //     (in-browser engine, identical to the Python backend; see app/check_whatif.mjs).
 // To change the wording, edit STEPS below.
-// ─────────────────────────────────────────────────────────────────────────────
 import { app } from './app.js';
 import { h, fill, $, sleep } from './util.js';
 import { replayApi as R } from './mode_replay.js';
@@ -117,7 +115,7 @@ const STEPS = [
         num('2', b('Chance'), ': how likely the fire reaches it in 3 hours'),
         num('3', b('Dist.'), ': how far the fire is now')),
       h('div', { class: 'dm-honest' }, b('Leave by about 8 pm. '), 'Both directions of the I-210 stay clear of the forecast fire for at least 3 hours, so the deadline is the fire reaching town.'),
-      why('People get a clear answer, when to leave and which road, not just a map.')],
+      why('People get a clear answer: when to leave, and which road to take.')],
     async run(d) {
       await d.replay(EATON, 2, { fire: true, forecast: true });
       R.town('Sierra Madre');
@@ -201,7 +199,7 @@ const STEPS = [
           h('tr', {}, h('td', {}, 'Towns warned before the fire came'), h('td', { class: 'ours mono' }, '18 / 20'), h('td', { class: 'mono' }, '18 / 20'), h('td', { class: 'mono' }, '0 / 20')),
           h('tr', {}, h('td', {}, 'How early, on average'), h('td', { class: 'ours mono' }, '2.8 h'), h('td', { class: 'mono' }, '2.5 h'), h('td', { class: 'mono' }, '–')),
           h('tr', {}, h('td', {}, 'Spotting new fire (0 to 1)'), h('td', { class: 'ours mono' }, '0.41'), h('td', { class: 'mono' }, '0.24'), h('td', { class: 'mono' }, '0')))),
-      why('It works across many fires, not just one: 90% of towns warned, almost 3 hours early, and about 1.7 times better at spotting new fire. ',
+      why('The result holds across many fires: 90% of towns warned, almost 3 hours early, and about 1.7 times better at spotting new fire. ',
         'It held up just as well when we swapped in the ', b('weather forecast people really had'), '.')],
     async run(d) {
       R.realWind();
@@ -367,7 +365,7 @@ class Demo {
     if (this.card) this.card.hidden = true;
   }
 
-  // ── what the steps can do ──────────────────────────────────────────────────
+  // what the steps can do
   _ctx(token) {
     const demo = this;
     return {
@@ -428,7 +426,7 @@ class Demo {
 
 export const demo = new Demo();
 
-// ── welcome screen + settings menu ───────────────────────────────────────────
+// welcome screen + settings menu
 function closeOverlays() {
   $('#welcome')?.remove();
   $('#settings-menu')?.setAttribute('hidden', '');

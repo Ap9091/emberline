@@ -1,4 +1,3 @@
-// ─────────────────────────────────────────────────────────────────────────────
 // leaveby.js - "leave by" times: when a town should be gone, from the forecast alone.
 //
 // For each escape road we know whether the forecast fire reaches it within 1, 2 or 3 hours
@@ -9,7 +8,6 @@
 // A town's leave-by time is the earlier of: when the fire may reach the town (its countdown), and when its best
 // road closes. It uses only the forecast: no traffic, no road closures by police, no evacuation zones.
 // Pure functions (no page), so tests/test_leaveby.py can run them in Node.
-// ─────────────────────────────────────────────────────────────────────────────
 
 const set = v => v !== null && v !== undefined;
 

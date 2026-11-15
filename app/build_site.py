@@ -226,7 +226,7 @@ def frontend_only():
 def build_data():
     sizes = {}
 
-    # ── config + results ──
+    # config + results
     cfg = server.config()
     cfg["static"] = True
     cfg["ai"] = {"provider": "Claude Sonnet 5.5", "model": "live + saved Gemini runs",
@@ -236,7 +236,7 @@ def build_data():
     write("config.json", cfg)
     write("results.json", server.results())
 
-    # ── replay ──
+    # replay
     boxes, ai_replay = [], {}
     write("replay/list.json", server.replay_list())
     for fid in store.REPLAY_FIRES:
@@ -259,7 +259,7 @@ def build_data():
         sizes[fid] = total // 1024
         print(f"{fid}: {len(meta['hours'])} hours, {total // 1024} KB, copilot cached for {len(ai_replay[fid])} hours", flush=True)
 
-    # ── archive days (STATE) + their incidents ──
+    # archive days (STATE) + their incidents
     # Archive days and their incidents come from the RUNNING server (app/run.sh): it already holds them,
     # and asking it avoids downloading the satellite scans and weather again.
     import requests
@@ -292,7 +292,7 @@ def build_data():
     now["static_snapshot"] = True
     write("state/live.json", now)
 
-    # ── basemaps + highways ──
+    # basemaps + highways
     images, seen = [relief([-124.6, 32.3, -113.9, 42.2], 7, "california", margin_deg=0.3)], []
     for key, box, bounds in boxes:
         c = ((bounds[0] + bounds[2]) / 2, (bounds[1] + bounds[3]) / 2)
@@ -304,7 +304,7 @@ def build_data():
     print("basemap images:", len(images), "total KB", sum(i["kb"] for i in images), flush=True)
     write("roads.geojson", roads_geojson([b for _, b, _ in boxes]))
 
-    # ── in-browser what-if: model + per-fire inputs ──
+    # in-browser what-if: model + per-fire inputs
     import whatif_export
     whatif_export.export(DATA, [fid for fid in store.REPLAY_FIRES])
 

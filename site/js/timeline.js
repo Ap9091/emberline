@@ -1,11 +1,9 @@
-// ─────────────────────────────────────────────────────────────────────────────
 // timeline.js - the bottom bar in REPLAY mode.
 //   left:  fire picker, clock, play / pause / step, speed, split screen, "Run copilot at HH:MM"
 //   right: scrubber over all replay hours with three lanes of marks + a fire-area sparkline
 //
 // The timeline does not know about the map. It calls the functions in `on` (given by mode_replay.js):
 //   on.hour(h)  on.playToggle()  on.step(±1)  on.speed(i)  on.split()  on.copilot()  on.fire(id)
-// ─────────────────────────────────────────────────────────────────────────────
 import { h, svg, fill, $, fmtInt, showTooltip, hideTooltip, pacific } from './util.js';
 import { segmented } from './app.js';
 
@@ -32,7 +30,7 @@ export class Timeline {
     const t0 = new Date(meta.hours[0].time_utc).getTime();
     this.hourOf = iso => (new Date(iso).getTime() - t0) / 3600000;
 
-    // ── left: controls ──
+    // left: controls
     const fireSelect = h('select', { id: 'tl-fire', title: 'Replay fire', onchange: e => this.on.fire(e.target.value) },
       fires.map(f => h('option', { value: f.fire_id, selected: f.fire_id === meta.fire_id }, f.name)));
     this.timeEl = h('span', { class: 'tl-time mono' });
@@ -49,7 +47,7 @@ export class Timeline {
         segmented([[0, '1 h/s'], [1, '1 h/2 s']], ui.speedIdx, i => this.on.speed(i), 'seg-small'),
         this.splitBtn, this.runBtn));
 
-    // ── right: lanes + sparkline + axis ──
+    // right: lanes + sparkline + axis
     const orders = meta.official_orders || [];
     this.cursor = h('div', { class: 'tl-cursor' });
     this.track = h('div', { class: 'tl-track' },
@@ -87,7 +85,7 @@ export class Timeline {
     this.cursor.dataset.label = hm;
   }
 
-  // ── pieces ─────────────────────────────────────────────────────────────────
+  // pieces
   _lane(kind, marks) { return h('div', { class: 'tl-lane tl-lane-' + kind }, marks); }
 
   /** One tick per hour that has an event; towns that share an hour share a tick. */

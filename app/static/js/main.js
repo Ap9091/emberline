@@ -1,4 +1,3 @@
-// ─────────────────────────────────────────────────────────────────────────────
 // main.js - start-up and the app shell: top bar, mode switching, 2D/3D toggle.
 //
 // File map (all in app/static/js):
@@ -13,7 +12,6 @@
 //   mode_state.js    STATE mode        mode_incident.js  INCIDENT mode
 //   mode_replay.js   REPLAY mode       timeline.js       replay timeline bar
 //   results.js       Results drawer
-// ─────────────────────────────────────────────────────────────────────────────
 import * as api from './api.js';
 import { app, setClock } from './app.js';
 import { COLORS, TEXT } from './config.js';

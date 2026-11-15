@@ -1,4 +1,3 @@
-// ─────────────────────────────────────────────────────────────────────────────
 // api/copilot.js - the live AI copilot on the hosted site (Vercel serverless function).
 // Copied into site/api/ by app/build_site.py. Used for any hour without a saved answer, and for what-if winds.
 // The key lives ONLY in Vercel's environment variable ANTHROPIC_API_KEY.
@@ -8,7 +7,6 @@
 //   plan     -> {status: ACCEPTED | MANUAL | AI_OFFLINE, attempts: [...], plan, human_decisions}   (same as /api/ai/plan)
 //   alert    -> {..., text, chars, label}
 // Every plan goes through the same plain-code safety check as the full app (_copilot_core.js).
-// ─────────────────────────────────────────────────────────────────────────────
 import Anthropic from '@anthropic-ai/sdk';
 import { SYSTEM, briefingPrompt, planLoop, alertPrompt, parseJson, cutAlert, ALERT_MAX } from './_copilot_core.js';
 

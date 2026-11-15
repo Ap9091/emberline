@@ -1,4 +1,3 @@
-// ─────────────────────────────────────────────────────────────────────────────
 // api/chat.js - the "Ask Emberline" assistant on Vercel (a serverless function next to the static site).
 // Copied into site/api/ by app/build_site.py. The API key lives ONLY in Vercel's environment variable
 // ANTHROPIC_API_KEY; the browser never sees it.
@@ -6,7 +5,6 @@
 // POST /api/chat  {messages: [{role, content}], screen: {...what the app shows}}
 //   → {reply, actions, suggestions}
 // The knowledge (system prompt) is app/assistant/knowledge.md, copied in as _knowledge.js at build time.
-// ─────────────────────────────────────────────────────────────────────────────
 import Anthropic from '@anthropic-ai/sdk';
 import { KNOWLEDGE } from './_knowledge.js';
 

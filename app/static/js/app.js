@@ -1,7 +1,5 @@
-// ─────────────────────────────────────────────────────────────────────────────
 // app.js - the shared "app" object: things every mode needs (the map, the config, the top-bar clock,
 // the loading pill, the archive banner, the legend). main.js fills it in at start-up.
-// ─────────────────────────────────────────────────────────────────────────────
 import { h, fill, $ } from './util.js';
 
 export const app = {
@@ -15,27 +13,27 @@ export const app = {
   on3DChange: null,    // set by the active mode if it wants to hear about the 2D/3D toggle
 };
 
-// ── top-bar clock chip ───────────────────────────────────────────────────────
+// top-bar clock chip
 /** kind: 'live' (green dot) | 'archive' (amber dot) | 'idle' (grey dot) */
 export function setClock(text, kind = 'idle') {
   $('#clock-text').textContent = text;
   $('#clock-chip').dataset.kind = kind;
 }
 
-// ── loading pill on the map ──────────────────────────────────────────────────
+// loading pill on the map
 export function setLoading(text) {
   $('#map-loading').hidden = !text;
   $('#map-loading-text').textContent = text || '';
 }
 
-// ── amber archive banner on top of the map ───────────────────────────────────
+// amber archive banner on top of the map
 export function setBanner(text) {
   const el = $('#map-banner');
   el.hidden = !text;
   el.textContent = text || '';
 }
 
-// ── layer toggle card (top-left of the map) ──────────────────────────────────
+// layer toggle card (top-left of the map)
 export function setToggles(...children) {
   const el = $('#layer-toggles');
   el.hidden = !children.length;
@@ -58,7 +56,7 @@ export function segmented(options, current, onPick, cls = '') {
   return el;
 }
 
-// ── legend (bottom-left of the map) ──────────────────────────────────────────
+// legend (bottom-left of the map)
 const LEGENDS = {
   state: [['sw sw-pixel', 'GOES-18 fire pixel'], ['sw sw-incident', 'Incident (ring size = area, number = rank)']],
   situation: [

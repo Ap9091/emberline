@@ -1,8 +1,6 @@
-// ─────────────────────────────────────────────────────────────────────────────
 // config.js - ONE place for colours, constants and wording.
 // Change a colour here and it changes on the map AND in the side panel
 // (main.js copies COLORS into CSS variables like --evacuate).
-// ─────────────────────────────────────────────────────────────────────────────
 
 export const COLORS = {
   // status colours (the only "real" colours in the app)

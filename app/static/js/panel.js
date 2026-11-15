@@ -1,8 +1,6 @@
-// ─────────────────────────────────────────────────────────────────────────────
 // panel.js - the "situation" part of the side panel, shared by INCIDENT and REPLAY:
 //   header · wind card · numbers · town countdowns
 // The AI part (briefing, plan, alert, event log) is in copilot.js.
-// ─────────────────────────────────────────────────────────────────────────────
 import { h, fill, fmtInt, fmtKm2, fmt1, fmtPct, utcHM, localHMZone, compass, windArrow } from './util.js';
 import { leaveBy, roadClosesH, roadLabel } from './leaveby.js';
 
@@ -22,7 +20,7 @@ export const plain = (...text) => h('p', { class: 'plain' }, ...text);
 /** Technical detail folded away behind a small "Details" toggle (model names, cut-offs, scores). */
 export const tech = (...body) => h('details', { class: 'tech' }, h('summary', {}, 'Details'), ...body);
 
-// ── source captions (every number shows its source and time) ─────────────────
+// source captions (every number shows its source and time)
 function fireSource(sit) {
   return sit.scan_time_utc ? `GOES-18 · scan ${utcHM(sit.scan_time_utc)} UTC` : `GOES-18 hourly · ${localHMZone(sit.time_local)}`;
 }
@@ -31,7 +29,7 @@ function windSource(sit) {
   return `Open-Meteo ${historical ? 'ERA5' : 'forecast'} · ${localHMZone(sit.time_local)}`;
 }
 
-// ── 1. header ────────────────────────────────────────────────────────────────
+// 1. header
 export function headerCard(sit, tag) {
   return h('div', { class: 'sit-head' },
     h('div', { class: 'sit-title' },
@@ -41,7 +39,7 @@ export function headerCard(sit, tag) {
     sit.data_note ? h('div', { class: 'sit-note' }, sit.data_note) : null);
 }
 
-// ── 2. wind card ─────────────────────────────────────────────────────────────
+// 2. wind card
 export function windCard(sit) {
   const w = sit.wind || {};
   const to = ((w.from_deg ?? 0) + 180) % 360;
@@ -59,7 +57,7 @@ export function windCard(sit) {
         stat('Temp', fmt1(w.temp_c), '°C'))));
 }
 
-// ── 3. numbers ───────────────────────────────────────────────────────────────
+// 3. numbers
 export function numbersCard(sit, modelName) {
   const n = sit.numbers || {};
   const fc = n.forecast_area_km2 || [];
@@ -78,7 +76,7 @@ export function numbersCard(sit, modelName) {
       (cut ? ` · a square counts as burning at chance ≥ ${cut.burn} (already burning) / ≥ ${cut.new} (new)` : '') + ' · 1 km² ≈ 250 acres')));
 }
 
-// ── 4. town countdowns ───────────────────────────────────────────────────────
+// 4. town countdowns
 const ETA_TEXT = { 0: 'fire at town', 1: 'fire in < 1 h', 2: 'fire in ~2 h', 3: 'fire in ~3 h' };
 
 export function etaText(t) {
@@ -153,7 +151,7 @@ export function townsCard(sit, modelName, ui, onSelect, onToggleMonitor) {
       `WARNING from a chance of ${cut ?? '-'} up (set on past fires, so few towns are missed). Model: ${modelName || 'logreg'}.`)));
 }
 
-// ── the whole situation block ────────────────────────────────────────────────
+// the whole situation block
 /**
  * Keeps the situation sections in one container and re-draws them for each new situation.
  *   const sp = new SituationPanel(container, {modelName, onTownSelect});
