@@ -402,7 +402,14 @@ class Demo {
     const narrow = window.innerWidth <= 900;
     const split = $('#map-area').classList.contains('split');
     const left = narrow || split || this.card?.classList.contains('dock-right') ? 30 : Math.min(420, (this.card?.offsetWidth || 360) + 40);
-    app.view.map.fitBounds([[w, s], [e, n]], { padding: { top: 40, bottom: 40, left, right: 40 }, duration: ms, pitch: app.view.is3D ? 50 : 0, bearing: 0 });
+    // phones: the card sits over the lower part of the map, so keep the fire in the part above it
+    let bottom = 40;
+    if (narrow && this.card && !this.card.hidden) {
+      const mapBox = app.view.map.getContainer().getBoundingClientRect(), cardBox = this.card.getBoundingClientRect();
+      const covered = mapBox.bottom - cardBox.top;
+      if (covered > 40) bottom = Math.min(covered + 16, mapBox.height * 0.6);
+    }
+    app.view.map.fitBounds([[w, s], [e, n]], { padding: { top: 40, bottom, left, right: 40 }, duration: ms, pitch: app.view.is3D ? 50 : 0, bearing: 0 });
   }
 
   /** Spotlight one element: the rest of the side panel fades back. null = no spotlight (panel faded). */

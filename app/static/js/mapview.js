@@ -308,8 +308,16 @@ export class MapView {
     for (const f of this.sit?.layers?.exits?.features || []) {
       if (f.properties.town === town.name) f.geometry.coordinates.forEach(c => box.extend(c));
     }
-    this.map.fitBounds(box, { padding: { top: 70, bottom: 70, left: 250, right: 70 }, maxZoom: 10.2, duration: 900,
-      pitch: this.is3D ? PITCH_3D : 0 });
+    let padding = { top: 70, bottom: 70, left: 250, right: 70 };
+    if (window.innerWidth <= 900) {                 // phones: no side panel over the map, but maybe the demo card below
+      padding = { top: 40, bottom: 40, left: 30, right: 30 };
+      const card = document.getElementById('demo-card');
+      if (card && !card.hidden) {
+        const mapBox = this.map.getContainer().getBoundingClientRect(), covered = mapBox.bottom - card.getBoundingClientRect().top;
+        if (covered > 40) padding.bottom = Math.min(covered + 16, mapBox.height * 0.6);
+      }
+    }
+    this.map.fitBounds(box, { padding, maxZoom: 10.2, duration: 900, pitch: this.is3D ? PITCH_3D : 0 });
   }
 
   /** Switch 3D terrain on or off. */
