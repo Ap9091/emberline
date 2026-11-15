@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Emberline">
+  <defs>
+    <linearGradient id="eb-flame" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffc56b"/>
+      <stop offset=".45" stop-color="#ff6a14"/>
+      <stop offset="1" stop-color="#a8300a"/>
+    </linearGradient>
+    <linearGradient id="eb-core" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff4de"/>
+      <stop offset="1" stop-color="#ffb454"/>
+    </linearGradient>
+    <linearGradient id="eb-edge" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ff8a3d"/>
+      <stop offset="1" stop-color="#5a2410"/>
+    </linearGradient>
+    <clipPath id="eb-cut"><path d="M0 0H64V35L0 44Z M0 49.5L64 40.5V64H0Z"/></clipPath>
+  </defs>
+  <rect x="1.5" y="1.5" width="61" height="61" rx="14" fill="#111418" stroke="url(#eb-edge)" stroke-width="2.5"/>
+  <g clip-path="url(#eb-cut)">
+    <path d="M32 4 L40 17 L43 11 L49 26 C53 34 52 44 47 51 C43 56 38 58 32 58 C26 58 21 56 17 51 C12 44 11 34 15 26 L21 13 L24 21 Z" fill="url(#eb-flame)"/>
+    <path d="M32 29 L37.5 37.5 C40.5 42 40.5 48 37.5 51 C35.5 53 33.5 54 32 54 C30.5 54 28.5 53 26.5 51 C23.5 48 23.5 42 26.5 37.5 Z" fill="url(#eb-core)"/>
+  </g>
+  <path d="M6 45.9 L58 38.6" stroke="#ffd08a" stroke-width="2.6" stroke-linecap="round" stroke-dasharray="0.1 4.4"/>
+</svg>

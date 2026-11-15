@@ -1,3 +1,5 @@
+<img src="app/static/logo.svg" width="84" alt="Emberline logo">
+
 # Emberline: a wildfire copilot for California.
 
 **Track:** Climate · **Team:** Aryan Thakrar, Sneh Patel, Anirudhan Illayaraja · **Live demo:** [emberline-site-lyart.vercel.app](https://emberline-site-lyart.vercel.app) (press "Start the demo", it takes 2 minutes) · **Video:** _add the link_
