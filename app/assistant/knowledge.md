@@ -24,8 +24,8 @@ Why it is different: fire apps show where a fire is now; research models predict
 - Fire list: CAL FIRE incidents. Official evacuation times: published county records, each with a source link (Eaton: LA County report on the Eaton Fire evacuation alerts).
 
 # The model
-- A logistic regression (simple and explainable). We also tried gradient-boosted trees; they were not better on the validation fires, so we kept the simple one.
-- Trained on 40 California fires from 2018 to 2022 (355,483 examples: one 2 km square at one hour). Settings tuned on 12 fires from 2023. Tested once on 18 fires from 2024 and 2025 that it never saw.
+- A logistic regression (simple and explainable). We also tried gradient-boosted trees: on the tuning fires they scored a little better square by square, but warned fewer towns (87% vs 93%). The decision is about towns, so we kept the simpler model, which is also easier to explain.
+- Trained on 40 California fires from 2018 to 2022 (237,225 examples: one 2 km square at one hour; 355,483 in the whole dataset with the tuning and test fires). Settings tuned on 12 fires from 2023 (plus cross-validation by fire on the training fires). Tested on 18 fires from 2024 and 2025 that it never saw. Honest detail: the first test run exposed three bugs (other fires inside a fire's box, one cut-off hiding new spread, too few tuning towns); we fixed them, re-ran the test once, and kept the first run's results in the repo (results/phase3_run1_*).
 - Each hour it gives every square near the fire a chance of burning in the next hour, then rolls forward to +2 and +3 hours.
 
 # Test results on the 18 unseen fires (compared with two simple guesses)

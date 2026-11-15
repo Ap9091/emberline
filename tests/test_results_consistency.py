@@ -55,3 +55,13 @@ def test_hosted_site_has_the_same_results():
     site = json.load(open(os.path.join(ROOT, "site", "data", "results.json")))
     assert site["table"]["logreg"]["towns_warned"] == table()["logreg"]["towns_warned"]
     assert site["table"]["logreg"]["IoU +3h"] == table()["logreg"]["IoU +3h"]
+
+
+def test_readme_quotes_the_same_numbers():
+    readme = open(os.path.join(ROOT, "README.md"), encoding="utf-8").read()
+    t = table()
+    for text in ("18 of 20 (90%)", "2.8 h", "2.5 h", f"{t['logreg']['false_alarms_per_fire_day']:.1f}",
+                 f"{t['grow_1km']['false_alarms_per_fire_day']:.1f}", "0.32 / 0.41", "0.14 / 0.24",
+                 "0.68 / 0.54 / 0.45", "0.70 / 0.56 / 0.47", "0.31 / 0.19 / 0.17", "98.5%", "237,225", "355,483",
+                 "87% against 93%", "Sierra Madre 2.4 h"):
+        assert text in readme, text
