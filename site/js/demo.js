@@ -1,7 +1,9 @@
 // demo.js - the guided demo. It plays the app by itself; the viewer only presses Next.
 //
-// One story, told on the real Eaton Fire (Los Angeles, January 2025), plus one step on the Park Fire
-// (2024), where the saved copilot run shows the safety check rejecting an AI plan.
+// Seven cards that follow the video script (problem on the welcome card, then the demo, how it works, next steps).
+// One story, told on the real Eaton Fire (Los Angeles, January 2025), plus one card on the Park Fire
+// (2024), where the saved copilot run shows the safety check rejecting an AI plan. Inside a card, the feature plays
+// in timed beats: the card line, the map and the panel part being talked about light up together.
 // Every number in the cards comes from the replay data or the test results (results/metrics.json):
 //   * Eaton hour 2: the 3-hour forecast overlapped 76% with what really burned (fire stays put 65%,
 //     grow 1 km/h 31%); one of the best +3 h hours of the Eaton Fire (not the top one). Square check: 13 hit, 4 missed, 0 false alarms.
@@ -41,215 +43,222 @@ const why = (...c) => h('div', { class: 'dm-why' }, h('span', { class: 'dm-lab' 
 const key = (cls, ...c) => h('div', {}, h('span', { class: 'dm-key ' + cls }), h('span', {}, ...c));
 const num = (n, ...c) => h('div', {}, h('span', { class: 'dm-key n' }, n), h('span', {}, ...c));
 
+/** A line in the card that lights up when the narration reaches it (see d.beat). */
+const beat = (n, ...c) => h('div', { class: 'dm-beat', 'data-beat': String(n) }, ...c);
+/** A section of the situation panel by its title (Wind, Fire size, Town countdowns), and one of its number tiles. */
+const sec = title => [...(R.state.slots?.sit?.querySelectorAll('section.sec') || [])].find(x => x.querySelector('h3')?.textContent === title) || null;
+const tile = (title, i) => sec(title)?.querySelectorAll('.tile')[i] || sec(title);
+
+// Seven cards, one per part of the video script. Each card plays its feature in timed beats and spotlights what
+// the narration is about: the line on the card (d.beat), the map, and the panel (d.focus).
 const STEPS = [
   {
-    title: 'One real place: California',
-    body: () => [see('Only California is on the map. The glowing outline is ', b('Los Angeles County'), '.'),
-      why('We kept the project to one real place, so we could test it properly on real fires.')],
+    title: 'The Eaton Fire, seen from space',
+    kicker: 'Jan 7, 2025, 6 pm · Los Angeles',
+    body: () => [
+      beat(1, see('Only California is on the map. The glowing outline is ', b('Los Angeles County'), '.')),
+      beat(2, p(h('span', { class: 'dm-key fire' }), b('Red squares'), ' are land burning right now, 2 km each. ',
+        'A NOAA weather satellite spots the heat every 5 minutes, while winds gust near 100 km/h.')),
+      why('That night the winds grounded the aircraft. The satellite kept watching, and Emberline always starts from where the fire really is.')],
     async run(d) {
       await d.replay(EATON, 1, { fire: true, forecast: false });
+      if (!d.alive()) return;
       app.view.setGroup('towns', false);
       app.view.showLA(true);
       d.pin(LA, 'Los Angeles');
-      d.frame(CA, 1400);
+      d.frame(CA, 1200);
+      d.beat(1);
+      if (!await d.wait(2600)) return;
+      d.clearPins();
+      app.view.setGroup('towns', true);
+      d.frameFire(1800);
+      d.beat(2);
+      if (!await d.wait(2200)) return;
+      d.focus(tile('Fire size', 0));
     },
   },
   {
-    title: 'Jan 7, 2025, 6 pm: the Eaton Fire',
-    body: () => [see(h('span', { class: 'dm-key fire' }), b('Red squares'), ' are land burning right now. Each one is 2 km wide. ',
-        'A NOAA weather satellite spots the heat every 5 minutes, while winds gust near 100 km/h.'),
-      why('Emberline always starts from where the fire really is, straight from space.')],
-    async run(d) {
-      await d.replay(EATON, 1, { fire: true, forecast: false });
-      d.frameFire(1400);
-    },
-  },
-  {
-    title: 'Emberline guesses the next 3 hours',
-    body: () => [see(h('div', { class: 'dm-legend' },
+    title: 'Emberline forecasts the next 3 hours',
+    body: () => [
+      beat(1, p('The model adds the ', b('wind, humidity, slope and plants'), ' to the satellite picture.')),
+      h('div', { class: 'dm-hours' }, beat(2, '+1 h'), beat(3, '+2 h'), beat(4, '+3 h')),
+      beat(5, see(h('div', { class: 'dm-legend' },
         key('fire', b('Red'), ': burning now'),
         key('forecast', b('Orange'), ': may burn soon (darker = more likely)'),
-        key('ring', b('Dotted lines'), ': where the edge should be in 1, 2 and 3 hours'))),
-      why('Towns see the danger before it arrives. The model learned from ', b('38 past California fires'),
-        ', using wind, slopes, plants and how dry the air is.')],
+        key('ring', b('Dotted lines'), ': where the edge should be in 1, 2 and 3 hours')))),
+      why('Towns see the danger before it arrives. The model learned from ', b('38 past California fires'), '.')],
     async run(d) {
-      await d.replay(EATON, 2, { fire: true, forecast: true });
+      await d.replay(EATON, 2, { fire: true, forecast: false });
+      if (!d.alive()) return;
       d.frameFire(900);
+      d.focus(sec('Wind'));
+      d.beat(1);
+      if (!await d.wait(5200)) return;
+      R.layers({ forecast: true });
+      for (const k of [1, 2, 3]) {                // one, two and three hours ahead
+        R.horizon(k);
+        app.view.showRings(k);
+        d.focus(tile('Fire size', k + 1));
+        d.beat(k + 1);
+        if (!await d.wait(1400)) return;
+      }
+      d.beat(5);
     },
   },
   {
     title: 'Was the guess right?',
-    body: () => [see(b('Left:'), ' what the satellite saw at 7 pm. ', b('Right:'), ' the dotted line is our guess for 10 pm, and the ',
-        h('span', { class: 'dm-key actual' }), b('dark squares'), ' are where the fire really was at 10 pm.'),
-      h('div', { class: 'dm-bars' }, h('div', { class: 'dm-bars-title' }, 'How much the guess and the real fire overlap (100% = perfect)'),
-        bar('Emberline', 76, true), bar('Guess “fire stays put”', 65), bar('Guess “grows 1 km/h”', 31)),
-      why('Anyone can check the forecast against what really happened. ', b('This is one of our best hours'),
-        '; across all 18 test fires the average overlap is 45%.')],
+    body: () => [
+      beat(1, see(b('Left:'), ' what the satellite saw at 7 pm. ', b('Right:'), ' our guess for 10 pm, and the ',
+        h('span', { class: 'dm-key actual' }), b('dark squares'), ' fading in are where the fire really was at 10 pm.')),
+      beat(2, h('div', { class: 'dm-bars' }, h('div', { class: 'dm-bars-title' }, 'How much the guess and the real fire overlap (100% = perfect)'),
+        bar('Emberline', 76, true), bar('Guess “fire stays put”', 65), bar('Guess “grows 1 km/h”', 31))),
+      beat(3, see('Square by square:', h('div', { class: 'dm-legend' },
+        key('hit', b('13 green'), ': we said fire, and fire came'),
+        key('missed', b('4 pink'), ': fire came, but we missed it (each one next to a green)'),
+        key('false', b('0 grey'), ': we said fire, but none came')))),
+      why(b('This is one of our best hours'), '; across all 18 test fires the average overlap is 45%.')],
     async run(d) {
       await d.replay(EATON, 2, { fire: true, forecast: true }, { split: true });
+      if (!d.alive()) return;
       d.frameFire(0);
+      d.beat(1);
+      if (!await d.wait(6800)) return;
+      d.focus(R.state.slots.verify);
+      d.beat(2);
+      if (!await d.wait(2400)) return;
+      await R.split(false);
+      if (!d.alive()) return;
+      R.layers({ fire: false, forecast: false, verify: true });
+      d.frameFire(900);
+      d.focus(R.state.slots.verify);
+      d.beat(3);
     },
     dock: 'right',
   },
   {
-    title: 'Square by square',
-    body: () => [see('The same guess, checked one square at a time:', h('div', { class: 'dm-legend' },
-        key('hit', b('13 green'), ': we said fire, and fire came'),
-        key('missed', b('4 pink'), ': fire came, but we missed it'),
-        key('false', b('0 grey'), ': we said fire, but none came'))),
-      why('Every pink square touches a green one, so the guess was never more than ', b('one square (2 km) off'),
-        ', about as sharp as the satellite can see. And it raised no false alarms.')],
-    async run(d) {
-      await d.replay(EATON, 2, { fire: false, forecast: false, verify: true });
-      d.frameFire(900);
-      d.focus(R.state.slots.verify);
-    },
-  },
-  {
-    title: 'It warns towns before the fire arrives',
-    body: () => [see('Every nearby town gets a colour: ', h('span', { class: 'dm-tag evac' }, 'EVACUATE'), ' ',
-        h('span', { class: 'dm-tag warn' }, 'WARNING'), ' or ', h('span', { class: 'dm-tag mon' }, 'MONITOR'),
-        '. ', b('Sierra Madre'), ' (10,775 people) is told to evacuate. The lines are its roads out.'),
-      h('div', { class: 'dm-legend' },
-        num('1', b('People'), ': how many live there'),
-        num('2', b('Chance'), ': how likely the fire reaches it in 3 hours'),
-        num('3', b('Dist.'), ': how far the fire is now')),
-      h('div', { class: 'dm-honest' }, b('Leave by about 8 pm. '), 'Both directions of the I-210 stay clear of the forecast fire for at least 3 hours, so the deadline is the fire reaching town.'),
-      why('People get a clear answer: when to leave, and which road to take.')],
-    async run(d) {
-      await d.replay(EATON, 2, { fire: true, forecast: true });
-      R.town('Sierra Madre');
-      d.focus(R.state.slots.sit);
-      d.pinTown('Sierra Madre');
-    },
-  },
-  {
-    title: 'Real proof: we were hours early',
-    body: () => [see(h('div', { class: 'dm-times' },
+    title: 'Who should leave, and when',
+    body: () => [
+      beat(1, see('Every town gets ', h('span', { class: 'dm-tag evac' }, 'EVACUATE'), ' ', h('span', { class: 'dm-tag warn' }, 'WARNING'),
+        ' or ', h('span', { class: 'dm-tag mon' }, 'MONITOR'), ', a countdown and a leave-by time.')),
+      beat(2, h('div', { class: 'dm-honest' }, b('Sierra Madre'), ' (10,775 people, under 3 km from the fire) is told to evacuate. ',
+        b('Leave by about 8 pm.'), ' Both directions of the I-210 stay clear of the forecast fire for at least 3 hours.')),
+      beat(3, h('div', { class: 'dm-times' },
         h('div', { class: 'dm-time ours' }, h('span', { class: 'mono' }, '7:00 pm'), h('span', {}, 'Emberline warns Sierra Madre')),
         h('div', { class: 'dm-time' }, h('span', { class: 'mono' }, '8–9 pm'), h('span', {}, 'Satellite sees fire at the edge of town')),
         h('div', { class: 'dm-time official' }, h('span', { class: 'mono' }, '9:26 pm'), h('span', {}, 'Official evacuation order')))),
-      why('Emberline flagged Sierra Madre ', b('almost 2½ hours before the official order'), '. On this fire it was first for ',
-        b('all 5 towns'), ' with public order times, usually by about half an hour. Across all 3 replay fires: first for ',
-        b('8 of 9 towns'), ', including ', b('every town the fire actually reached'), '.'),
-      h('div', { class: 'dm-src' }, 'The panel lists each town, our time, the official time, and a link to the public record (LA County report).')],
+      beat(4, why('Across all 3 replay fires, Emberline was first for ', b('8 of 9 towns'), ' with public order times, including ',
+        b('every town the fire actually reached'), '. On the bar at the bottom, our orange warning ticks come before the white official ones.'))],
     async run(d) {
       await d.replay(EATON, 2, { fire: true, forecast: true });
-      d.focus(R.state.slots.official);
+      if (!d.alive()) return;
+      d.frameFire(900);
+      d.focus(sec('Town countdowns'));
+      d.beat(1);
+      if (!await d.wait(5200)) return;
+      R.town('Sierra Madre');
       d.pinTown('Sierra Madre');
-      for (const hr of [3, 4]) {          // let the fire reach the town
-        await sleep(1600); if (!d.alive()) return;
+      const row = R.state.slots.sit.querySelector('.town-row.selected');
+      d.focus(row || sec('Town countdowns'), row?.nextElementSibling?.classList.contains('exit-list') ? row.nextElementSibling : null);
+      d.beat(2);
+      if (!await d.wait(8800)) return;
+      d.focus(R.state.slots.official, $('#timeline'));
+      d.beat(3);
+      for (const hr of [3, 4]) {                  // let the fire reach the town
+        if (!await d.wait(1700)) return;
         await R.hour(hr);
       }
-    },
-  },
-  {
-    title: 'The bar at the bottom tells the whole story',
-    body: () => [see('The whole fire, hour by hour, left to right:', h('div', { class: 'dm-legend' },
-        key('tick warn', b('Orange ticks'), ': Emberline warns a town'),
-        key('tick arrive', b('Red ticks'), ': the fire reaches a town'),
-        key('tick official', b('White ticks'), ': official orders'),
-        key('hill', b('Brown hill'), ': how big the fire was'))),
-      why('Orange before red means a town was warned in time.')],
-    async run(d) {
-      await d.replay(EATON, 4, { fire: true, forecast: true });
-      d.focus($('#timeline'));
+      if (!await d.wait(2600)) return;
+      d.beat(4);
     },
   },
   {
     title: 'AI writes the plan. Code checks it.',
     kicker: 'Another real fire: Park Fire, July 2024',
-    body: () => [see('The AI wrote an evacuation plan that sent Butte Creek Canyon out on Highway 32 west, but the fire was about to cross that road.',
-        h('div', { class: 'dm-legend' },
-          key('evacbox', b('Red box'), ': the plan our code ', h('span', { class: 'dm-tag evac' }, 'REJECTED'), ', and why'),
-          key('okbox', b('Green box'), ': the fixed plan (Highway 32 north) that passed'),
-          num('✓', b('Approve plan'), ': nothing happens until a person presses it'))),
+    body: () => [
+      beat(1, p('An AI drafts the evacuation plan for every town in danger.')),
+      beat(2, h('div', { class: 'dm-legend' }, key('evacbox', b('Red box'), ': it sent Butte Creek Canyon out on Highway 32 west, but the fire was about to cross that road. Our code said ',
+        h('span', { class: 'dm-tag evac' }, 'REJECTED'), '.'))),
+      beat(3, h('div', { class: 'dm-legend' }, key('okbox', b('Green box'), ': the fixed plan (Highway 32 north) passed the check.'))),
+      beat(4, h('div', { class: 'dm-legend' }, num('✓', b('Approve plan'), ': nothing happens until a person presses it.'))),
       why('The AI never acts alone. Code checks every road, and a person makes the final call.')],
     async run(d) {
       await d.replay(PARK, 2, { fire: true, forecast: true });
+      if (!d.alive()) return;
       d.frameFire(900);
       d.focus(R.state.slots.ai);
-      await R.copilot(window.innerWidth <= 900);       // phones: no panel scrolling (keeps the card in view)
+      d.beat(1);
+      R.copilot(window.innerWidth <= 900).catch(() => {});      // phones: no panel scrolling (keeps the card in view)
+      if (!await d.wait(5600)) return;
+      d.focus(R.state.slots.ai.querySelector('.attempt-rejected') || R.state.slots.ai);
+      d.beat(2);
+      if (!await d.wait(3800)) return;
+      d.focus(R.state.slots.ai.querySelector('.attempt-ok') || R.state.slots.ai);
+      d.beat(3);
+      if (!await d.wait(2200)) return;
+      d.focus($('#approve-plan') || R.state.slots.ai);
+      d.beat(4);
     },
   },
   {
-    title: 'What if the wind changes?',
-    body: () => [see('Back on the Eaton Fire, the wind now blows ', b('twice as hard'), '. The map and the towns update in about a second:'),
-      h('div', { class: 'dm-compare' },
+    title: 'What if the wind doubles? Just ask.',
+    chat: true,
+    body: () => [
+      beat(1, see('The ', b('✦ Ask Emberline'), ' guide (Claude Sonnet 5.5) answers in plain words, using our real results.')),
+      beat(2, h('div', { class: 'dm-compare' },
         h('div', {}, h('span', { class: 'dm-big mono' }, '10'), h('span', {}, 'towns in danger with the real wind (29 km/h)')),
-        h('div', { class: 'hot' }, h('span', { class: 'dm-big mono' }, '20'), h('span', {}, 'towns in danger at 60 km/h'))),
-      why('Teams can plan for a worse wind before it happens. Drag the compass on the right to try any wind.')],
+        h('div', { class: 'hot' }, h('span', { class: 'dm-big mono' }, '20'), h('span', {}, 'towns in danger at 60 km/h')))),
+      why('Emberline reruns the forecast in about a second, so teams can plan for a worse wind before it arrives.')],
     async run(d) {
+      const phone = window.innerWidth <= 900;      // on phones the chat would cover the card, so only the map changes
       await d.replay(EATON, 2, { fire: true, forecast: true });
+      if (!d.alive()) return;
+      if (!phone) setOpen(true);
       d.frameFire(900);
+      d.beat(1);
+      if (!await d.wait(1600)) return;
+      // the demo changes the wind itself (so the map is always right); the guide only explains it
+      if (!phone) ask('What happens if the wind doubles?', { fromDemo: true, actions: false });
+      if (!await d.wait(1600)) return;
       d.focus(R.state.slots.whatif);
-      await sleep(900); if (!d.alive()) return;
       await R.wind(R.state.sit.wind.from_deg, 60);
       if (!d.alive()) return;
-      d.focus(R.state.slots.whatif);
       d.frameFire(900);
+      d.focus(R.state.slots.whatif);
+      d.beat(2);
     },
   },
   {
-    title: 'Not one lucky fire: we tested 18',
-    body: () => [see('The dots are ', b('18 fires from 2024 and 2025 the model never saw'), '. We trained on 38 older fires, then compared it with two simple guesses:'),
-      h('table', { class: 'dm-table' },
+    title: 'How it works: tested on 18 fires it never saw',
+    body: () => [
+      beat(1, p(b('Data. '), 'NOAA GOES satellite scans of 70 California fires (2018 to 2025): 355,483 examples, each a 2 km square at one hour.')),
+      beat(2, p(b('Model. '), 'A logistic regression with 39 inputs (the fire, wind, humidity, slope and plants), trained on 38 older fires and tested on the ',
+        b('18 dots'), ': fires from 2024 and 2025 it never saw.')),
+      beat(3, h('table', { class: 'dm-table' },
         h('thead', {}, h('tr', {}, h('th'), h('th', { class: 'ours' }, 'Emberline'), h('th', {}, 'Grows 1 km/h'), h('th', {}, 'Stays put'))),
         h('tbody', {},
           h('tr', {}, h('td', {}, 'Towns warned before the fire came'), h('td', { class: 'ours mono' }, '18 / 20'), h('td', { class: 'mono' }, '18 / 20'), h('td', { class: 'mono' }, '0 / 20')),
           h('tr', {}, h('td', {}, 'How early, on average'), h('td', { class: 'ours mono' }, '2.8 h'), h('td', { class: 'mono' }, '2.5 h'), h('td', { class: 'mono' }, '–')),
-          h('tr', {}, h('td', {}, 'Spotting new fire (0 to 1)'), h('td', { class: 'ours mono' }, '0.41'), h('td', { class: 'mono' }, '0.24'), h('td', { class: 'mono' }, '0')))),
-      why('The result holds across many fires: 90% of towns warned, almost 3 hours early, and about 1.7 times better at spotting new fire. ',
-        'It held up just as well when we swapped in the ', b('weather forecast people really had'), '.')],
+          h('tr', {}, h('td', {}, 'Spotting new fire (0 to 1)'), h('td', { class: 'ours mono' }, '0.41'), h('td', { class: 'mono' }, '0.24'), h('td', { class: 'mono' }, '0')),
+          h('tr', {}, h('td', {}, 'Fire shape at +3 h'), h('td', { class: 'ours mono' }, '45%'), h('td', { class: 'mono' }, '17%'), h('td', { class: 'mono' }, '47%'))))),
+      beat(4, h('div', { class: 'dm-honest' }, b('Not perfect. '), 'On fire shape it ties “stays put” (45% vs 47%), and it gives extra “get ready” warnings on purpose. ',
+        b('Next: '), 'official evacuation zones, and a trial beside a county emergency office.')),
+      h('div', { class: 'dm-src' }, 'Explore on your own: STATE (all of California), INCIDENT, REPLAY, the Results button and ✦ Ask Emberline.')],
     async run(d) {
       R.realWind();
-      d.focus(null);
+      setOpen(false);
       await d.replay(EATON, 2, { fire: true, forecast: true });
+      if (!d.alive()) return;
       app.view.setGroup('towns', false);
-      d.dots(TEST_FIRES);
       d.frame(CA, 1400);
-    },
-  },
-  {
-    title: 'Where it gets things wrong',
-    body: () => [h('ul', { class: 'dm-list' },
-        h('li', {}, b('False alarms. '), 'It warns some towns the fire never reaches, more often than the simple rule. But 98% of them were “get ready”, not “leave now”. We chose this: missing a town is worse than an extra warning.'),
-        h('li', {}, b('Fire shape. '), 'For the overall shape it is about as good as “the fire stays put” (45% vs 47%). Its strength is new spread and town warnings.'),
-        h('li', {}, b('Blurry eyes. '), 'The satellite sees 2 km squares, and smoke, clouds and night can hide fire. Local wind gusts are missed.'),
-        h('li', {}, b('Few fires. '), 'Good satellite data only goes back to 2018, so there are only so many fires to learn from.')),
-      h('div', { class: 'dm-honest' }, 'Emberline is a research demo. In a real fire, follow official orders.')],
-    async run(d) {
-      d.focus(null);
-      await d.replay(EATON, 2, { fire: true, forecast: true });
-      app.view.setGroup('towns', false);
+      d.beat(1);
+      if (!await d.wait(5400)) return;
+      d.beat(2);
+      if (!await d.wait(3200)) return;
       d.dots(TEST_FIRES);
-      d.frame(CA, 0);
-    },
-  },
-  {
-    title: 'Ask Emberline anything',
-    body: () => [see('The ', b('✦ Ask Emberline'), ' guide (Claude Sonnet 5.5) answers in plain words, using our real results, and ', b('moves the app'), ' to the proof.'),
-      p('Watch it take a hard one: ', h('i', {}, '“Did Emberline just get lucky with Sierra Madre?”')),
-      why('Anyone can explore Emberline without knowing anything about wildfires.')],
-    async run(d) {
-      d.focus(null);
-      await sleep(700); if (!d.alive()) return;
-      await ask('Did Emberline just get lucky with Sierra Madre?', { fromDemo: true });
-      if (d.alive() && R.state?.slots) d.focus(R.state.slots.verify);
-    },
-    dock: 'right',
-  },
-  {
-    title: 'Your turn',
-    body: () => [h('div', { class: 'dm-modes' },
-        h('div', {}, b('REPLAY'), h('span', {}, 'Past fires hour by hour. You are here.')),
-        h('div', {}, b('INCIDENT'), h('span', {}, 'One fire up close, with the AI copilot.')),
-        h('div', {}, b('STATE'), h('span', {}, 'All of California at once.'))),
-      p('Ask the ', b('✦ Ask Emberline'), ' guide anything, and replay this demo any time from the ', b('⚙ menu'), '.')],
-    async run(d) {
-      d.focus($('#mode-tabs'));
-      await d.replay(EATON, 2, { fire: true, forecast: true });
-      d.frameFire(1000);
+      if (!await d.wait(4200)) return;
+      d.beat(3);
+      if (!await d.wait(8000)) return;
+      d.beat(4);
     },
   },
 ];
@@ -267,10 +276,11 @@ function fireBounds(sit) {
   return [cx - half, cy - half * 0.8, cx + half, cy + half * 0.8];
 }
 
-// Auto-play (URL #demo-auto, for recording the video): seconds per step, matched to the pitch script
-// (docs: about 175 words a minute). The welcome screen stays up for AUTO_WELCOME_S first. Space pauses.
-const AUTO_SECONDS = [5, 5.5, 9, 6, 14.5, 6, 8, 6.5, 8.2, 4.8, 7.8, 5.8, 9.5, 6];      // about 1:58 in total
-const AUTO_WELCOME_S = 15.5;
+// Auto-play (URL #demo-auto, for recording the video): seconds per card, matched to the 7-card video script read
+// fast (about 250 words a minute). The welcome card (the problem) stays up for AUTO_WELCOME_S first, and the last
+// card stays up while the speaker gives the next steps. Space pauses.
+const AUTO_SECONDS = [8.5, 13, 13.5, 24, 13, 12, 40];      // about 2 minutes in total, with the welcome card
+const AUTO_WELCOME_S = 16;
 let autoScale = 1;           // #demo-auto-1.1 = 10% slower, #demo-auto-0.9 = 10% faster
 
 /** Load everything the demo shows before it is needed, so no step waits on a download. */
@@ -333,7 +343,7 @@ class Demo {
     this.focus(null);
     app.view.showLA(false);
     this.card.classList.toggle('dock-right', step.dock === 'right');
-    if (step.title !== 'Ask Emberline anything' && step.title !== 'Your turn') setOpen(false);
+    if (!step.chat) setOpen(false);
     const last = i === STEPS.length - 1;
     fill(this.card,
       h('div', { class: 'dm-head' },
@@ -384,7 +394,11 @@ class Demo {
       },
       frame: (bounds, ms) => token === demo.token && demo.frame(bounds, ms),
       frameFire: ms => token === demo.token && demo.frame(fireBounds(R.state.sit) || R.state.meta?.bounds, ms),
-      focus: el => token === demo.token && demo.focus(el),
+      focus: (...els) => token === demo.token && demo.focus(...els),
+      /** Wait, then say whether this card is still on screen (false = the viewer moved on: stop). */
+      wait: async ms => { await sleep(ms); return token === demo.token; },
+      beat: n => token === demo.token && demo.beat(n),
+      clearPins: () => token === demo.token && demo.clearMarks(),
       pin: (lonlat, label) => token === demo.token && demo.pin(lonlat, label),
       pinTown: name => {
         const t = R.state.sit?.towns?.find(x => x.name === name);
@@ -402,6 +416,8 @@ class Demo {
     const narrow = window.innerWidth <= 900;
     const split = $('#map-area').classList.contains('split');
     const left = narrow || split || this.card?.classList.contains('dock-right') ? 30 : Math.min(420, (this.card?.offsetWidth || 360) + 40);
+    const chat = document.getElementById('as-box');
+    const right = !narrow && chat && !chat.hidden ? 420 : 40;          // the chat window sits over the right of the map
     // phones: the card sits over the lower part of the map, so keep the fire in the part above it
     let bottom = 40;
     if (narrow && this.card && !this.card.hidden) {
@@ -409,17 +425,44 @@ class Demo {
       const covered = mapBox.bottom - cardBox.top;
       if (covered > 40) bottom = Math.min(covered + 16, mapBox.height * 0.6);
     }
-    app.view.map.fitBounds([[w, s], [e, n]], { padding: { top: 40, bottom, left, right: 40 }, duration: ms, pitch: app.view.is3D ? 50 : 0, bearing: 0 });
+    app.view.map.fitBounds([[w, s], [e, n]], { padding: { top: 40, bottom, left, right }, duration: ms, pitch: app.view.is3D ? 50 : 0, bearing: 0 });
   }
 
-  /** Spotlight one element: the rest of the side panel fades back. null = no spotlight (panel faded). */
-  focus(el) {
-    document.querySelectorAll('.demo-focus').forEach(x => x.classList.remove('demo-focus'));
+  /** Spotlight elements: the rest of the side panel fades back. No element = no spotlight (panel faded). */
+  focus(...els) {
+    document.querySelectorAll('.demo-focus, .demo-lit').forEach(x => x.classList.remove('demo-focus', 'demo-lit'));
     $('#panel').classList.toggle('demo-dim', this.on);
-    if (!el) return;
-    el.classList.add('demo-focus');
+    els = els.filter(Boolean);
+    if (!els.length) return;
+    const body = $('#panel-body');
+    for (const el of els) {
+      el.classList.add('demo-focus');
+      if (body.contains(el) && el.parentElement !== body) {      // a piece inside a panel block: light up that block too
+        let top = el;
+        while (top.parentElement && top.parentElement !== body) top = top.parentElement;
+        top.classList.add('demo-lit');
+      }
+    }
     // phones: the panel is below the map, so scrolling to it would hide the demo card; keep the page still
-    if ($('#panel').contains(el) && window.innerWidth > 900) requestAnimationFrame(() => el.scrollIntoView({ block: 'start', behavior: 'smooth' }));
+    const first = els[0];
+    if ($('#panel').contains(first) && window.innerWidth > 900) {
+      requestAnimationFrame(() => first.scrollIntoView({ block: first.parentElement === body ? 'start' : 'center', behavior: 'smooth' }));
+    }
+  }
+
+  /** Light up the card line the narration has reached (made with beat(n, ...)) and keep it in view. */
+  beat(n) {
+    let first = null;
+    for (const el of this.card?.querySelectorAll('[data-beat]') || []) {
+      const on = el.dataset.beat === String(n);
+      el.classList.toggle('dm-on', on);
+      if (on && !first) first = el;
+    }
+    if (!first) return;
+    const c = this.card, foot = c.querySelector('.dm-foot')?.offsetHeight || 0;       // Next sits pinned at the bottom
+    const top = first.offsetTop - 50, bottom = first.offsetTop + first.offsetHeight - c.clientHeight + foot + 16;
+    if (top < c.scrollTop) c.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+    else if (bottom > c.scrollTop) c.scrollTo({ top: bottom, behavior: 'smooth' });
   }
 
   pin([lon, lat], label, kind = 'place') {

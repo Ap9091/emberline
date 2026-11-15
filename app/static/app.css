@@ -591,7 +591,8 @@ ul, ol { margin: 0; padding-left: 16px; }
 #demo-card h2 { font-size: 19px; line-height: 1.25; margin: 0 0 8px; }
 .dm-body p { margin: 0 0 8px; color: #d3d8dd; }
 .dm-body b { color: var(--text); font-weight: 600; }
-.dm-foot { display: flex; align-items: center; justify-content: flex-end; margin-top: 12px; }
+.dm-foot { display: flex; align-items: center; justify-content: flex-end; margin-top: 12px;
+           position: sticky; bottom: -16px; margin-bottom: -16px; padding: 8px 0 16px; background: rgba(20, 23, 26, .97); }   /* Next stays in view on long cards */
 .dm-next { font-size: 14px; padding: 9px 20px; border-radius: 6px; }
 .dm-key { display: inline-block; width: 11px; height: 11px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
 .dm-key.fire { background: var(--fire); }
@@ -662,6 +663,17 @@ body.demo-on #map-banner { left: 400px; }
 .demo-focus { outline: 2px solid var(--ring); outline-offset: 4px; border-radius: 4px; box-shadow: inset 0 0 0 4px rgba(255, 180, 84, .08); }
 #mode-tabs.demo-focus { pointer-events: auto; outline-offset: 2px; animation: dm-glow 1.6s ease-in-out infinite; }
 @keyframes dm-glow { 50% { outline-color: rgba(255, 180, 84, .35); } }
+/* a piece inside a panel block is spotlit: keep its block bright, and make the piece pulse */
+#panel.demo-dim #panel-body > .demo-lit { opacity: 1; }
+#panel-body .demo-lit .demo-focus { animation: dm-glow 1.6s ease-in-out infinite; }
+/* card lines that light up as the narration reaches them */
+.dm-beat { border-left: 3px solid transparent; padding: 3px 0 3px 8px; margin: 0 0 6px -11px; border-radius: 0 4px 4px 0;
+           transition: background .3s, border-color .3s; }
+.dm-beat > p:last-child, .dm-beat > .dm-see:last-child { margin-bottom: 0; }
+.dm-beat.dm-on { border-left-color: var(--ring); background: rgba(255, 180, 84, .07); }
+.dm-hours { display: flex; gap: 6px; margin: 0 0 8px; }
+.dm-hours .dm-beat { margin: 0; padding: 4px 12px; border: 1px solid var(--line); border-radius: 5px; font: 600 12px var(--mono); color: var(--text-2); }
+.dm-hours .dm-beat.dm-on { border-color: var(--ring); color: var(--ring); background: rgba(255, 180, 84, .1); }
 
 /* map pins */
 .demo-pin { display: flex; flex-direction: column; align-items: center; pointer-events: none; }
@@ -709,6 +721,7 @@ body.hide-layers #layer-toggles, body.hide-layers #legend { display: none !impor
 @media (max-width: 900px) {
   #demo-card { left: 8px; right: 8px; bottom: 8px; width: auto; max-height: 58%; font-size: 13.5px; padding: 12px 14px 14px; }
   #demo-card h2 { font-size: 17px; }
+  .dm-foot { bottom: -14px; margin-bottom: -14px; padding-bottom: 14px; }
   body.demo-on #map-banner { left: 12px; }
   #demo-card.dock-right { position: absolute; left: 8px; right: 8px; bottom: 8px; }
   .wl-points { grid-template-columns: 1fr; }

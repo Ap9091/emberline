@@ -166,7 +166,7 @@ function count() { try { return +sessionStorage.getItem('emberline-chat-n') || 0
 function bump() { try { sessionStorage.setItem('emberline-chat-n', String(count() + 1)); } catch { /* private mode */ } }
 
 /** Ask a question (typed by the visitor, tapped as a chip, or sent by the demo). */
-export async function ask(text, { fromDemo = false } = {}) {
+export async function ask(text, { fromDemo = false, actions = true } = {}) {
   text = String(text || '').trim().slice(0, 600);
   if (!text || ui.busy) return;
   setOpen(true);
@@ -187,7 +187,7 @@ export async function ask(text, { fromDemo = false } = {}) {
   ui.history.push({ role: 'assistant', content: out.reply });
   addMsg('bot', out.reply, out.suggestions, source);
   ui.busy = false; drawInput();
-  await runActions(out.actions, { fromDemo });
+  if (actions) await runActions(out.actions, { fromDemo });     // the demo moves the map itself, so it can turn these off
 }
 
 // the window
@@ -200,17 +200,20 @@ function addMsg(who, content, suggestions = [], source = null) {
   return row;
 }
 
+// while the guided demo runs, the cursor stays on its Next button, so Enter keeps moving the demo on
+const typeHere = () => !ui.busy && !ui.demo?.on;
+
 function drawInput() {
   ui.input.disabled = ui.busy;
   ui.box.querySelector('.as-send').disabled = ui.busy;
-  if (!ui.busy) ui.input.focus({ preventScroll: true });
+  if (typeHere()) ui.input.focus({ preventScroll: true });
 }
 
 export function setOpen(open) {
   ui.open = open;
   ui.box.hidden = !open;
   $('#as-launch').classList.toggle('on', open);
-  if (open) { ui.list.scrollTop = ui.list.scrollHeight; if (!ui.busy) ui.input.focus({ preventScroll: true }); }
+  if (open) { ui.list.scrollTop = ui.list.scrollHeight; if (typeHere()) ui.input.focus({ preventScroll: true }); }
 }
 
 export function initAssistant(demo) {

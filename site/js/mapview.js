@@ -250,6 +250,16 @@ export class MapView {
     }
   }
 
+  /** Guided demo: show the forecast rings only up to +k hours (3 shows all of them again). */
+  showRings(k) {
+    if (!this.visible.rings) return;
+    for (const j of [1, 2, 3]) {
+      for (const id of [`ring-casing-${j}`, `ring-${j}`]) {
+        if (this.map.getLayer(id)) this.map.setLayoutProperty(id, 'visibility', j <= k ? 'visible' : 'none');
+      }
+    }
+  }
+
   /** Los Angeles County outline (used by the demo). */
   showLA(on) {
     for (const id of ['la-fill', 'la-line']) if (this.map.getLayer(id)) this.map.setLayoutProperty(id, 'visibility', on ? 'visible' : 'none');
