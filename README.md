@@ -8,7 +8,16 @@
 
 > **Main takeaway:** tested on 18 California fires it had never seen, Emberline warned 18 of the 20 towns those fires reached, about three hours before the fire arrived, and on the 2025 Eaton Fire it flagged Sierra Madre almost two and a half hours before the official evacuation order.
 
+### The idea in 30 seconds
+
+- **Who it's for.** The county emergency manager who has to decide which towns leave, and when, in the first hours of a wildfire.
+- **What it does.** It takes the fire as a weather satellite sees it every five minutes, adds the wind, the slope and the plants, and forecasts where the fire will be in 1, 2 and 3 hours. Then it tells every nearby town whether to evacuate, by what time, and which roads out are still clear.
+- **Why you can trust it.** We tested it on 18 newer fires it had never seen. The simple guess that the fire stays put warned 0 of the 20 towns those fires reached, and Emberline warned 18. An AI drafts the evacuation plan, but plain code rejects any route the fire is about to cross, and a person always approves.
+- **See it.** Open the [live demo](https://emberline-site-lyart.vercel.app) and press "Start the demo". It plays by itself in two minutes.
+
 ![Emberline replaying the Eaton Fire: its warning for Sierra Madre at 7:00 pm next to the official order at 9:26 pm](docs/screenshots/readme_proof.jpg)
+
+The rest of this page is the full write-up, in the hackathon's template: [the problem](#the-problem), [what we built](#what-we-built), [how it works](#how-it-works), [results](#results), [what we learned](#what-we-learned), [what we'd do next](#what-wed-do-next) and [sources](#sources).
 
 ## The problem
 
