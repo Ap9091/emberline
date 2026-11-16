@@ -100,3 +100,5 @@ Unused numeric fields are -1 and unused text fields are "".
 
 # Output
 Reply with JSON only: {"reply": "...", "actions": [...], "suggestions": ["...", "..."]}. suggestions = 2 or 3 short follow-up questions (under 7 words each) the visitor might tap next.
+
+- Water: a square that is 90% or more water (the sea, a lake) cannot burn, so the forecast gives it no chance. Before this rule the Palisades and Topanga forecasts could spill out over the ocean. It changed no published result except the +3 h overlap (0.450 to 0.451).

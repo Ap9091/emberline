@@ -9,6 +9,7 @@ const MSG = {
   outside: 'This spot is outside the fire’s 80 km box.',
   far: 'This square is more than 6 km from the fire, so the model does not score it.',
   nofire: 'No fire was seen at this hour, so there is nothing to forecast.',
+  water: 'This square is the sea or a lake (90% or more water), so it cannot burn. Emberline gives it no chance.',
   error: '“Why this square?” runs on the replay fires of the hosted site.',
 };
 let popup = null;

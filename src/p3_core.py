@@ -153,6 +153,20 @@ class Fire:
         return now, ever
 
 
+# A square that is almost all water (the sea, a lake or a reservoir) cannot burn, so the forecast gives it no chance.
+# Without this the model, which mostly follows the wind and the nearby fire, can push a coastal fire out over the
+# sea. Of 82,556 burning squares the satellite saw in all 70 fires, 28 were 90%+ water (lake shores in two 2018-2020
+# fires) and none in the 18 test fires, so this only removes forecast squares that could never burn.
+WATER_MAX = 0.9
+
+
+def no_water(probs, feats):
+    """Probabilities with every square that is at least WATER_MAX water set to 0."""
+    probs = np.array(probs, dtype=np.float32)
+    probs[feats.frac_water.fillna(0).to_numpy() >= WATER_MAX] = 0
+    return probs
+
+
 def as_fire(probs, ever, th):
     """Turn probabilities into 'the fire': burned squares need the 'burn' cut-off, never-burned squares the 'new' one."""
     return np.where(ever, probs >= th["burn"], probs >= th["new"])
@@ -168,6 +182,7 @@ def forecast(model, fire, h, th):
       Step 1: features at hour h -> probability each candidate square burns at h+1.
       Step 2: turn that into "the fire at h+1" (two cut-offs, see as_fire), recompute the features from that
               imagined fire and predict h+2. Step 3 is the same again for h+3.
+    Squares that are almost all water never burn (see WATER_MAX).
     Honest note: for h+2 and h+3 we use the weather that really happened (a stand-in for a weather forecast).
     Everything about the FIRE after hour h is the model's own guess.
     """
@@ -178,7 +193,7 @@ def forecast(model, fire, h, th):
     r_idx, c_idx = feats.row.to_numpy(), feats.col.to_numpy()
     if model.direct:
         for k in range(1, HORIZON + 1):
-            out[k - 1, r_idx, c_idx] = model.prob(feats, k)
+            out[k - 1, r_idx, c_idx] = no_water(model.prob(feats, k), feats)
         return out
     burning = fire.known(h)
     _, ever = fire.now_and_ever(h)
@@ -186,7 +201,7 @@ def forecast(model, fire, h, th):
     pw = burning[burning.hour_idx == h].max_power_mw.dropna()
     power = float(pw.mean()) if len(pw) else np.nan       # imagined squares get today's average fire power
     for k in range(1, HORIZON + 1):
-        out[k - 1, feats.row.to_numpy(), feats.col.to_numpy()] = model.prob(feats)
+        out[k - 1, feats.row.to_numpy(), feats.col.to_numpy()] = no_water(model.prob(feats), feats)
         if k == HORIZON or h + k >= grid.N_HOURS:
             break
         pred = as_fire(out[k - 1], ever, th)

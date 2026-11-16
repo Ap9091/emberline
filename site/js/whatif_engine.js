@@ -115,6 +115,10 @@ function predict(M, X) {
 
 const asFire = (p, ever, th) => ever ? p >= th.burn : p >= th.new;
 
+// A square that is almost all water (sea, lake) cannot burn: its chance is 0 (same rule as WATER_MAX in p3_core.py)
+export const WATER_MAX = 0.9;
+const isWater = (F, i) => F.static.frac_water[i] >= WATER_MAX;
+
 // 3. forecast with rolling forward (port of p3_core.forecast)
 function forecast(F, M, weather, h) {
   const N = F.n, th = M.th;
@@ -130,7 +134,7 @@ function forecast(F, M, weather, h) {
   const power = pw.length ? pw.reduce((a, b) => a + b, 0) / pw.length : null;
   for (let k = 1; k <= 3; k++) {
     const p = predict(M, feats.X);
-    feats.cells.forEach((i, n) => { out[k - 1][i] = p[n]; });
+    feats.cells.forEach((i, n) => { out[k - 1][i] = isWater(F, i) ? 0 : p[n]; });
     if (k === 3 || h + k >= N_HOURS) break;
     const pred = [];
     for (let i = 0; i < N * N; i++) if (asFire(out[k - 1][i], ever[i], th)) pred.push(i);
@@ -311,6 +315,7 @@ export function explain(F, M, h, where) {
   if (!feats) return { ok: false, why: 'nofire' };
   const n = feats.cells.indexOf(cell);
   if (n < 0) return { ok: false, why: 'far' };             // more than 6 km from the fire: the model does not score it
+  if (isWater(F, cell)) return { ok: false, why: 'water', square: squareFeature(F, cell, {}) };   // the sea or a lake: it cannot burn
   const row = feats.X[n];
   const v = Object.fromEntries(M.features.map((name, j) => [name, row[j]]));
   const push = M.features.map((name, j) => {
@@ -347,7 +352,7 @@ export function likelySquareNear(F, M, h, lon, lat) {
   const p = predict(M, feats.X), k = Math.cos(lat * Math.PI / 180), N = F.n;
   let best = null, bd = Infinity;
   feats.cells.forEach((i, n) => {
-    if (feats.X[n][0] || p[n] < M.th.new) return;            // already burning, or not forecast to burn
+    if (feats.X[n][0] || p[n] < M.th.new || isWater(F, i)) return;     // already burning, not forecast to burn, or water
     const r = Math.floor(i / N), c = i % N, a = corner(F, r, c), b = corner(F, r + 1, c + 1);
     const d = (((a[0] + b[0]) / 2 - lon) * k) ** 2 + ((a[1] + b[1]) / 2 - lat) ** 2;
     if (d < bd) { bd = d; best = i; }

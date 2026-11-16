@@ -508,7 +508,7 @@
    "logreg: towns warned": "3/5",
    "logreg: false alarms": 192,
    "logreg: F1 new (2km)": 0.22,
-   "logreg: IoU +3h": 0.535,
+   "logreg: IoU +3h": 0.547,
    "grow_1km: towns warned": "3/5",
    "grow_1km: false alarms": 145,
    "grow_1km: F1 new (2km)": 0.169,
