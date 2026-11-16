@@ -19,6 +19,7 @@ import { h, fill, $, sleep } from './util.js';
 import { replayApi as R } from './mode_replay.js';
 import { ask, setOpen, flashMic } from './assistant.js';
 import { markReason } from './why.js';
+import { say, hush } from './speech.js';
 import * as api from './api.js';
 
 const EATON = 'eaton_fire_2025', PARK = 'park_fire_2024';
@@ -294,14 +295,16 @@ function fireBounds(sit) {
 // Auto-play (URL #demo-auto, for recording the video): seconds per card, matched to the 7-card video script read
 // fast (about 250 words a minute). The welcome card (the problem) stays up for AUTO_WELCOME_S first, and the last
 // card stays up while the speaker gives the next steps. Space pauses.
-const AUTO_SECONDS = [7, 25.5, 11, 12, 11, 14, 22];       // about 1:53 in all with the welcome card (videos are 2 min max)
+const AUTO_SECONDS = [14, 25.5, 11, 12, 11, 14, 22];      // about 1:53 in all (videos are 2 min max); click Start right away
 const AUTO_WELCOME_S = 10;
 
 // Subtitles for auto-play, so a silent screen recording explains itself: [seconds into the card, line].
 const SUB_WELCOME = [[0, 'Climate change made the Eaton Fire’s weather 35% more likely, and it killed 19 people.'],
   [5, 'Emberline helps emergency managers decide which towns evacuate, and when.']];
 const SUBS = [
-  [[0, 'A NOAA weather satellite scans California every 5 minutes.'], [3.5, 'We turn each scan into 2 km squares. Red squares are burning right now.']],
+  [[0, 'Climate change made the Eaton Fire’s weather 35% more likely, and it killed 19 people.'],
+   [4.5, 'Emberline helps emergency managers decide which towns evacuate, and when.'],
+   [8.5, 'A NOAA weather satellite scans California every 5 minutes. We turn each scan into 2 km squares, and red squares are burning.']],
   [[0, 'Red towers are burning squares seen from space. White streaks are the real wind.'],
    [4.5, 'Every hour our model, a logistic regression with 39 inputs like wind, slope and plants, gives each square a chance of burning.'],
    [9, 'It feeds that forecast back in to look 3 hours ahead. Taller orange towers are more likely to burn.'],
@@ -322,6 +325,17 @@ const SUBS = [
    [10, 'On 18 fires it never saw, guessing the fire stays put warned 0 towns. Emberline warned 18 of 20, almost 3 hours early.'],
    [15.5, 'It still only ties that guess on the fire’s shape. You can also replay past fires, and the full app tracks California live.'],
    [19.5, 'Emberline. The AI drafts, the code checks, and a person decides.']],
+];
+// Emberline's voice (ElevenLabs, see speech.js) reads a short version of each card in auto-play; the subtitles keep
+// the detail. Sound needs one click first (browsers block it), so click "Start the demo". Card 6 speaks for itself.
+const VOICE = [
+  'In 2025 the Eaton Fire killed nineteen people, in fire weather that climate change made 35 percent more likely. Emberline helps decide which towns evacuate. Red squares are fire seen from space.',
+  'Every hour, our logistic regression weighs wind, slope and plants to give each square a chance of burning, three hours ahead. Taller towers are more likely. Then the real fire grows into the forecast. Sierra Madre’s official order came at 9:26, almost two and a half hours after our warning, and we covered 76 percent of the real fire.',
+  'Click any square and the model shows exactly why. Here, the wind pushed hardest.',
+  'Every town gets a status, a countdown and a leave-by time.',
+  'An AI drafts the plan, but our code rejected this route, because the fire was about to cross it.',
+  null,
+  'We built our own dataset from 67 fires and kept the model simple, since big fires are rare. On 18 fires it never saw, it warned 18 of 20 towns, almost three hours early, while guessing the fire stays put warned none. The AI drafts, the code checks, and a person decides.',
 ];
 let subEl = null, subTimers = [];
 function subtitles(lines, card) {
@@ -426,6 +440,7 @@ class Demo {
     this.card.querySelector('.dm-next').focus({ preventScroll: true });
     this._arm();
     subtitles(this.auto ? SUBS[i] : null, this.card);
+    if (this.auto && VOICE[i]) say(VOICE[i], { rate: 1.05 });
     const d = this._ctx(token);
     try { await step.run(d); }
     catch (e) { console.warn('demo step', i + 1, e); }
@@ -435,6 +450,7 @@ class Demo {
   stop() {
     this.token++; this.i = -1;
     app.stopTour?.(); R.closeWhy?.(); flashMic(false);
+    if (this.auto) hush();
     clearTimeout(this.timer); this.auto = false; subtitles(null);
     this.clearMarks(); this.focus(null);
     app.view.showLA(false);
