@@ -56,7 +56,7 @@ export const replayMode = {
   },
   leave() {
     pause(); s.token++;
-    app.view.map.off('click', onMapClick); closeWhy(); app.stopTour?.();
+    app.view.map.off('click', onMapClick); closeWhy(); app.stopTour?.({ putBack: false });
     setBanner(null);
     if (s.split) setSplit(false);
     document.removeEventListener('keydown', onKey);

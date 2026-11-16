@@ -6,7 +6,7 @@
 // POST /api/speak  {text}  ->  audio/mpeg
 // API: POST https://api.elevenlabs.io/v1/text-to-speech/{voice_id}?output_format=mp3_44100_128, header xi-api-key.
 
-const VOICE = process.env.ELEVENLABS_VOICE_ID || 'JBFqnCBsd6RMkjVDRZzb';   // "George", a calm narrator voice from the voice library
+const VOICE = process.env.ELEVENLABS_VOICE_ID || '21m00Tcm4TlvDq8ikWAM';   // "Rachel", a calm, warm narrator voice from the voice library
 const MODEL = process.env.ELEVENLABS_MODEL || 'eleven_multilingual_v2';
 const MAX_CHARS = 420;          // about 30 seconds of speech per request, so one request stays cheap
 const LIMIT_PER_IP = 40;        // requests per IP per warm instance per hour (protects the account's credits)

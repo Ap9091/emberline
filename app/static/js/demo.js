@@ -24,6 +24,8 @@ import * as api from './api.js';
 const EATON = 'eaton_fire_2025', PARK = 'park_fire_2024';
 const CA = [-124.4, 32.5, -114.1, 42.0];
 const LA = [-118.25, 34.2];
+const LA_BASIN = [-118.72, 33.72, -117.68, 34.48];   // card 1 stays this high
+const EATON_AT = [-118.085, 34.205];               // where the Eaton Fire is burning at 6 pm
 // The 18 test fires (2024-2025), never used for training (data/fires.csv, split = test)
 const TEST_FIRES = [['Park', -121.762, 39.779], ['Gifford', -120.098, 35.111], ['Madre', -119.983, 35.099],
   ['Garnet', -119.028, 36.865], ['Borel', -118.684, 35.515], ['Bridge', -117.763, 34.24], ['Line', -117.155, 34.121],
@@ -58,48 +60,63 @@ const STEPS = [
     kicker: 'Jan 7, 2025, 6 pm · Los Angeles',
     body: () => [
       beat(1, see('Only California is on the map. The glowing outline is ', b('Los Angeles County'), '.')),
-      beat(2, p(h('span', { class: 'dm-key fire' }), b('Red squares'), ' are land burning right now, 2 km each. ',
+      beat(2, p(h('span', { class: 'dm-key fire' }), b('Red squares'), ' are land burning right now, 2 km each, in the hills above Pasadena. ',
         'A NOAA weather satellite spots the heat every 5 minutes, while winds gust near 100 km/h.')),
       why('That night the winds grounded the aircraft. The satellite kept watching, and Emberline always starts from where the fire really is.')],
     async run(d) {
       await d.replay(EATON, 1, { fire: true, forecast: false });
       if (!d.alive()) return;
+      if (app.view.is3D) app.set3D(false);
       app.view.setGroup('towns', false);
       app.view.showLA(true);
       d.pin(LA, 'Los Angeles');
       d.frame(CA, 1200);
       d.beat(1);
-      if (!await d.wait(2600)) return;
+      if (!await d.wait(2400)) return;
       d.clearPins();
+      // stay high over the LA basin: the fire is a small red patch in the foothills (card 2 swoops down onto it)
       app.view.setGroup('towns', true);
-      d.frameFire(1800);
+      d.frame(LA_BASIN, 1800);
+      d.pin(EATON_AT, 'Eaton Fire', 'fire');
       d.beat(2);
-      if (!await d.wait(2200)) return;
+      if (!await d.wait(2000)) return;
       d.focus(tile('Fire size', 0));
     },
   },
   {
-    title: 'The next 3 hours, in 3D',
-    kicker: 'Forecast made at 7 pm, checked at 10 pm',
+    title: 'The night, as a 3D movie',
+    kicker: 'Jan 7, 2025 · 6 pm to 10 pm, sped up',
     body: () => [
-      beat(1, p('The model adds the ', b('wind, humidity, slope and plants'), ' to the satellite picture, then forecasts hour by hour.')),
-      h('div', { class: 'dm-hours' }, beat(2, '+1 h'), beat(3, '+2 h'), beat(4, '+3 h')),
-      beat(5, h('div', { class: 'dm-bars' }, h('div', { class: 'dm-bars-title' }, 'The real fire at 10 pm fades in. Overlap with the guess (100% = perfect)'),
+      beat(1, p(h('span', { class: 'dm-key fire' }), b('Red towers'), ' are the land burning, seen from space. ',
+        b('White streaks'), ' are the real wind, about 30 km/h out of the north-north-east.')),
+      beat(2, p(h('span', { class: 'dm-key forecast' }), b('Orange towers'), ' are Emberline’s forecast at 7 pm. ',
+        b('Taller means more likely'), ' to burn.')),
+      h('div', { class: 'dm-hours' }, beat(3, '+1 h'), beat(4, '+2 h'), beat(5, '+3 h')),
+      beat(6, p('The clock runs and the real fire grows into the forecast. At ', b('9:26 pm'),
+        ' the official evacuation order for Sierra Madre comes.')),
+      beat(7, h('div', { class: 'dm-bars' }, h('div', { class: 'dm-bars-title' }, 'At 10 pm: how much of the real fire the guess covered (100% = perfect)'),
         bar('Emberline', 76, true), bar('Guess “fire stays put”', 65), bar('Guess “grows 1 km/h”', 31))),
-      beat(6, see('Square by square:', h('div', { class: 'dm-legend' },
+      beat(8, see('Square by square:', h('div', { class: 'dm-legend' },
         key('hit', b('13 green'), ': we said fire, and fire came'),
         key('missed', b('4 pink'), ': fire came, but we missed it (each one next to a green)'),
         key('false', b('0 grey'), ': we said fire, but none came')))),
-      why(b('This is one of our best hours'), '; across all 18 test fires the average overlap is 45%.')],
+      beat(9, why(b('This is one of our best hours'), '; across all 18 test fires the average overlap is 45%.'))],
     async run(d) {
-      await d.replay(EATON, 2, { fire: true, forecast: false });
+      await d.replay(EATON, 1, { fire: true, forecast: false });
       if (!d.alive()) return;
-      d.beat(1);
-      const wide = window.innerWidth > 900;
-      // the self-driving 3D tour (tour.js), without its own box: this card is the explanation
-      await app.tour?.({ captions: false, restore: false, only: ['now', 'h1', 'h2', 'h3', 'real', 'check'],
-        pace: [3200, 1700, 1600, 2400, 3600, 3400], padding: { top: 40, bottom: 40, right: 40, left: wide ? 400 : 30 },
-        onStep: i => { if (d.alive()) { d.beat(i + 1); if (i === 4 || i === 5) d.focus(R.state.slots.verify); } } });
+      if (app.view.is3D) app.set3D(false);           // flat ground: the towers are the 3D (sharper and quicker than terrain)
+      const beats = { space: 1, forecast: 2, h1: 3, h2: 4, h3: 5, race: 6, overlap: 7, check: 8, town: 9 };
+      // the 3D movie (tour.js), without its own caption box: this card is the explanation
+      await app.tour?.({ captions: false, restore: false, hour: 2, padding: () => d.pad(),
+        onStep: k => {
+          if (!d.alive()) return;
+          if (beats[k]) d.beat(beats[k]);
+          if (k === 'space') d.focus(sec('Wind'));
+          else if (k === 'forecast') d.focus(sec('Fire size'));
+          else if (k === 'order') d.focus(R.state.slots.official, $('#timeline'));
+          else if (k === 'overlap') d.focus(R.state.slots.verify);
+          else if (k === 'town') d.focus(sec('Town countdowns'));
+        } });
     },
   },
   {
@@ -277,13 +294,13 @@ function fireBounds(sit) {
 // Auto-play (URL #demo-auto, for recording the video): seconds per card, matched to the 7-card video script read
 // fast (about 250 words a minute). The welcome card (the problem) stays up for AUTO_WELCOME_S first, and the last
 // card stays up while the speaker gives the next steps. Space pauses.
-const AUTO_SECONDS = [8.5, 18.5, 12.5, 17, 12, 14, 40];   // the cards take about 1:45, the welcome card 15 s first
+const AUTO_SECONDS = [7.5, 21.5, 12.5, 17, 12, 14, 40];   // the cards take about 1:45, the welcome card 15 s first
 const AUTO_WELCOME_S = 15;
 let autoScale = 1;           // #demo-auto-1.1 = 10% slower, #demo-auto-0.9 = 10% faster
 
 /** Load everything the demo shows before it is needed, so no step waits on a download. */
 function preload() {
-  const hours = { eaton_fire_2025: [1, 2, 3, 4], park_fire_2024: [2] };
+  const hours = { eaton_fire_2025: [1, 2, 3, 4, 5], park_fire_2024: [2] };
   for (const [fid, hs] of Object.entries(hours)) {
     api.getReplayMeta(fid).catch(() => {});
     hs.forEach(hr => api.getReplayHour(fid, hr).catch(() => {}));
@@ -394,6 +411,7 @@ class Demo {
       },
       frame: (bounds, ms) => token === demo.token && demo.frame(bounds, ms),
       frameFire: ms => token === demo.token && demo.frame(fireBounds(R.state.sit) || R.state.meta?.bounds, ms),
+      pad: () => demo.pad(),
       focus: (...els) => token === demo.token && demo.focus(...els),
       /** Wait, then say whether this card is still on screen (false = the viewer moved on: stop). */
       wait: async ms => { await sleep(ms); return token === demo.token; },
@@ -413,6 +431,11 @@ class Demo {
     if (!bounds) return;
     let [w, s, e, n] = bounds;
     if (shrink) { const dx = (e - w) * shrink, dy = (n - s) * shrink; w += dx; e -= dx; s += dy; n -= dy; }
+    app.view.map.fitBounds([[w, s], [e, n]], { padding: this.pad(), duration: ms, pitch: app.view.is3D ? 50 : 0, bearing: 0 });
+  }
+
+  /** The part of the map the card and the chat leave free, as camera padding. */
+  pad() {
     const narrow = window.innerWidth <= 900;
     const split = $('#map-area').classList.contains('split');
     const left = narrow || split || this.card?.classList.contains('dock-right') ? 30 : Math.min(420, (this.card?.offsetWidth || 360) + 40);
@@ -425,7 +448,7 @@ class Demo {
       const covered = mapBox.bottom - cardBox.top;
       if (covered > 40) bottom = Math.min(covered + 16, mapBox.height * 0.6);
     }
-    app.view.map.fitBounds([[w, s], [e, n]], { padding: { top: 40, bottom, left, right }, duration: ms, pitch: app.view.is3D ? 50 : 0, bearing: 0 });
+    return { top: 40, bottom, left, right };
   }
 
   /** Spotlight elements: the rest of the side panel fades back. No element = no spotlight (panel faded). */
@@ -466,9 +489,12 @@ class Demo {
   }
 
   pin([lon, lat], label, kind = 'place') {
-    const el = h('div', { class: `demo-pin demo-pin-${kind}` }, h('i'), kind === 'place' ? h('span', {}, label) : null);
+    const named = kind === 'place' || kind === 'fire';
+    const el = h('div', { class: `demo-pin demo-pin-${kind}` }, h('i'), named ? h('span', {}, label) : null);
     if (kind === 'dot') el.title = label + ' Fire';
-    this.markers.push(new maplibregl.Marker({ element: el, anchor: kind === 'place' ? 'bottom' : 'center' }).setLngLat([lon, lat]).addTo(app.view.map));
+    // a fire pin is a ring around the fire (not a dot over it), so the red squares stay visible
+    this.markers.push(new maplibregl.Marker({ element: el, anchor: named ? 'bottom' : 'center', offset: kind === 'fire' ? [0, 19] : [0, 0] })
+      .setLngLat([lon, lat]).addTo(app.view.map));
   }
 
   clearMarks() { this.markers.forEach(m => m.remove()); this.markers = []; }

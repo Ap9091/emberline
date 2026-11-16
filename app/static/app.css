@@ -690,6 +690,9 @@ body.demo-on #map-banner { left: 400px; }
 .demo-pin-town i::after { inset: -6px; border-width: 3px; }
 .demo-pin-dot i { width: 11px; height: 11px; background: var(--fire); }
 .demo-pin-dot i::after { border-color: var(--fire); inset: -6px; }
+.demo-pin-fire i { background: transparent; border: 2px solid var(--fire); width: 34px; height: 34px; }
+.demo-pin-fire i::after { border-color: var(--fire); inset: -8px; }
+.demo-pin-fire span { color: #ffd0b8; border-color: #8a2d12; margin-bottom: 4px; }
 
 /* welcome screen and "how it works" */
 #welcome, #howto { position: fixed; inset: 0; z-index: 40; display: grid; place-items: center; padding: 16px;
@@ -875,7 +878,54 @@ body.tour-on #layer-toggles { display: none !important; }
 .tour-dots i { height: 3px; flex: 1; border-radius: 2px; background: var(--line-2); }
 .tour-dots i.done { background: #8a6a45; }
 .tour-dots i.on { background: var(--ring); }
-@media (max-width: 900px) { #tour-box { left: 8px; right: 8px; width: auto; top: 8px; } }
+@media (max-width: 900px) { #tour-box { left: 8px; right: 8px; width: auto; top: auto; bottom: 8px; } }
+
+/* the 3D movie (tour.js): the clock and key in the top right, the official-order banner under it, wind streaks, the town label */
+body.tour-on #legend, body.tour-on #map-area .maplibregl-ctrl-top-right { display: none !important; }
+body.tour-on .town-marker[data-status="MONITOR"], body.tour-on .town-marker[data-status="NONE"] { display: none; }   /* the movie: only towns in danger */
+#movie-hud { position: absolute; z-index: 9; top: 14px; right: 14px; width: 300px; display: flex; flex-direction: column; gap: 8px;
+  pointer-events: none; }
+.mh-card { background: rgba(14, 16, 19, .9); border: 1px solid rgba(255, 180, 84, .35); border-radius: 9px; padding: 9px 13px 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .5); backdrop-filter: blur(4px); animation: dm-in .3s ease-out; }
+.mh-top { display: flex; align-items: center; gap: 10px; }
+.mh-time { font-size: 30px; font-weight: 600; line-height: 1.05; color: #fff; letter-spacing: -.01em; min-width: 6.4ch; white-space: nowrap; }
+.mh-chip { font: 600 10px var(--mono); letter-spacing: .1em; color: #14171a; background: var(--ring); padding: 2px 6px; border-radius: 3px;
+  white-space: nowrap; }
+.mh-sub { font-size: 11.5px; color: var(--text-3); margin-top: 3px; }
+.mh-wind { font-size: 12px; color: #dfe4e8; margin-top: 6px; display: flex; align-items: center; gap: 3px; }
+.mh-wind:empty { display: none; }
+.mh-wind .wind-arrow { color: #fff; flex: none; }
+.mh-key { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 7px; font-size: 11.5px; color: #d3d8dd; }
+.mh-key span { display: inline-flex; align-items: center; gap: 5px; }
+.mh-key i { width: 10px; height: 14px; border-radius: 2px 2px 0 0; display: inline-block; }
+.mh-key i.k-fire { background: #e2420d; }
+.mh-key i.k-fc { background: linear-gradient(#f0701c, #ffd28f); }
+.mh-key i.k-ghost { background: rgba(240, 140, 46, .45); outline: 1px solid rgba(240, 140, 46, .8); }
+.mh-key i.k-hit { background: var(--hit, #3f9e78); }
+.mh-key i.k-missed { background: #b0306a; }
+.mh-key i.k-false { background: #9aa3ab; }
+#movie-banner { display: flex; gap: 10px; align-items: flex-start; background: rgba(60, 12, 8, .94); border: 1px solid var(--evacuate);
+  border-radius: 9px; padding: 9px 12px; font-size: 12.5px; line-height: 1.4; color: #f3e3de; box-shadow: 0 10px 30px rgba(0, 0, 0, .5);
+  animation: mb-in .45s cubic-bezier(.2, 1.3, .5, 1); }
+#movie-banner b { color: #fff; }
+.mb-time { font-size: 19px; font-weight: 600; color: #fff; white-space: nowrap; line-height: 1.15; }
+@keyframes mb-in { from { opacity: 0; transform: translateY(-8px) scale(.96); } to { opacity: 1; transform: none; } }
+.wind-canvas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
+.movie-label { background: rgba(14, 16, 19, .92); border: 1px solid var(--evacuate); border-radius: 7px; padding: 5px 9px; text-align: center;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, .55); animation: mb-in .45s ease-out; pointer-events: none; }
+.movie-label b { display: block; font-size: 14px; color: #fff; }
+.movie-label span { display: block; font: 11px var(--mono); color: #f1b9a8; }
+@media (max-width: 900px) {
+  #movie-hud { top: 8px; right: 8px; left: 8px; width: auto; gap: 6px; }
+  .mh-key { font-size: 10.5px; margin-top: 5px; }
+  .mh-wind { font-size: 11px; margin-top: 4px; }
+  #movie-banner { font-size: 11px; padding: 5px 9px; line-height: 1.3; }
+  .mb-time { font-size: 14px; }
+  .mh-sub, .mh-wind, .mh-key { display: none; }                       /* phones: just the clock, the map is small */
+  .mh-card { padding: 5px 10px; }
+  .mh-time { font-size: 19px; }
+  body.tour-on #demo-card { max-height: 40%; }                         /* leave the movie room on the map */
+}
 
 /* 22. voice in Ask Emberline (speech.js) */
 .as-mic { padding: 0 10px; font-size: 15px; }

@@ -10,6 +10,7 @@ import { COLORS, TERRAIN_EXAGGERATION, PITCH_3D, SPLIT_FADE } from './config.js'
 import { h } from './util.js';
 
 const EMPTY = { type: 'FeatureCollection', features: [] };
+const TOWER_M = 1000;            // height of a burning square's tower in the 3D movie (metres); forecast towers are p × this
 
 // Dash pattern for the +1 h / +2 h / +3 h rings: solid, dashed, dotted
 const RING_DASH = [null, [3, 2], [0.6, 1.8]];
@@ -24,6 +25,7 @@ const GROUPS = {
   exits: ['exit-casing', 'exit-clear', 'exit-blocked', 'exit-approved-casing', 'exit-approved'],
   pixels: ['pixel-glow', 'pixel-core'],
   verify: ['verify-fill', 'verify-line'],
+  towers: ['night', 'tower-fc', 'tower-fire'], // the 3D movie (tour.js)
 };
 
 export class MapView {
@@ -36,7 +38,7 @@ export class MapView {
     this.options = options;
     this.sit = null;                 // situation on screen
     this.horizon = 3;                // forecast hour shown as squares: 1, 2 or 3
-    this.visible = { fire: true, forecast: true, rings: true, baseline: false, actual: false, exits: true, pixels: true, towns: true, verify: false };
+    this.visible = { fire: true, forecast: true, rings: true, baseline: false, actual: false, exits: true, pixels: true, towns: true, verify: false, towers: false };
     this.selectedTown = null;        // town whose exits are shown
     this.plan = null;                // AI plan on screen (its evacuation towns also show exits)
     this.approved = false;           // plan approved → highlight the chosen routes
@@ -71,7 +73,7 @@ export class MapView {
       layout: { visibility: 'none', 'line-join': 'round' }, paint: { 'line-color': '#ffb454', 'line-width': 2.2 } });
     m.addLayer({ id: 'ca-line', type: 'line', source: 'california', filter: ['==', ['get', 'kind'], 'ca'],
       paint: { 'line-color': '#e6e9ec', 'line-width': ['interpolate', ['linear'], ['zoom'], 4, 0.8, 9, 1.6], 'line-opacity': 0.55 } });
-    for (const id of ['forecast', 'actual', 'fire', 'verify', 'baseline', 'ring-1', 'ring-2', 'ring-3', 'exits', 'pixels', 'why']) {
+    for (const id of ['forecast', 'actual', 'fire', 'verify', 'baseline', 'ring-1', 'ring-2', 'ring-3', 'exits', 'pixels', 'why', 'tower-fire', 'tower-fc']) {
       m.addSource(id, { type: 'geojson', data: EMPTY });
     }
 
@@ -134,6 +136,16 @@ export class MapView {
     m.addLayer({ id: 'pixel-core', type: 'circle', source: 'pixels', paint: {
       'circle-color': COLORS.fire, 'circle-stroke-color': '#fff3e0', 'circle-stroke-width': 0.6,
       'circle-radius': ['interpolate', ['linear'], ['zoom'], 4, 1.8, 8, 3, 11, 5] } });
+
+    // the 3D movie (tour.js): the fire as red towers, the forecast as orange towers whose height is the chance of burning
+    // (night: the movie happens after dark, so the base map dims under them and the towers and wind streaks stand out)
+    m.addLayer({ id: 'night', type: 'background', paint: { 'background-color': '#05080d', 'background-opacity': 0 } });
+    m.addLayer({ id: 'tower-fc', type: 'fill-extrusion', source: 'tower-fc', paint: {
+      'fill-extrusion-color': ['interpolate', ['linear'], ['get', 'p'], 0, '#ffe08a', 0.5, '#ffb03a', 1, '#ff8c1a'],
+      'fill-extrusion-height': ['*', ['get', 'p'], TOWER_M], 'fill-extrusion-opacity': 0.6 } });
+    m.addLayer({ id: 'tower-fire', type: 'fill-extrusion', source: 'tower-fire', paint: {
+      'fill-extrusion-color': ['match', ['get', 'result'], 'hit', COLORS.hit, 'missed', COLORS.missed, 'false_alarm', COLORS.falseAlarm, '#f0341a'],
+      'fill-extrusion-height': TOWER_M, 'fill-extrusion-opacity': 0.9 } });
 
     // "Why this square?": the square being explained (see why.js)
     m.addLayer({ id: 'why-glow', type: 'line', source: 'why', paint: { 'line-color': '#ffb454', 'line-width': 7, 'line-opacity': 0.35, 'line-blur': 3 } });
@@ -251,6 +263,41 @@ export class MapView {
       for (const id of ids) {
         if (this.map.getLayer(id)) this.map.setLayoutProperty(id, 'visibility', this.visible[group] ? 'visible' : 'none');
       }
+    }
+  }
+
+  /** The 3D movie's night: dim the base map (under the towers) over ms, or bring it back at once. */
+  night(on, ms = 1500) {
+    if (!this.map.getLayer('night')) return;
+    this.map.setPaintProperty('night', 'background-opacity-transition', { duration: on ? ms : 0, delay: 0 });
+    this.map.setPaintProperty('night', 'background-opacity', on ? 0.66 : 0);
+  }
+
+  /** The 3D movie's towers: fire = burning squares (fresh: 1 = new this hour, they rise), fc = forecast squares with p. */
+  setTowers({ fire, fc } = {}) {
+    if (fire !== undefined) this._setData('tower-fire', fire);
+    if (fc !== undefined) this._setData('tower-fc', fc);
+  }
+
+  /**
+   * Animate the towers over ms: new fire towers (fresh: 1) rise from the ground, and forecast towers move from their
+   * old height (p0) to their new one (p). Only the layers asked for move; the other keeps its current heights.
+   */
+  growTowers(ms = 700, { fire = true, fc = false } = {}) {
+    const start = performance.now(), frames = this._growFrames ||= {};
+    const heights = {
+      'tower-fire': e => ['case', ['==', ['get', 'fresh'], 1], TOWER_M * e, TOWER_M],
+      'tower-fc': e => ['*', ['+', ['*', ['coalesce', ['get', 'p0'], 0], 1 - e], ['*', ['get', 'p'], e]], TOWER_M],
+    };
+    for (const [id, on] of [['tower-fire', fire], ['tower-fc', fc]]) {
+      if (!on) continue;
+      cancelAnimationFrame(frames[id]);
+      const step = now => {
+        const t = Math.max(0, Math.min(1, (now - start) / ms)), e = 1 - (1 - t) ** 3;
+        if (this.map.getLayer(id)) this.map.setPaintProperty(id, 'fill-extrusion-height', heights[id](e));
+        if (t < 1) frames[id] = requestAnimationFrame(step);
+      };
+      frames[id] = requestAnimationFrame(step);
     }
   }
 
