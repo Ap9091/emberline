@@ -2,7 +2,7 @@
 
 # Emberline: a wildfire copilot for California.
 
-**Track:** Climate · **Team:** Aryan Thakrar, Sneh Patel, Anirudhan Illayaraja · **Live demo:** [emberline-site-lyart.vercel.app](https://emberline-site-lyart.vercel.app) (press "Start the demo", it takes 2 minutes) · **Video:** _add the link_
+**Track:** Climate · **Team:** Aryan Thakrar, Sneh Patel, Anirudhan Illayaraja · **Live demo:** [emberline-site-lyart.vercel.app](https://emberline-site-lyart.vercel.app) (press "Start the demo", it takes 2 minutes) · **Video:** [youtu.be/a1xDM7S3XyE](https://youtu.be/a1xDM7S3XyE)
 
 [![tests](https://github.com/Ap9091/emberline/actions/workflows/tests.yml/badge.svg)](https://github.com/Ap9091/emberline/actions/workflows/tests.yml)
 
