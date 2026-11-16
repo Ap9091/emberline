@@ -147,12 +147,15 @@ The full list of sources, with licences and how each one is used, is in [data_so
 
 ## How this meets the brief
 
-| The brief asks | Where it is |
+Where to find the evidence for each part of the Round 1 review:
+
+| Round 1 criterion | Where it is |
 |---|---|
-| **Technical quality:** a baseline, results on unseen test data, where it fails | Results table (persistence and a growth rule), 18 test fires from 2024-25, "Where it fails, and why" with an example; 32 automated tests ([tests/](tests/)) |
-| **Impact:** who it helps and what would change for them | The county emergency manager; towns warned 2.8 h before the fire, and earlier than the official order in 8 of 9 towns |
-| **Creativity:** a known technique on an unusual dataset, question or user | Logistic regression on a dataset we built from raw satellite files; an AI plan checked by code; graded against real evacuation orders |
-| **Clarity:** understood in two minutes, one main takeaway | The takeaway at the top, the two-minute guided demo in the app, the video |
+| **Technical execution (30):** does it work, and is it well built? | A [live site](https://emberline-site-lyart.vercel.app) with a guided demo that plays itself; a full pipeline from raw GOES satellite files to forecasts, town warnings and escape roads; 41 automated tests that run on every change ([tests/](tests/)); re-running the test-fire scoring reproduces every published number |
+| **Originality (20):** is this a fresh take on the problem? | Our own dataset built from raw satellite files for 70 fires; scored against the real evacuation orders, not just the fire's shape; an AI plan that plain code checks before a person approves it; exact "Why this square?" reasons; the night replayed as a 3D movie |
+| **Impact and track fit (20):** does it solve a real problem in the track? | Climate change made the LA fire weather about 35% more likely; Emberline is for the person deciding evacuations; towns warned 2.8 h before the fire, and before the official order in 8 of 9 towns (Sierra Madre 2.4 h earlier) |
+| **Testing and honesty (15):** did you measure it, and do you know where it fails? | Two simple baselines scored the same way; 18 test fires from 2024-25 the model never saw (no tuning on them); "Where it fails, and why" with a real example; what it ties or loses on; who it works for; our own mistakes; a test with the weather forecast people really had |
+| **Communication (15):** are the write-up and video clear? | The main takeaway and "the idea in 30 seconds" at the top; this write-up in the hackathon's template; a one-page PDF; the two-minute video |
 | **Climate track:** a fair comparison with a simple forecast | Persistence ("stays put") and a growth rule, scored the same way on the same fires |
 | **Climate track:** a link between the prediction and a decision | Town statuses, escape roads and the evacuation plan, made by the emergency manager |
 | **Climate track:** a test period the model never saw | Trained on 2018-22, tuned on 2023, tested on 2024-25, never shuffled |
