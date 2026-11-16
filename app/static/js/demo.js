@@ -294,8 +294,58 @@ function fireBounds(sit) {
 // Auto-play (URL #demo-auto, for recording the video): seconds per card, matched to the 7-card video script read
 // fast (about 250 words a minute). The welcome card (the problem) stays up for AUTO_WELCOME_S first, and the last
 // card stays up while the speaker gives the next steps. Space pauses.
-const AUTO_SECONDS = [7.5, 25.5, 12.5, 17, 12, 14, 40];   // the cards take about 1:45, the welcome card 15 s first
-const AUTO_WELCOME_S = 15;
+const AUTO_SECONDS = [7, 25.5, 11, 12, 11, 14, 22];       // about 1:53 in all with the welcome card (videos are 2 min max)
+const AUTO_WELCOME_S = 10;
+
+// Subtitles for auto-play, so a silent screen recording explains itself: [seconds into the card, line].
+const SUB_WELCOME = [[0, 'Climate change made the Eaton Fire’s weather 35% more likely, and it killed 19 people.'],
+  [5, 'Emberline helps emergency managers decide which towns evacuate, and when.']];
+const SUBS = [
+  [[0, 'A NOAA weather satellite scans California every 5 minutes.'], [3.5, 'We turn each scan into 2 km squares. Red squares are burning right now.']],
+  [[0, 'Red towers are burning squares seen from space. White streaks are the real wind.'],
+   [4.5, 'Every hour our model, a logistic regression with 39 inputs like wind, slope and plants, gives each square a chance of burning.'],
+   [9, 'It feeds that forecast back in to look 3 hours ahead. Taller orange towers are more likely to burn.'],
+   [12, 'Then the clock runs, and the real fire grows into the forecast.'],
+   [15, 'At 9:26 PM came the official order to evacuate Sierra Madre, almost 2½ hours after Emberline warned it.'],
+   [19, 'By 10 PM the forecast covered 76% of the real fire, with zero false alarms.'],
+   [22.5, 'Sierra Madre, a town of 10,775 people, sat right next to the fire.']],
+  [[0, 'Click any square and the model shows exactly why it gave that chance.'],
+   [5.5, 'It is a weighted sum, so the reasons add up exactly. Here the wind pushed hardest.']],
+  [[0, 'Every town gets a status (evacuate, warning or monitor), a countdown and a leave-by time.'],
+   [6, 'Sierra Madre should leave by about 8 PM, while both directions of the I-210 are still clear.']],
+  [[0, 'On the 2024 Park Fire, an AI drafts the evacuation plan.'],
+   [3.5, 'It picked a highway the fire was about to cross, so our code rejected it.'], [7.5, 'Nothing goes out until a person approves.']],
+  [[0, 'You can ask Emberline out loud, and it answers out loud.'],
+   [7, 'It reruns the model right in the browser. Towns in danger jump from 10 to 20.']],
+  [[0, 'We built our own dataset from raw satellite files: 355,000 examples from 67 California fires.'],
+   [5, 'Big fires are rare and these satellites are only a few years old, so we kept the model simple.'],
+   [10, 'On 18 fires it never saw, guessing the fire stays put warned 0 towns. Emberline warned 18 of 20, almost 3 hours early.'],
+   [15.5, 'It still only ties that guess on the fire’s shape. You can also replay past fires, and the full app tracks California live.'],
+   [19.5, 'Emberline. The AI drafts, the code checks, and a person decides.']],
+];
+let subEl = null, subTimers = [];
+function subtitles(lines, card) {
+  subTimers.forEach(clearTimeout); subTimers = [];
+  if (!lines) { subEl?.remove(); subEl = null; return; }
+  if (!subEl) { subEl = h('div', { id: 'demo-sub', 'aria-live': 'polite' }); document.body.append(subEl); }
+  for (const [t, text] of lines) {
+    subTimers.push(setTimeout(() => {
+      if (!subEl) return;
+      // keep it over the map, clear of the demo card and the chat window
+      const m = $('#map-area').getBoundingClientRect();
+      let L = m.left + 16, Rt = window.innerWidth - m.right + 16;
+      if (card && !card.hidden) {
+        const c = card.getBoundingClientRect();
+        if (c.left < m.left + m.width / 2) L = Math.max(L, c.right + 16); else Rt = Math.max(Rt, window.innerWidth - c.left + 16);
+      }
+      const chat = document.getElementById('as-box');
+      if (chat && !chat.hidden) Rt = Math.max(Rt, window.innerWidth - chat.getBoundingClientRect().left + 16);
+      Object.assign(subEl.style, { left: L + 'px', right: Rt + 'px', bottom: (window.innerHeight - m.bottom + 16) + 'px' });
+      fill(subEl, h('span', { class: 'sub-line' }, text));
+      subEl.classList.remove('in'); void subEl.offsetWidth; subEl.classList.add('in');
+    }, t * autoScale * 1000));
+  }
+}
 let autoScale = 1;           // #demo-auto-1.1 = 10% slower, #demo-auto-0.9 = 10% faster
 
 /** Load everything the demo shows before it is needed, so no step waits on a download. */
@@ -375,6 +425,7 @@ class Demo {
     this.card.scrollTop = 0;
     this.card.querySelector('.dm-next').focus({ preventScroll: true });
     this._arm();
+    subtitles(this.auto ? SUBS[i] : null, this.card);
     const d = this._ctx(token);
     try { await step.run(d); }
     catch (e) { console.warn('demo step', i + 1, e); }
@@ -384,7 +435,7 @@ class Demo {
   stop() {
     this.token++; this.i = -1;
     app.stopTour?.(); R.closeWhy?.(); flashMic(false);
-    clearTimeout(this.timer); this.auto = false;
+    clearTimeout(this.timer); this.auto = false; subtitles(null);
     this.clearMarks(); this.focus(null);
     app.view.showLA(false);
     R.realWind?.();
@@ -530,7 +581,7 @@ export function showWelcome({ auto = false, scale = 1 } = {}) {
   document.body.append(box);
   box.querySelector('.wl-start').focus();
   preload();
-  if (auto) box._t = setTimeout(() => box.querySelector('.wl-start')?.click(), AUTO_WELCOME_S * autoScale * 1000);
+  if (auto) { box._t = setTimeout(() => box.querySelector('.wl-start')?.click(), AUTO_WELCOME_S * autoScale * 1000); subtitles(SUB_WELCOME, null); }
 }
 
 function showHowTo() {
