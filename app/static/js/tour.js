@@ -183,12 +183,13 @@ function captionBox(i, total, title, text) {
  *   padding   room to keep clear on the map (the demo card): a number, {top, bottom, left, right}, or a function
  *             that returns one (asked once the movie's own pieces are on screen)
  *   restore   put the normal map back at the end (the demo keeps the last frame until Next)
+ *   pace      1 = normal speed, 1.2 = 20% slower (the demo, so it keeps step with the narration)
  * Resolves when the movie ends or is stopped.
  */
-export async function startTour({ speak = false, captions = true, onStep = null, fireId = null, hour = null, restore = true, padding = 40 } = {}) {
+export async function startTour({ speak = false, captions = true, onStep = null, fireId = null, hour = null, restore = true, padding = 40, pace = 1 } = {}) {
   const me = ++run;
   const alive = () => me === run;
-  slow = Math.min(10, Math.max(1, Number(window.emberlineMovieSlow) || 1));
+  slow = Math.min(10, Math.max(0.5, (Number(pace) || 1) * (Number(window.emberlineMovieSlow) || 1)));
   finish();
   if (app.mode !== 'replay') await app.go('replay', { fireId });
   else if (fireId) await R.open(fireId);

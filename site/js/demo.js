@@ -107,7 +107,7 @@ const STEPS = [
       if (app.view.is3D) app.set3D(false);           // flat ground: the towers are the 3D (sharper and quicker than terrain)
       const beats = { space: 1, forecast: 2, h1: 3, h2: 4, h3: 5, race: 6, overlap: 7, check: 8, town: 9 };
       // the 3D movie (tour.js), without its own caption box: this card is the explanation
-      await app.tour?.({ captions: false, restore: false, hour: 2, padding: () => d.pad(),
+      await app.tour?.({ captions: false, restore: false, hour: 2, padding: () => d.pad(), pace: 1.2,
         onStep: k => {
           if (!d.alive()) return;
           if (beats[k]) d.beat(beats[k]);
@@ -294,7 +294,7 @@ function fireBounds(sit) {
 // Auto-play (URL #demo-auto, for recording the video): seconds per card, matched to the 7-card video script read
 // fast (about 250 words a minute). The welcome card (the problem) stays up for AUTO_WELCOME_S first, and the last
 // card stays up while the speaker gives the next steps. Space pauses.
-const AUTO_SECONDS = [7.5, 21.5, 12.5, 17, 12, 14, 40];   // the cards take about 1:45, the welcome card 15 s first
+const AUTO_SECONDS = [7.5, 25.5, 12.5, 17, 12, 14, 40];   // the cards take about 1:45, the welcome card 15 s first
 const AUTO_WELCOME_S = 15;
 let autoScale = 1;           // #demo-auto-1.1 = 10% slower, #demo-auto-0.9 = 10% faster
 
