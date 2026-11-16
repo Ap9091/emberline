@@ -6,7 +6,13 @@
 // POST /api/speak  {text}  ->  audio/mpeg
 // API: POST https://api.elevenlabs.io/v1/text-to-speech/{voice_id}?output_format=mp3_44100_128, header xi-api-key.
 
-const VOICE = process.env.ELEVENLABS_VOICE_ID || '21m00Tcm4TlvDq8ikWAM';   // "Rachel", a calm, warm narrator voice from the voice library
+// Emberline's voice: Rachel (a calm, warm woman's voice). Some accounts can't use Rachel through the API any more
+// (she is one of ElevenLabs' older voices), so if she is refused the next woman's voice in the list is used instead,
+// and the one that works is remembered. ELEVENLABS_VOICE_ID in Vercel overrides the list.
+const VOICES = process.env.ELEVENLABS_VOICE_ID ? [['custom', process.env.ELEVENLABS_VOICE_ID]] : [
+  ['Rachel', '21m00Tcm4TlvDq8ikWAM'], ['Sarah', 'EXAVITQu4vr4xnSDxMaL'], ['Jessica', 'cgSgspJ2msm6clMCkdW9'],
+  ['Matilda', 'XrExE9yKIg1WjnnlVkGX'], ['George', 'JBFqnCBsd6RMkjVDRZzb']];
+let working = 0;                // index of the first voice that worked on this warm instance
 const MODEL = process.env.ELEVENLABS_MODEL || 'eleven_multilingual_v2';
 const MAX_CHARS = 420;          // about 30 seconds of speech per request, so one request stays cheap
 const LIMIT_PER_IP = 40;        // requests per IP per warm instance per hour (protects the account's credits)
@@ -28,23 +34,37 @@ export default async function handler(req, res) {
   if (!text) return res.status(400).json({ error: 'No text.' });
   const ip = String(req.headers['x-forwarded-for'] || '').split(',')[0] || 'unknown';
   if (limited(ip)) return res.status(429).json({ error: 'Too many voice requests for now.' });
-  try {
-    const r = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${encodeURIComponent(VOICE)}?output_format=mp3_44100_128`, {
-      method: 'POST',
-      headers: { 'xi-api-key': key, 'Content-Type': 'application/json', Accept: 'audio/mpeg' },
-      body: JSON.stringify({ text, model_id: MODEL, voice_settings: { stability: 0.5, similarity_boost: 0.75 } }),
-      signal: AbortSignal.timeout(15000),
-    });
-    if (!r.ok) {
-      console.error('voice error', r.status, (await r.text()).slice(0, 300));
-      return res.status(502).json({ error: 'The voice service did not answer.' });
+  const tried = [];
+  for (let i = working; i < VOICES.length; i++) {
+    const [name, id] = VOICES[i];
+    try {
+      const r = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${encodeURIComponent(id)}?output_format=mp3_44100_128`, {
+        method: 'POST',
+        headers: { 'xi-api-key': key, 'Content-Type': 'application/json', Accept: 'audio/mpeg' },
+        body: JSON.stringify({ text, model_id: MODEL, voice_settings: { stability: 0.5, similarity_boost: 0.75 } }),
+        signal: AbortSignal.timeout(15000),
+      });
+      if (r.ok) {
+        working = i;
+        const audio = Buffer.from(await r.arrayBuffer());
+        res.setHeader('Content-Type', 'audio/mpeg');
+        res.setHeader('Cache-Control', 'no-store');
+        res.setHeader('X-Voice', name);
+        if (tried.length) res.setHeader('X-Voice-Skipped', tried.join(', '));
+        return res.status(200).send(audio);
+      }
+      const detail = (await r.text()).slice(0, 300);
+      console.error('voice error', name, r.status, detail);
+      tried.push(`${name} ${r.status}`);
+      // this voice refused (not on the account / needs another plan): try the next; anything else (bad key, out of
+      // credits, rate limit, outage) would fail for every voice, so stop
+      if (![400, 402, 403, 404, 422].includes(r.status) || /quota|credit|invalid_api_key|unauthorized/i.test(detail)) break;
+    } catch (e) {
+      console.error('voice error', name, e?.message);
+      tried.push(`${name} timeout`);
+      break;
     }
-    const audio = Buffer.from(await r.arrayBuffer());
-    res.setHeader('Content-Type', 'audio/mpeg');
-    res.setHeader('Cache-Control', 'no-store');
-    return res.status(200).send(audio);
-  } catch (e) {
-    console.error('voice error', e?.message);
-    return res.status(502).json({ error: 'The voice service did not answer.' });
   }
+  if (tried.length) res.setHeader('X-Voice-Skipped', tried.join(', '));
+  return res.status(502).json({ error: 'The voice service did not answer.' });
 }
