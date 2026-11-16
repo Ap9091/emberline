@@ -98,6 +98,8 @@ Persistence cannot warn anyone, since it never predicts new fire, and it is hard
 
 **What affects its accuracy.** Wind matters most: without the wind inputs, the model's skill at ranking new burning squares on the test fires dropped by about 20%, while removing terrain made almost no difference (measured with the boosted-tree version). Accuracy is lower at night (new-square F1 0.29 against 0.42 by day), when the fire is small (0.37 against 0.42 for large fires, with far more false alarms), and in extreme gusts, when nearly every square near the fire passes the low warning threshold.
 
+**Who it works for.** We checked whether some kinds of towns get warned less. On the test fires, Emberline warned all 9 reached towns of 10,000 people or more and 9 of the 11 smaller ones, including rural places like Lodoga (184 people) and Cohasset (830). Both misses were small towns, but they were missed because a separate fire reached them (below), not because of their size. The bigger gap is inside towns: each town is one point, so a neighbourhood like west Altadena, where 18 of the Eaton Fire's 19 victims lived, gets the same status as the rest of Altadena. That is why official evacuation zones are our first next step.
+
 **Where it fails, and why.** The two towns it missed, Bell Canyon and Hidden Hills, were reached on the afternoon of January 9, 2025, by fire that appeared 13 km from the Palisades Fire's edge just as the wind turned by about 70 degrees. The time and place match the Kenneth Fire, a separate fire that started near West Hills that afternoon. Our 6 km tracker joined it to the Palisades Fire because GOES pixels are coarse, and no spread model can forecast a new ignition, so this is mostly a tracking error rather than a forecast error.
 
 ![Failure example: at hour 53 the forecast (middle) stays around the Palisades Fire, while new fire appears near Bell Canyon and Hidden Hills (right)](results/phase3_failure_1.png)
@@ -112,6 +114,10 @@ The other limits, plainly:
 - Two of our own mistakes, both fixed: the what-if view once compared a trimmed replay with a full model run, which made a wind change look bigger (6 to 20 towns instead of 10 to 20), and the replay files keep only forecast chances of 5% and above, so the replay can show a WARNING up to an hour later than the model gave it. Every test score above uses the full model; the comparison with official orders uses the saved replays, so its 8 of 9 is slightly cautious.
 
 Emberline is a research prototype. In a real fire, follow official orders.
+
+## What we learned
+
+Firstly, the hard part was the data, not the model. Turning raw GOES satellite files into a clean 2 km grid of 70 fires took most of the weekend, and once the data was right, a simple logistic regression did as well as boosted trees on the decision that matters. Next, the score you pick changes the model you pick. On the fire's shape we only tie the "fire stays put" guess, but that guess never warns a single town, so we judged every model by towns warned in time and how early, the thing an emergency manager actually acts on. Finally, a forecast can look right on paper and still be impossible. Ours once pushed the Palisades Fire out over the ocean, and our AI once picked an escape road the fire was about to cross, so we now check both with plain rules: water can't burn, and no plan goes out with a road the fire is about to reach.
 
 ## What we'd do next
 
